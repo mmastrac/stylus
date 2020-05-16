@@ -1,6 +1,7 @@
 import { Application, Router, send } from "https://deno.land/x/oak/mod.ts";
 import { readConfig } from "./config.ts";
 import { Monitor } from "./monitor.ts";
+import { interpolateUnsafely } from "./interpolate.ts";
 
 const config = await readConfig();
 const monitor = await Monitor.create(config);
@@ -13,12 +14,12 @@ router
   .get("/style.css", (context) => {
     let css = `/* ${new Date()}*/\n`;
     monitor.status().forEach((m) => {
-      let monitor = m;
-      css += `/* ${monitor.config.id} */\n`;
+      let env = { monitor: m };
+      css += `/* ${m.config.id} */\n`;
       config.css.rules.forEach((rule) => {
         try {
-          css += eval("`" + rule.selectors + "`").trim() + "{" +
-            eval("`" + rule.declarations + "`").trim() + "}" + "\n";
+          css += interpolateUnsafely(rule.selectors, env).trim() + "{" +
+          interpolateUnsafely(rule.declarations, env).trim() + "}" + "\n";
         } catch (e) {
           css += "/* Error: " + e + "*/" + "\n";
         }

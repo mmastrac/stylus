@@ -91,9 +91,7 @@ async function test(config: MonitorConfig) {
     // Script completed, read out the status
     updateStatus(
       {
-        status: result.success
-          ? "green"
-          : "red",
+        status: result.success ? "green" : "red",
         code: result.code,
         description: result.success
           ? "Success"

@@ -19,7 +19,7 @@ router
       config.css.rules.forEach((rule) => {
         try {
           css += interpolateUnsafely(rule.selectors, env).trim() + "{" +
-          interpolateUnsafely(rule.declarations, env).trim() + "}" + "\n";
+            interpolateUnsafely(rule.declarations, env).trim() + "}" + "\n";
         } catch (e) {
           css += "/* Error: " + e + "*/" + "\n";
         }

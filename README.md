@@ -58,5 +58,10 @@ css:
 
 ## Screenshots
 
+Included example
+
 ![Screenshot](docs/screenshot-1.png)
+
+My personal network
+
 ![Screenshot](docs/screenshot-2.png)

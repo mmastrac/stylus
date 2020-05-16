@@ -30,7 +30,7 @@ sample of how this might work.
 
 ## Configuration
 
-Example configuration for a status page. This configuration attaches metadata to the various states and has
+Example `config.yaml` for a **Stylus** install. This configuration attaches metadata to the various states and has
 selectors that apply to both and HTML (for a status table) and CSS (for a status SVG image).
 
 ```

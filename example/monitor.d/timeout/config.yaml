@@ -1,0 +1,4 @@
+test:
+  interval: 60s
+  timeout: 2s
+  script: test.sh

@@ -1,0 +1,11 @@
+version: 1
+server:
+  port: 8000
+  static: static
+
+monitor:
+  dir: monitor.d
+
+css:
+  selector: "#${monitor.config.id}, [data-monitor-id=\"${monitor.config.id}\"] > *"
+  styles: "background-color: ${monitor.status} !important; fill: ${monitor.status} !important;"

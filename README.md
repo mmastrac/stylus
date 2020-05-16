@@ -13,4 +13,4 @@ deno run --unstable --allow-net --allow-read --allow-run src/main.ts example/con
 
 ## Screenshots
 
-!(Screenshot)[docs/screenshot.png]
+![Screenshot](docs/screenshot.png)

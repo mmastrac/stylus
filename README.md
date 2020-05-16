@@ -53,20 +53,28 @@ css:
       color: "#d0e6a5"
   rules:
     # Multiple CSS rules are supported
-    - selectors: "
-        #${monitor.config.id}
-      "
+    - selectors: "#${monitor.config.id}"
       declarations: "
         background-color: ${monitor.status.metadata.color} !important;
       "
 ```
 
+The monitors are configured by creating a subdirectory in the monitor directory (default `monitor.d/`) and
+placing a `config.yaml` in that monitor subdirectory.
+
+```
+test:
+  interval: 60s
+  timeout: 30s
+  script: test.sh
+```
+
 ## Screenshots
 
-Included example
+### Included example
 
 ![Screenshot](docs/screenshot-1.png)
 
-My personal network
+### My personal network
 
 ![Screenshot](docs/screenshot-2.png)

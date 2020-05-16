@@ -3,23 +3,26 @@ import { readConfig } from "./config.ts";
 import { Monitor } from "./monitor.ts";
 
 const config = await readConfig();
-const monitor = await Monitor.create(config.monitorDir);
+const monitor = await Monitor.create(config);
 
 const router = new Router();
 router
-  .get("/config.json", (context) => {
+  .get("/status.json", (context) => {
     context.response.body = { server: config, monitor: monitor.status() };
   })
   .get("/style.css", (context) => {
     let css = `/* ${new Date()}*/\n`;
-    monitor.status().forEach(m => {
+    monitor.status().forEach((m) => {
       let monitor = m;
       css += `/* ${monitor.config.id} */\n`;
-      try {
-        css += eval("`" + config.cssSelectorFmt + "`") + "{" + eval("`" + config.cssStyleFmt + "`") + "}" + "\n";
-      } catch (e) {
-        css += "/* Error: " + e + "*/" + "\n";
-      }
+      config.css.rules.forEach((rule) => {
+        try {
+          css += eval("`" + rule.selectors + "`").trim() + "{" +
+            eval("`" + rule.declarations + "`").trim() + "}" + "\n";
+        } catch (e) {
+          css += "/* Error: " + e + "*/" + "\n";
+        }
+      });
     });
     context.response.type = "text/css";
     context.response.body = css;

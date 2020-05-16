@@ -4,8 +4,17 @@ import { MonitorConfig } from "./config.ts";
 
 const UTF8 = new TextDecoder("utf-8");
 
-function updateStatus(status: "green" | "yellow" | "red", log: any[]) {
-  self.postMessage({ "message": "status", status: { status: status, log: log }});
+function updateStatus(
+  status: {
+    status: "green" | "yellow" | "red";
+    code: number;
+    description: string;
+  },
+  log: any[],
+) {
+  self.postMessage(
+    { "message": "status", status: { status: status, log: log } },
+  );
 }
 
 async function test(config: MonitorConfig) {
@@ -25,10 +34,10 @@ async function test(config: MonitorConfig) {
   let output = [];
   let rl1, rl2;
   while (stderr || stdout) {
-    const tuple = <T extends any[]>(...args: T): T => args
-    rl1 = rl1 ? rl1 : stderr?.readLine().then(r => tuple(1, r));
-    rl2 = rl2 ? rl2 : stdout?.readLine().then(r => tuple(2, r));
-    let res = await Promise.race([rl1, rl2, timeout].filter(e => !!e));
+    const tuple = <T extends any[]>(...args: T): T => args;
+    rl1 = rl1 ? rl1 : stderr?.readLine().then((r) => tuple(1, r));
+    rl2 = rl2 ? rl2 : stdout?.readLine().then((r) => tuple(2, r));
+    let res = await Promise.race([rl1, rl2, timeout].filter((e) => !!e));
     if (!res) {
       // Timeout
       break;
@@ -56,17 +65,42 @@ async function test(config: MonitorConfig) {
   if (result === undefined) {
     // Timeout
     process.kill(1);
-    const result = Promise.race([process.status(), delay(5000)]);
+    const result = await Promise.race([process.status(), delay(5000)]);
     if (result === undefined) {
       // If we need to kill -9 a script, mark it red
-      updateStatus("red", output);
+      updateStatus(
+        {
+          status: "red",
+          code: -1,
+          description: "Process timed out and was forceably killed",
+        },
+        output,
+      );
       process.kill(9);
     } else {
-      updateStatus("yellow", output);
+      updateStatus(
+        {
+          status: "yellow",
+          code: -1,
+          description: "Process timed out and was killed",
+        },
+        output,
+      );
     }
   } else {
     // Script completed, read out the status
-    updateStatus(result.success ? "green" : "red", output);
+    updateStatus(
+      {
+        status: result.success
+          ? "green"
+          : "red",
+        code: result.code,
+        description: result.success
+          ? "Success"
+          : "Monitor script returned an error",
+      },
+      output,
+    );
   }
 
   setTimeout(() => {
@@ -82,7 +116,7 @@ async function init(config: MonitorConfig) {
 self.onmessage = async (e) => {
   if (e.data["message"] == "init") {
     try {
-      init(<MonitorConfig>e.data["config"]);
+      init(<MonitorConfig> e.data["config"]);
     } catch (e) {
       console.log(e);
       self.postMessage({ error: e.toString() });

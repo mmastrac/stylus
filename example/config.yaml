@@ -7,5 +7,31 @@ monitor:
   dir: monitor.d
 
 css:
-  selector: "#${monitor.config.id}, [data-monitor-id=\"${monitor.config.id}\"] > *"
-  styles: "background-color: ${monitor.status} !important; fill: ${monitor.status} !important;"
+  metadata:
+    red:
+      color: "#fa897b"
+    yellow:
+      color: "#ffdd94"
+    green:
+      color: "#d0e6a5"
+  rules:
+    - selectors: "
+        #${monitor.config.id},
+        [data-monitor-id=\"${monitor.config.id}\"] > *
+      "
+      declarations: "
+        background-color: ${monitor.status.metadata.color} !important;
+        fill: ${monitor.status.metadata.color} !important;
+      "
+    - selectors: "
+        #${monitor.config.id} td:nth-child(2)::after
+      "
+      declarations: "
+        content: \"status=${monitor.status.status} retval=${monitor.status.code}\"
+      "
+    - selectors: "
+        #${monitor.config.id} td:nth-child(3)::after
+      "
+      declarations: "
+        content: \"${monitor.status.description}\"
+      "

@@ -1,6 +1,6 @@
 # stylus
 
-Stylus is a lightweight status page for home infrastructure. Configure a set of bash scripts that test
+Stylus (_style + status_) is a lightweight status page for home infrastructure. Configure a set of bash scripts that test
 the various parts of your infrastructure, set up HTML/SVG with a diagram of your network, and stylus will
 generate you a dynamic stylesheet to give you a visual overview of the current state.
 
@@ -20,12 +20,13 @@ selectors that apply to both and HTML (for a status table) and CSS (for a status
 version: 1
 server:
   port: 8000
-  static: static
+  static: static/
 
 monitor:
-  dir: monitor.d
+  dir: monitor.d/
 
 css:
+  # Arbitrary metadata can be associated with the three states
   metadata:
     red:
       color: "#fa897b"
@@ -34,25 +35,12 @@ css:
     green:
       color: "#d0e6a5"
   rules:
+    # Multiple CSS rules are supported
     - selectors: "
-        #${monitor.config.id},
-        [data-monitor-id=\"${monitor.config.id}\"] > *
+        #${monitor.config.id}
       "
       declarations: "
         background-color: ${monitor.status.metadata.color} !important;
-        fill: ${monitor.status.metadata.color} !important;
-      "
-    - selectors: "
-        #${monitor.config.id} td:nth-child(2)::after
-      "
-      declarations: "
-        content: \"status=${monitor.status.status} retval=${monitor.status.code}\"
-      "
-    - selectors: "
-        #${monitor.config.id} td:nth-child(3)::after
-      "
-      declarations: "
-        content: \"${monitor.status.description}\"
       "
 ```
 

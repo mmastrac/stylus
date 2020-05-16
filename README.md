@@ -1,4 +1,4 @@
-# stylus
+# stylus ![CI](https://github.com/mmastrac/stylus/workflows/CI/badge.svg?branch=master)
 
 **Stylus** (_style + status_) is a lightweight status page for home infrastructure. Configure a set of bash scripts that test
 the various parts of your infrastructure, set up HTML/SVG with a diagram of your network, and stylus will

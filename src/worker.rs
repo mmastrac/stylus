@@ -16,23 +16,33 @@ pub enum WorkerMessage {
     AbnormalTermination(String),
 }
 
-pub fn monitor_thread<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
+pub fn monitor_thread<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Error>>>(
     monitor: MonitorDirConfig,
     mut sender: T,
 ) {
     loop {
         let args: Option<&[OsString]> = None;
-        let _ = monitor_thread_impl(
+        let r = monitor_thread_impl(
+            &monitor.id,
             &monitor.test.script,
             args,
             monitor.test.timeout,
             &mut sender,
         );
+        if let Err(err) = r {
+            // Break the loop on a task failure
+            error!("[{}] Task failure: {}", monitor.id, err);
+            if let Err(_) = sender(&monitor.id, WorkerMessage::AbnormalTermination(err.to_string())) {
+                return
+            }
+        }
+        trace!("[{}] Sleeping {}ms", monitor.id, monitor.test.interval.as_millis());
         thread::sleep(monitor.test.interval);
     }
 }
 
 fn append(
+    id: &String,
     out: &mut Option<Vec<u8>>,
     stdout: &mut Vec<u8>,
     err: &mut Option<Vec<u8>>,
@@ -41,10 +51,15 @@ fn append(
     if let (Some(out), Some(err)) = (out, err) {
         // Termination condition: "until read() returns all-empty data, which marks EOF."
         let done = out.len() == 0 && err.len() == 0;
+        if !done {
+            // This is pretty noisy, so only trace if we have data
+            trace!("[{}] read out={} err={}", id, out.len(), err.len());
+        }
         stdout.append(out);
         stderr.append(err);
         done
     } else {
+        error!("[{}] null reader?", id);
         debug_assert!(false, "Unexpectedly null reads");
         false
     }
@@ -55,15 +70,16 @@ enum DeathResult {
     Wedged(Popen),
 }
 
-fn aggressively_wait_for_death(mut popen: Popen, duration: Duration) -> DeathResult {
+fn aggressively_wait_for_death(id: &String, mut popen: Popen, duration: Duration) -> DeathResult {
     let r = popen.wait_timeout(duration);
     if let Ok(Some(status)) = r {
         // Easy, status was available right await
+        debug!("[{}] Normal exit: {:?}", id, status);
         return DeathResult::ExitStatus(status);
     }
 
     // If we didn't get a result OR there was an error, let's try to terminate the process, ignoring any errors
-    info!("Terminating process...");
+    info!("[{}] Terminating process...", id);
     let _ = popen.terminate();
 
     // Now give it 5 seconds to exit for good
@@ -74,7 +90,7 @@ fn aggressively_wait_for_death(mut popen: Popen, duration: Duration) -> DeathRes
     }
 
     // Kill with prejudice
-    info!("Killing process...");
+    info!("[{}] Killing process...", id);
     let _ = popen.kill();
 
     // Give it another 5 seconds
@@ -85,19 +101,21 @@ fn aggressively_wait_for_death(mut popen: Popen, duration: Duration) -> DeathRes
     }
 
     // This process is probably wedged and will become a zombie
+    error!("[{}] Process wedged, bad things may happen", id);
     DeathResult::Wedged(popen)
 }
 
-fn monitor_thread_impl<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
+fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Error>>>(
+    id: &String,
     cmd: &Path,
     args: Option<&[impl AsRef<OsStr>]>,
     timeout: Duration,
     sender: &mut T,
 ) -> Result<(), Box<dyn Error>> {
     // This will fail if we're supposed to shut down
-    sender(WorkerMessage::Starting)?;
+    sender(id, WorkerMessage::Starting)?;
 
-    debug!("Starting {:?}", cmd);
+    debug!("[{}] Starting {:?}", id, cmd);
 
     let mut exec = Exec::cmd(cmd)
         .stdout(Redirection::Pipe)
@@ -108,7 +126,7 @@ fn monitor_thread_impl<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
     let mut popen = exec.popen()?;
 
     // TODO: We don't actually send log messages
-    sender(WorkerMessage::LogMessage("TODO".into()))?;
+    sender(id, WorkerMessage::LogMessage("TODO".into()))?;
 
     let mut stdout = Vec::new();
     let mut stderr = Vec::new();
@@ -121,6 +139,7 @@ fn monitor_thread_impl<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
         if let Err(ref mut err) = r {
             if err.error.kind() == std::io::ErrorKind::TimedOut {
                 append(
+                    id,
                     &mut err.capture.0,
                     &mut stdout,
                     &mut err.capture.1,
@@ -130,12 +149,12 @@ fn monitor_thread_impl<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
             }
         }
         let mut r = r?;
-        if append(&mut r.0, &mut stdout, &mut r.1, &mut stderr) {
+        if append(id, &mut r.0, &mut stdout, &mut r.1, &mut stderr) {
             break;
         }
     }
 
-    debug!("Finished read, waiting for status...");
+    debug!("[{}] Finished read, waiting for status...", id);
 
     // Give the process reaper at least 250ms to get the exit code (or longer if the test timeout is still not elapsed)
     let timeout = Duration::max(
@@ -144,27 +163,27 @@ fn monitor_thread_impl<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
             .checked_sub(start.elapsed())
             .unwrap_or(Duration::from_secs(0)),
     );
-    match aggressively_wait_for_death(popen, timeout) {
+    match aggressively_wait_for_death(id, popen, timeout) {
         DeathResult::ExitStatus(ExitStatus::Exited(code)) => {
-            sender(WorkerMessage::Termination(code as i64))?;
+            sender(id, WorkerMessage::Termination(code as i64))?;
         }
         DeathResult::ExitStatus(ExitStatus::Signaled(code)) => {
-            sender(WorkerMessage::AbnormalTermination(
+            sender(id, WorkerMessage::AbnormalTermination(
                 format!("Process exited with signal {}", code).into(),
             ))?;
         }
         DeathResult::ExitStatus(ExitStatus::Other(code)) => {
-            sender(WorkerMessage::AbnormalTermination(
+            sender(id, WorkerMessage::AbnormalTermination(
                 format!("Process exited for unknown reason {:x}", code).into(),
             ))?;
         }
         DeathResult::ExitStatus(ExitStatus::Undetermined) => {
-            sender(WorkerMessage::AbnormalTermination(
+            sender(id, WorkerMessage::AbnormalTermination(
                 "Process exited for unknown reason".into(),
             ))?;
         }
         DeathResult::Wedged(mut popen) => {
-            sender(WorkerMessage::AbnormalTermination(
+            sender(id, WorkerMessage::AbnormalTermination(
                 "Process timed out".into(),
             ))?;
             // We can wait here after we notify the monitor system
@@ -184,10 +203,11 @@ mod tests {
     fn test_timeout() {
         let (tx, rx) = channel();
         monitor_thread_impl(
+            &"test".to_owned(),
             Path::new("/bin/sleep"),
             Some(&["10"]),
             Duration::from_millis(5000),
-            &mut |m| {
+            &mut |_, m| {
                 tx.send(m)?;
                 Ok(())
             },

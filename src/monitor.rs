@@ -52,7 +52,7 @@ impl Monitor {
             let (tx, rx) = channel();
             let thread = thread::spawn(move || {
                 let thread = rx.recv().expect("Unexpected error receiving mutex");
-                monitor_thread(monitor_config2, move |m| Self::process_message(&thread, m));
+                monitor_thread(monitor_config2, move |id, m| Self::process_message(id, &thread, m));
             });
             let thread = Arc::new(Mutex::new(MonitorThread {
                 thread,
@@ -75,11 +75,12 @@ impl Monitor {
     }
 
     fn process_message(
+        id: &String,
         monitor: &Arc<Mutex<MonitorThread>>,
         msg: WorkerMessage,
     ) -> Result<(), Box<dyn Error>> {
         let mut thread = monitor.lock().map_err(|_| "Poisoned mutex")?;
-        debug!("Worker message {:?}", msg);
+        debug!("[{}] Worker message {:?}", id, msg);
         match msg {
             WorkerMessage::Starting => {
                 // Note that we don't update the state here

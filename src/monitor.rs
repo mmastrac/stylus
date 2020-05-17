@@ -15,7 +15,7 @@ struct MonitorThread {
     state: MonitorState,
 }
 
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct Monitor {
     config: Config,
     monitors: Vec<Arc<Mutex<MonitorThread>>>,
@@ -26,6 +26,8 @@ impl Monitor {
         let config = config.clone();
         let mut monitor_configs = Vec::new();
         for e in WalkDir::new(&config.monitor.dir)
+            .min_depth(1)
+            .max_depth(1)
             .follow_links(true)
             .into_iter()
         {
@@ -34,8 +36,13 @@ impl Monitor {
                 let mut p = e.into_path();
                 p.push("config.yaml");
                 if p.exists() {
-                    monitor_configs.push(parse_monitor_config(&p)?)
+                    monitor_configs.push(parse_monitor_config(&p)?);
+                    info!("Found monitor in {:?}", p);
+                } else {
+                    debug!("Ignoring {:?} as there was no config.yaml", p);
                 }
+            } else {
+                debug!("Ignoring {:?} as it was not a directory", e.path());
             }
         }
         let mut monitors = Vec::new();
@@ -72,6 +79,7 @@ impl Monitor {
 
     fn process_message(monitor: &Arc<Mutex<MonitorThread>>, msg: WorkerMessage) -> Result<(), Box<dyn Error>> {
         let mut thread = monitor.lock().map_err(|_| "Poisoned mutex")?;
+        debug!("Worker message {:?}", msg);
         match msg {
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
@@ -92,5 +100,23 @@ impl Monitor {
             },
         }
         Ok(())
+    }
+
+    pub fn generate_css(&self) -> String {
+        "css".into()
+    }
+
+    pub fn status(&self) -> Status {
+        let mut monitors = Vec::new();
+
+        for monitor in self.monitors.iter() {
+            let monitor = monitor.lock().expect("Failed to lock mutex while updating status");
+            monitors.push(monitor.state.clone());
+        }
+
+        Status {
+            config: self.config.clone(),
+            monitors,
+        }
     }
 }

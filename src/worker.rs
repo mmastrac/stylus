@@ -87,6 +87,8 @@ fn monitor_thread_impl<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
     // This will fail if we're supposed to shut down
     sender(WorkerMessage::Starting)?;
 
+    debug!("Starting {:?}", cmd);
+
     let mut exec = Exec::cmd(cmd)
         .stdout(Redirection::Pipe)
         .stderr(Redirection::Pipe);
@@ -122,6 +124,8 @@ fn monitor_thread_impl<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
             break;
         }
     }
+
+    debug!("Finished read, waiting for status...");
 
     // Give the process reaper at least 250ms to get the exit code (or longer if the test timeout is still not elapsed)
     let timeout = Duration::max(Duration::from_millis(250), timeout.checked_sub(start.elapsed()).unwrap_or(Duration::from_secs(0)));

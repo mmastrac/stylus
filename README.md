@@ -92,3 +92,5 @@ test:
 ### My personal network
 
 ![Screenshot](docs/screenshot-2.png)
+
+[diagrams.net]: https://www.diagrams.net/

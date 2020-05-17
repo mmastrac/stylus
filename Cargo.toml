@@ -1,0 +1,17 @@
+[package]
+name = "stylus"
+version = "0.1.0"
+authors = ["Matt Mastracci <matthew@mastracci.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "0.2", features = ["macros"] }
+warp = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.8"
+humantime-serde = "1.0.0"
+walkdir = "2.3.1"
+handlebars = "3.0.1"
+subprocess = "0.2.4"

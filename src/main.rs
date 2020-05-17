@@ -1,9 +1,9 @@
 use std::convert::Infallible;
 use std::sync::Arc;
 
-use warp::Filter;
 use monitor::Monitor;
 use status::Status;
+use warp::Filter;
 
 mod config;
 mod interpolate;
@@ -11,7 +11,8 @@ mod monitor;
 mod status;
 mod worker;
 
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 
 async fn css_request(monitor: Arc<Monitor>) -> Result<String, Infallible> {
     Ok(monitor.generate_css())
@@ -24,9 +25,7 @@ async fn status_request(monitor: Arc<Monitor>) -> Result<Status, Infallible> {
 /// Provide the given arc to a warp chain
 fn provide_monitor(monitor: &Arc<Monitor>) -> impl Fn() -> Arc<Monitor> + Clone {
     let monitor = Box::new(monitor.clone());
-    move || {
-        *monitor.clone() 
-    }
+    move || *monitor.clone()
 }
 
 #[tokio::main]
@@ -43,9 +42,14 @@ async fn main() -> () {
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
 
     // style.css for formatting
-    let style = warp::path("style.css").map(provide_monitor(&monitor)).and_then(css_request);
+    let style = warp::path("style.css")
+        .map(provide_monitor(&monitor))
+        .and_then(css_request);
     // status.json for advanced integrations
-    let status = warp::path("status.json").map(provide_monitor(&monitor)).and_then(status_request).map(|s| warp::reply::json(&s));
+    let status = warp::path("status.json")
+        .map(provide_monitor(&monitor))
+        .and_then(status_request)
+        .map(|s| warp::reply::json(&s));
     // static pages
     let r#static = warp::fs::dir(config.server.r#static);
 

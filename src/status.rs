@@ -25,6 +25,6 @@ pub struct MonitorState {
 pub struct MonitorStatus {
     pub status: StatusState,
     pub metadata: HashMap<String, String>,
-    pub code: i32,
+    pub code: i64,
     pub description: String,
 }

@@ -1,8 +1,8 @@
 use std::error::Error;
+use std::ffi::{OsStr, OsString};
 use std::path::Path;
 use std::thread;
 use std::time::{Duration, Instant};
-use std::ffi::{OsStr, OsString};
 
 use subprocess::{Exec, ExitStatus, Popen, Redirection};
 
@@ -16,10 +16,18 @@ pub enum WorkerMessage {
     AbnormalTermination(String),
 }
 
-pub fn monitor_thread<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(monitor: MonitorDirConfig, mut sender: T) {
+pub fn monitor_thread<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
+    monitor: MonitorDirConfig,
+    mut sender: T,
+) {
     loop {
         let args: Option<&[OsString]> = None;
-        let _ = monitor_thread_impl(&monitor.test.script, args, monitor.test.timeout, &mut sender);
+        let _ = monitor_thread_impl(
+            &monitor.test.script,
+            args,
+            monitor.test.timeout,
+            &mut sender,
+        );
         thread::sleep(monitor.test.interval);
     }
 }
@@ -55,6 +63,7 @@ fn aggressively_wait_for_death(mut popen: Popen, duration: Duration) -> DeathRes
     }
 
     // If we didn't get a result OR there was an error, let's try to terminate the process, ignoring any errors
+    info!("Terminating process...");
     let _ = popen.terminate();
 
     // Now give it 5 seconds to exit for good
@@ -65,6 +74,7 @@ fn aggressively_wait_for_death(mut popen: Popen, duration: Duration) -> DeathRes
     }
 
     // Kill with prejudice
+    info!("Killing process...");
     let _ = popen.kill();
 
     // Give it another 5 seconds
@@ -128,7 +138,12 @@ fn monitor_thread_impl<T: FnMut(WorkerMessage) -> Result<(), Box<dyn Error>>>(
     debug!("Finished read, waiting for status...");
 
     // Give the process reaper at least 250ms to get the exit code (or longer if the test timeout is still not elapsed)
-    let timeout = Duration::max(Duration::from_millis(250), timeout.checked_sub(start.elapsed()).unwrap_or(Duration::from_secs(0)));
+    let timeout = Duration::max(
+        Duration::from_millis(250),
+        timeout
+            .checked_sub(start.elapsed())
+            .unwrap_or(Duration::from_secs(0)),
+    );
     match aggressively_wait_for_death(popen, timeout) {
         DeathResult::ExitStatus(ExitStatus::Exited(code)) => {
             sender(WorkerMessage::Termination(code as i64))?;
@@ -168,8 +183,16 @@ mod tests {
     #[test]
     fn test_timeout() {
         let (tx, rx) = channel();
-        monitor_thread_impl(Path::new("/bin/sleep"), Some(&["10"]), Duration::from_millis(5000), &mut |m| { tx.send(m)?; Ok(()) })
-            .expect("Failed to monitor");
+        monitor_thread_impl(
+            Path::new("/bin/sleep"),
+            Some(&["10"]),
+            Duration::from_millis(5000),
+            &mut |m| {
+                tx.send(m)?;
+                Ok(())
+            },
+        )
+        .expect("Failed to monitor");
         drop(tx);
         loop {
             if let Ok(msg) = rx.recv() {

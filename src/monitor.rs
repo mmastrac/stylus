@@ -1,11 +1,12 @@
 use std::error::Error;
+use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::sync::mpsc::channel;
 
 use walkdir::WalkDir;
 
 use crate::config::*;
+use crate::interpolate::interpolate_monitor;
 use crate::status::*;
 use crate::worker::{monitor_thread, WorkerMessage};
 
@@ -51,9 +52,7 @@ impl Monitor {
             let (tx, rx) = channel();
             let thread = thread::spawn(move || {
                 let thread = rx.recv().expect("Unexpected error receiving mutex");
-                monitor_thread(monitor_config2, move |m| {
-                    Self::process_message(&thread, m)
-                });
+                monitor_thread(monitor_config2, move |m| Self::process_message(&thread, m));
             });
             let thread = Arc::new(Mutex::new(MonitorThread {
                 thread,
@@ -63,33 +62,35 @@ impl Monitor {
                         status: StatusState::Yellow,
                         code: 0,
                         description: "Unknown (initializing)".into(),
-                        metadata: config.css.metadata.yellow.clone(),
-                    }
+                        metadata: Default::default(),
+                    },
                 },
             }));
             // Let the thread go!
-            tx.send(thread.clone()).expect("Unexpected error sending mutex");
+            tx.send(thread.clone())
+                .expect("Unexpected error sending mutex");
             monitors.push(thread);
         }
-        Ok(Monitor {
-            config,
-            monitors,
-        })
+        Ok(Monitor { config, monitors })
     }
 
-    fn process_message(monitor: &Arc<Mutex<MonitorThread>>, msg: WorkerMessage) -> Result<(), Box<dyn Error>> {
+    fn process_message(
+        monitor: &Arc<Mutex<MonitorThread>>,
+        msg: WorkerMessage,
+    ) -> Result<(), Box<dyn Error>> {
         let mut thread = monitor.lock().map_err(|_| "Poisoned mutex")?;
         debug!("Worker message {:?}", msg);
         match msg {
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
-            },
-            WorkerMessage::LogMessage(..) => {},
+            }
+            WorkerMessage::LogMessage(..) => {}
             WorkerMessage::AbnormalTermination(s) => {
                 thread.state.status.description = s;
                 thread.state.status.status = StatusState::Yellow;
-            },
+            }
             WorkerMessage::Termination(code) => {
+                thread.state.status.code = code;
                 if code == 0 {
                     thread.state.status.description = "Success".into();
                     thread.state.status.status = StatusState::Green;
@@ -97,21 +98,43 @@ impl Monitor {
                     thread.state.status.description = "Failed".into();
                     thread.state.status.status = StatusState::Red;
                 }
-            },
+            }
         }
         Ok(())
     }
 
     pub fn generate_css(&self) -> String {
-        "css".into()
+        let mut css = format!("/* Generated at {:?} */\n", std::time::Instant::now()).to_owned();
+        let status = self.status();
+        for monitor in status.monitors {
+            css += "\n";
+            css += &format!("/* {} */\n", monitor.config.id);
+            for rule in &self.config.css.rules {
+                css += &interpolate_monitor(&monitor, &rule.selectors)
+                    .unwrap_or("/* failed */".into());
+                css += "{\n";
+                css += &interpolate_monitor(&monitor, &rule.declarations)
+                    .unwrap_or("/* failed */".into());
+                css += "}\n\n";
+            }
+        }
+        css
     }
 
     pub fn status(&self) -> Status {
         let mut monitors = Vec::new();
 
-        for monitor in self.monitors.iter() {
-            let monitor = monitor.lock().expect("Failed to lock mutex while updating status");
-            monitors.push(monitor.state.clone());
+        for monitor in &self.monitors {
+            let monitor = monitor
+                .lock()
+                .expect("Failed to lock mutex while updating status");
+            let mut state = monitor.state.clone();
+            state.status.metadata = match state.status.status {
+                StatusState::Green => self.config.css.metadata.green.clone(),
+                StatusState::Yellow => self.config.css.metadata.yellow.clone(),
+                StatusState::Red => self.config.css.metadata.red.clone(),
+            };
+            monitors.push(state);
         }
 
         Status {

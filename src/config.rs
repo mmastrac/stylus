@@ -59,6 +59,8 @@ pub struct MonitorDirConfig {
     pub test: MonitorDirTestConfig,
     #[serde(default)]
     pub base_path: PathBuf,
+    #[serde(default)]
+    pub id: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -105,6 +107,16 @@ pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Err
     // Canonical paths
     config.base_path = Path::canonicalize(&config.base_path)?.into();
     config.test.script = Path::canonicalize(&config.base_path.join(&config.test.script))?.into();
+
+    if config.id.is_empty() {
+        config.id = file
+            .parent()
+            .ok_or("Invalid parent")?
+            .file_name()
+            .ok_or("Invalid file name")?
+            .to_string_lossy()
+            .to_string();
+    }
 
     // Basic checks before we return the config
     if !config.test.script.exists() {

@@ -6,9 +6,9 @@ cross build --release --target arm-unknown-linux-musleabihf
 cross build --release --target aarch64-unknown-linux-musl
 cross build --release --target x86_64-unknown-linux-musl
 
-docker build --platform linux/arm/v6 --build-arg BUILDPLATFORM=arm32v6 --build-arg RUSTPLATFORM=arm-unknown-linux-musleabi -t mmastrac/stylus:latest-arm -f docker/Dockerfile .
-docker build --platform linux/arm64 --build-arg BUILDPLATFORM=arm64v8 --build-arg RUSTPLATFORM=aarch64-unknown-linux-musl -t mmastrac/stylus:latest-arm64 -f docker/Dockerfile .
-docker build --platform linux/amd64 --build-arg BUILDPLATFORM=amd64 --build-arg RUSTPLATFORM=x86_64-unknown-linux-musl -t mmastrac/stylus:latest-x86_64 -f docker/Dockerfile .
+docker build --no-cache --platform linux/arm/v6 --build-arg BUILDPLATFORM=arm32v6 --build-arg RUSTPLATFORM=arm-unknown-linux-musleabi -t mmastrac/stylus:latest-arm -f docker/Dockerfile .
+docker build --no-cache --platform linux/arm64 --build-arg BUILDPLATFORM=arm64v8 --build-arg RUSTPLATFORM=aarch64-unknown-linux-musl -t mmastrac/stylus:latest-arm64 -f docker/Dockerfile .
+docker build --no-cache --platform linux/amd64 --build-arg BUILDPLATFORM=amd64 --build-arg RUSTPLATFORM=x86_64-unknown-linux-musl -t mmastrac/stylus:latest-x86_64 -f docker/Dockerfile .
 
 docker push mmastrac/stylus:latest-arm
 docker push mmastrac/stylus:latest-arm64

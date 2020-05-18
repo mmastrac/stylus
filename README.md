@@ -13,6 +13,12 @@ original deno source is available in the `deno` branch.
 cargo run -- example/config.yaml
 ```
 
+Or install via `cargo`:
+
+```
+cargo install stylus
+```
+
 Or on docker:
 
 ```

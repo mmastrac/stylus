@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::error::Error;
 use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
@@ -66,6 +67,7 @@ impl Monitor {
                         description: "Unknown (initializing)".into(),
                         metadata: Default::default(),
                     },
+                    log: Arc::new(Mutex::new(VecDeque::new())),
                 },
             }));
             // Let the thread go!
@@ -87,7 +89,15 @@ impl Monitor {
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
             }
-            WorkerMessage::LogMessage(..) => {}
+            WorkerMessage::LogMessage(m) => {
+                let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
+                log.push_back(m);
+
+                // This should be configurable
+                while log.len() > 100 {
+                    log.pop_front();
+                }
+            }
             WorkerMessage::AbnormalTermination(s) => {
                 thread.state.status.code = -1;
                 thread.state.status.description = s;

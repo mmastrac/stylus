@@ -1,5 +1,5 @@
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::collections::{HashMap, VecDeque};
+use std::sync::{Arc, Mutex};
 
 use serde::{Deserialize, Serialize};
 
@@ -22,6 +22,7 @@ pub struct Status {
 pub struct MonitorState {
     pub config: MonitorDirConfig,
     pub status: MonitorStatus,
+    pub log: Arc<Mutex<VecDeque<String>>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

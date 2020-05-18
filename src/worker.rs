@@ -1,12 +1,14 @@
 use std::error::Error;
 use std::ffi::{OsStr, OsString};
 use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 
 use subprocess::{Exec, ExitStatus, Popen, Redirection};
 
 use crate::config::*;
+use crate::linebuf::LineBuf;
 
 #[derive(Debug)]
 pub enum WorkerMessage {
@@ -48,12 +50,13 @@ pub fn monitor_thread<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Err
     }
 }
 
-fn append(
+fn append<T: FnMut(String)>(
     id: &String,
+    f: &mut T,
     out: &mut Option<Vec<u8>>,
-    stdout: &mut Vec<u8>,
+    stdout: &mut LineBuf,
     err: &mut Option<Vec<u8>>,
-    stderr: &mut Vec<u8>,
+    stderr: &mut LineBuf,
 ) -> bool {
     if let (Some(out), Some(err)) = (out, err) {
         // Termination condition: "until read() returns all-empty data, which marks EOF."
@@ -62,8 +65,8 @@ fn append(
             // This is pretty noisy, so only trace if we have data
             trace!("[{}] read out={} err={}", id, out.len(), err.len());
         }
-        stdout.append(out);
-        stderr.append(err);
+        stdout.accept(out, f);
+        stderr.accept(err, f);
         done
     } else {
         error!("[{}] null reader?", id);
@@ -132,11 +135,15 @@ fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
     }
     let mut popen = exec.popen()?;
 
-    // TODO: We don't actually send log messages
-    sender(id, WorkerMessage::LogMessage("TODO".into()))?;
+    let failed = AtomicBool::new(false);
+    let mut f = |s| {
+        if let Err(_) = sender(id, WorkerMessage::LogMessage(s)) {
+            failed.store(true, Ordering::SeqCst)
+        }
+    };
+    let mut stdout = LineBuf::new(80);
+    let mut stderr = LineBuf::new(80);
 
-    let mut stdout = Vec::new();
-    let mut stderr = Vec::new();
     let start = Instant::now();
     let mut comms = popen
         .communicate_start(None)
@@ -147,6 +154,7 @@ fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
             if err.error.kind() == std::io::ErrorKind::TimedOut {
                 append(
                     id,
+                    &mut f,
                     &mut err.capture.0,
                     &mut stdout,
                     &mut err.capture.1,
@@ -156,10 +164,13 @@ fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
             }
         }
         let mut r = r?;
-        if append(id, &mut r.0, &mut stdout, &mut r.1, &mut stderr) {
+        if append(id, &mut f, &mut r.0, &mut stdout, &mut r.1, &mut stderr) {
             break;
         }
     }
+
+    stdout.close(&mut f);
+    stderr.close(&mut f);
 
     debug!("[{}] Finished read, waiting for status...", id);
 

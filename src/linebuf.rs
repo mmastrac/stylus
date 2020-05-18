@@ -10,7 +10,11 @@ const CR: u8 = '\r' as u8;
 impl LineBuf {
     pub fn new(buffer_size: usize) -> Self {
         let buf = Vec::with_capacity(buffer_size);
-        LineBuf { buf, buffer_size, pending_cr: false }
+        LineBuf {
+            buf,
+            buffer_size,
+            pending_cr: false,
+        }
     }
 
     pub fn accept<T: FnMut(String)>(&mut self, bytes: &[u8], accept_lines: &mut T) {
@@ -125,13 +129,19 @@ pub mod tests {
     fn test_cr_lf() {
         // DOS-style CR+LF
         test("hello world\r\n", vec!["hello world\n"]);
-        test("hello world\r\nbye world", vec!["hello world\n", "bye world"]);
-        test("hello world\r\nbye world\r\n", vec!["hello world\n", "bye world\n"]);
+        test(
+            "hello world\r\nbye world",
+            vec!["hello world\n", "bye world"],
+        );
+        test(
+            "hello world\r\nbye world\r\n",
+            vec!["hello world\n", "bye world\n"],
+        );
     }
 
     #[test]
     fn test_cr() {
-        // Curl-style CR
+        // cURL-style CR
         test("test1\rtest2\rtest3\n", vec!["test3\n"]);
         test("test1\rtest2\rtest3", vec!["test3"]);
         test("test1\rtest2\rtest3\r", vec![]);

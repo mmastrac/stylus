@@ -86,10 +86,12 @@ The monitors are configured by creating a subdirectory in the monitor directory 
 placing a `config.yaml` in that monitor subdirectory.
 
 ```
+# ID is optional and will be inferred from the directory
+id: router-1
 test:
   interval: 60s
   timeout: 30s
-  script: test.sh
+  command: test.sh
 ```
 
 ## Screenshots

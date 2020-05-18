@@ -22,11 +22,7 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    # Runs a single command using the runners shell
-    - name: Install Deno
-      run: curl -fsSL https://deno.land/x/install/install.sh | sh
-
-    # Runs a set of commands using the runners shell
-    - name: Build
-      run: ~/.deno/bin/deno bundle --unstable src/main.ts > /dev/null
+    # Build!
+    - name: Build it
+      run: cargo build --verbose
       

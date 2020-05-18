@@ -100,6 +100,38 @@ test:
   command: test.sh
 ```
 
+## Test scripts
+
+The test scripts are usually pretty simple. Note that the docker container ships with a number of useful utilities,
+but you can consider manually installing additional packages (either creating an addition docker container or manually
+running alpine's `apk` tool inside the contain) to handle your specific cases.
+
+### Ping
+
+Unless you have a particularly lossy connection, a single ping should be enough to test whether a host is up:
+
+```
+#!/bin/bash
+set -xeuf -o pipefail
+ping -c 1 8.8.8.8
+```
+
+### cURL
+
+For hosts with services that may be up or down, you may want to use cURL to test whether the service itself
+is reachable.
+
+```
+#!/bin/bash
+set -xeuf -o pipefail
+curl --retry 2 --max-time 5 --connect-timeout 5 http://192.168.1.1:9000
+```
+
+### Advanced techniques
+
+Tools such as `jq`, `sed`, or `awk` can be used for more advanced tests (ie: APIs). If needed, ssh can be used to
+connect to hosts and remote tests can be executed.
+
 ## Screenshots
 
 ### Included example

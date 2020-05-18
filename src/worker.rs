@@ -32,11 +32,18 @@ pub fn monitor_thread<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Err
         if let Err(err) = r {
             // Break the loop on a task failure
             error!("[{}] Task failure: {}", monitor.id, err);
-            if let Err(_) = sender(&monitor.id, WorkerMessage::AbnormalTermination(err.to_string())) {
-                return
+            if let Err(_) = sender(
+                &monitor.id,
+                WorkerMessage::AbnormalTermination(err.to_string()),
+            ) {
+                return;
             }
         }
-        trace!("[{}] Sleeping {}ms", monitor.id, monitor.test.interval.as_millis());
+        trace!(
+            "[{}] Sleeping {}ms",
+            monitor.id,
+            monitor.test.interval.as_millis()
+        );
         thread::sleep(monitor.test.interval);
     }
 }
@@ -168,24 +175,32 @@ fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
             sender(id, WorkerMessage::Termination(code as i64))?;
         }
         DeathResult::ExitStatus(ExitStatus::Signaled(code)) => {
-            sender(id, WorkerMessage::AbnormalTermination(
-                format!("Process exited with signal {}", code).into(),
-            ))?;
+            sender(
+                id,
+                WorkerMessage::AbnormalTermination(
+                    format!("Process exited with signal {}", code).into(),
+                ),
+            )?;
         }
         DeathResult::ExitStatus(ExitStatus::Other(code)) => {
-            sender(id, WorkerMessage::AbnormalTermination(
-                format!("Process exited for unknown reason {:x}", code).into(),
-            ))?;
+            sender(
+                id,
+                WorkerMessage::AbnormalTermination(
+                    format!("Process exited for unknown reason {:x}", code).into(),
+                ),
+            )?;
         }
         DeathResult::ExitStatus(ExitStatus::Undetermined) => {
-            sender(id, WorkerMessage::AbnormalTermination(
-                "Process exited for unknown reason".into(),
-            ))?;
+            sender(
+                id,
+                WorkerMessage::AbnormalTermination("Process exited for unknown reason".into()),
+            )?;
         }
         DeathResult::Wedged(mut popen) => {
-            sender(id, WorkerMessage::AbnormalTermination(
-                "Process timed out".into(),
-            ))?;
+            sender(
+                id,
+                WorkerMessage::AbnormalTermination("Process timed out".into()),
+            )?;
             // We can wait here after we notify the monitor system
             let _ = popen.wait();
         }

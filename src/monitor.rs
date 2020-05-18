@@ -52,7 +52,9 @@ impl Monitor {
             let (tx, rx) = channel();
             let thread = thread::spawn(move || {
                 let thread = rx.recv().expect("Unexpected error receiving mutex");
-                monitor_thread(monitor_config2, move |id, m| Self::process_message(id, &thread, m));
+                monitor_thread(monitor_config2, move |id, m| {
+                    Self::process_message(id, &thread, m)
+                });
             });
             let thread = Arc::new(Mutex::new(MonitorThread {
                 thread,
@@ -87,6 +89,7 @@ impl Monitor {
             }
             WorkerMessage::LogMessage(..) => {}
             WorkerMessage::AbnormalTermination(s) => {
+                thread.state.status.code = -1;
                 thread.state.status.description = s;
                 thread.state.status.status = StatusState::Yellow;
             }

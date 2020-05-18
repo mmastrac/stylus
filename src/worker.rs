@@ -26,7 +26,7 @@ pub fn monitor_thread<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Err
         let args: Option<&[OsString]> = None;
         let r = monitor_thread_impl(
             &monitor.id,
-            &monitor.test.script,
+            &monitor.test.command,
             args,
             monitor.test.timeout,
             &mut sender,

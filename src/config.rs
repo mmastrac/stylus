@@ -71,7 +71,7 @@ pub struct MonitorDirTestConfig {
     pub interval: Duration,
     #[serde(with = "humantime_serde")]
     pub timeout: Duration,
-    pub script: PathBuf,
+    pub command: PathBuf,
 }
 
 pub fn parse_config(file: String) -> Result<Config, Box<dyn Error>> {
@@ -108,7 +108,7 @@ pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Err
 
     // Canonical paths
     config.base_path = Path::canonicalize(&config.base_path)?.into();
-    config.test.script = Path::canonicalize(&config.base_path.join(&config.test.script))?.into();
+    config.test.command = Path::canonicalize(&config.base_path.join(&config.test.command))?.into();
 
     if config.id.is_empty() {
         config.id = file
@@ -121,8 +121,8 @@ pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Err
     }
 
     // Basic checks before we return the config
-    if !config.test.script.exists() {
-        Err("Test script does not exist".into())
+    if !config.test.command.exists() {
+        Err("Test command does not exist".into())
     } else {
         Ok(config)
     }

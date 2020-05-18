@@ -15,7 +15,8 @@ docker push mmastrac/stylus:latest-arm64
 docker push mmastrac/stylus:latest-x86_64
 
 # TBH I don't fully understand manifests, but this seems to work
-docker manifest create --amend mmastrac/stylus:latest \
+rm -rf ~/.docker/manifests/docker.io_mmastrac_stylus-latest
+docker manifest create mmastrac/stylus:latest \
     mmastrac/stylus:latest-arm \
     mmastrac/stylus:latest-arm64 \
     mmastrac/stylus:latest-x86_64

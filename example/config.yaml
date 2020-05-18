@@ -7,7 +7,7 @@ monitor:
   dir: monitor.d
 
 css:
-  # Use metadata to get prettier colors
+  # Use metadata to get prettier colors - note that we can add arbitrary string keys and values here
   metadata:
     red:
       color: "#fa897b"

@@ -1,4 +1,6 @@
+# Explicitly set the id here
+id: router
 test:
   interval: 60s
   timeout: 30s
-  script: test.sh
+  command: test.sh

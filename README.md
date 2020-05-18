@@ -75,10 +75,10 @@ css:
     green:
       color: "#d0e6a5"
   rules:
-    # Multiple CSS rules are supported
+    # Multiple CSS rules with handlebars replacements are supported
     - selectors: "#{{monitor.config.id}}"
       declarations: "
-        background-color: {{monitor.status.metadata.color}} !important;
+        background-color: {{monitor.status.css.metadata.color}} !important;
       "
 ```
 

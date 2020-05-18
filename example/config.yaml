@@ -22,8 +22,8 @@ css:
         [data-monitor-id=\"{{monitor.config.id}}\"] > *
       "
       declarations: "
-        background-color: {{monitor.status.metadata.color}} !important;
-        fill: {{monitor.status.metadata.color}} !important;
+        background-color: {{monitor.status.css.metadata.color}} !important;
+        fill: {{monitor.status.css.metadata.color}} !important;
       "
     # Add some text for the status/return value of the script
     - selectors: "

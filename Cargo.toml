@@ -1,6 +1,6 @@
 [package]
 name = "stylus"
-version = "0.9.9"
+version = "0.9.10"
 authors = ["Matt Mastracci <matthew@mastracci.com>"]
 edition = "2018"
 description = "Stylus (style + status) is a lightweight status page for home infrastructure."

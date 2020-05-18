@@ -1116,7 +1116,7 @@ checksum = "c7cb5678e1615754284ec264d9bb5b4c27d2018577fd90ac0ceb578591ed5ee4"
 
 [[package]]
 name = "stylus"
-version = "0.9.9"
+version = "0.9.10"
 dependencies = [
  "env_logger",
  "handlebars",

@@ -1,8 +1,10 @@
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::time::Duration;
+
+use serde::{Deserialize, Serialize};
 
 fn default_server_port() -> u16 {
     80
@@ -49,9 +51,9 @@ pub struct CssRule {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MetadataConfig {
-    pub red: HashMap<String, String>,
-    pub yellow: HashMap<String, String>,
-    pub green: HashMap<String, String>,
+    pub red: Arc<HashMap<String, String>>,
+    pub yellow: Arc<HashMap<String, String>>,
+    pub green: Arc<HashMap<String, String>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

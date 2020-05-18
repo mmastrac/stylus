@@ -221,7 +221,7 @@ mod tests {
             &"test".to_owned(),
             Path::new("/bin/sleep"),
             Some(&["10"]),
-            Duration::from_millis(5000),
+            Duration::from_millis(250),
             &mut |_, m| {
                 tx.send(m)?;
                 Ok(())
@@ -231,9 +231,11 @@ mod tests {
         drop(tx);
         loop {
             if let Ok(msg) = rx.recv() {
-                println!("{:?}", msg);
+                if let WorkerMessage::AbnormalTermination(_) = msg {
+                    return;
+                }
             } else {
-                break;
+                panic!("Never got the abnormal termination error")
             }
         }
     }

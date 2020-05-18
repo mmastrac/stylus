@@ -7,6 +7,7 @@ use warp::Filter;
 
 mod config;
 mod interpolate;
+mod linebuf;
 mod monitor;
 mod status;
 mod worker;
@@ -31,8 +32,7 @@ fn provide_monitor(monitor: &Arc<Monitor>) -> impl Fn() -> Arc<Monitor> + Clone 
 #[tokio::main]
 async fn main() -> () {
     env_logger::init();
-    let args = std::env::args()
-        .collect::<Vec<_>>();
+    let args = std::env::args().collect::<Vec<_>>();
 
     // TODO: Proper command parser
     if args.len() < 2 {
@@ -40,10 +40,7 @@ async fn main() -> () {
         return;
     }
 
-    let file = args
-        .get(1)
-        .unwrap()
-        .clone();
+    let file = args.get(1).unwrap().clone();
     let config = config::parse_config(file).expect("Unable to parse configuration");
     debug!("{:?}", config);
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
@@ -58,7 +55,10 @@ async fn main() -> () {
         .map(provide_monitor(&monitor))
         .and_then(status_request)
         .map(|s| warp::reply::json(&s))
-        .with(warp::reply::with::header("Content-Type", "application/json"));
+        .with(warp::reply::with::header(
+            "Content-Type",
+            "application/json",
+        ));
     // static pages
     let r#static = warp::fs::dir(config.server.r#static);
 

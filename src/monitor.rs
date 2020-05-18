@@ -65,7 +65,9 @@ impl Monitor {
                         status: StatusState::Yellow,
                         code: 0,
                         description: "Unknown (initializing)".into(),
-                        metadata: Default::default(),
+                        css: MonitorCssStatus {
+                            metadata: Default::default(),
+                        },
                     },
                     log: Arc::new(Mutex::new(VecDeque::new())),
                 },
@@ -143,7 +145,7 @@ impl Monitor {
                 .lock()
                 .expect("Failed to lock mutex while updating status");
             let mut state = monitor.state.clone();
-            state.status.metadata = match state.status.status {
+            state.status.css.metadata = match state.status.status {
                 StatusState::Green => self.config.css.metadata.green.clone(),
                 StatusState::Yellow => self.config.css.metadata.yellow.clone(),
                 StatusState::Red => self.config.css.metadata.red.clone(),

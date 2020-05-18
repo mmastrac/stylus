@@ -28,7 +28,12 @@ pub struct MonitorState {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorStatus {
     pub status: StatusState,
-    pub metadata: Arc<HashMap<String, String>>,
     pub code: i64,
     pub description: String,
+    pub css: MonitorCssStatus,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MonitorCssStatus {
+    pub metadata: Arc<HashMap<String, String>>,
 }

@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euf -o pipefail
+cargo clean
 cargo install cross
 cross build --release --target arm-unknown-linux-musleabi
 cross build --release --target arm-unknown-linux-musleabihf

@@ -15,6 +15,8 @@ mod worker;
 #[macro_use]
 extern crate log;
 
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 async fn css_request(monitor: Arc<Monitor>) -> Result<String, Infallible> {
     Ok(monitor.generate_css())
 }
@@ -65,7 +67,7 @@ async fn main() -> () {
     let routes = warp::get().and(style.or(status).or(r#static));
 
     // We print one and only one message
-    eprintln!("Stylus is listening on 0.0.0.0:{}!", config.server.port);
+    eprintln!("Stylus {} is listening on 0.0.0.0:{}!", VERSION, config.server.port);
 
     warp::serve(routes)
         .run(([0, 0, 0, 0], config.server.port))

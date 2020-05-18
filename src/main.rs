@@ -31,11 +31,18 @@ fn provide_monitor(monitor: &Arc<Monitor>) -> impl Fn() -> Arc<Monitor> + Clone 
 #[tokio::main]
 async fn main() -> () {
     env_logger::init();
+    let args = std::env::args()
+        .collect::<Vec<_>>();
 
-    let file = std::env::args()
-        .collect::<Vec<_>>()
+    // TODO: Proper command parser
+    if args.len() < 2 {
+        eprintln!("Usage: stylus [path-to-config.yaml]");
+        return;
+    }
+
+    let file = args
         .get(1)
-        .expect("Usage: stylus [path-to-config.yaml]")
+        .unwrap()
         .clone();
     let config = config::parse_config(file).expect("Unable to parse configuration");
     debug!("{:?}", config);
@@ -55,7 +62,10 @@ async fn main() -> () {
 
     let routes = warp::get().and(style.or(status).or(r#static));
 
+    // We print one and only one message
+    eprintln!("Stylus is listening on 0.0.0.0:{}!", config.server.port);
+
     warp::serve(routes)
-        .run(([127, 0, 0, 1], config.server.port))
+        .run(([0, 0, 0, 0], config.server.port))
         .await;
 }

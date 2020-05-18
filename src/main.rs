@@ -51,12 +51,14 @@ async fn main() -> () {
     // style.css for formatting
     let style = warp::path("style.css")
         .map(provide_monitor(&monitor))
-        .and_then(css_request);
+        .and_then(css_request)
+        .with(warp::reply::with::header("Content-Type", "text/css"));
     // status.json for advanced integrations
     let status = warp::path("status.json")
         .map(provide_monitor(&monitor))
         .and_then(status_request)
-        .map(|s| warp::reply::json(&s));
+        .map(|s| warp::reply::json(&s))
+        .with(warp::reply::with::header("Content-Type", "application/json"));
     // static pages
     let r#static = warp::fs::dir(config.server.r#static);
 

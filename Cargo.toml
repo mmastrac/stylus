@@ -17,3 +17,7 @@ handlebars = "3.0.1"
 subprocess = "0.2.4"
 log = "0.4.8"
 env_logger = "0.7.1"
+
+[profile.release]
+codegen-units = 1
+incremental = false

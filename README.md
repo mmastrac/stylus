@@ -4,11 +4,20 @@
 the various parts of your infrastructure, set up HTML/SVG with a diagram of your network, and stylus will
 generate you a dynamic stylesheet to give you a visual overview of the current state.
 
+Note that this project was originally written using deno, but was rewritten in Rust to support Raspberry Pis. The
+original deno source is available in the `deno` branch.
+
 ## Running
 
 ```
-brew install deno
-deno run --unstable --allow-net --allow-read --allow-run src/main.ts example/config.yaml
+cargo run -- example/config.yaml
+```
+
+Or on docker:
+
+```
+# Assume that this is started with $PWD in the example/ directory
+docker run --rm -p 8000:8000 -v $PWD:/srv mmastrac/stylus:latest
 ```
 
 ## Theory of operation
@@ -67,9 +76,9 @@ css:
       color: "#d0e6a5"
   rules:
     # Multiple CSS rules are supported
-    - selectors: "#${monitor.config.id}"
+    - selectors: "#{{monitor.config.id}}"
       declarations: "
-        background-color: ${monitor.status.metadata.color} !important;
+        background-color: {{monitor.status.metadata.color}} !important;
       "
 ```
 

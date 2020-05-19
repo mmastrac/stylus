@@ -72,13 +72,13 @@ mod tests {
     #[test]
     fn test_modify() -> Result<(), Box<dyn Error>> {
         let status = update("status.status=\"red\"")?;
-        assert_eq!(status.status, StatusState::Red);
+        assert_eq!(status.pending.unwrap().status.unwrap(), StatusState::Red);
         let status = update("status.description=\"foo\"")?;
-        assert_eq!(status.description, "foo");
+        assert_eq!(status.pending.unwrap().description.unwrap(), "foo");
         let status = update("status.metadata.foo=\"bar\"")?;
         let mut map = HashMap::new();
         map.insert("foo".to_owned(), "bar".to_owned());
-        assert_eq!(status.metadata, map);
+        assert_eq!(status.pending.unwrap().metadata.unwrap(), map);
         Ok(())
     }
 }

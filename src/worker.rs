@@ -11,9 +11,16 @@ use crate::config::*;
 use crate::linebuf::LineBuf;
 
 #[derive(Debug)]
+pub enum LogStream {
+    StdOut,
+    StdErr,
+}
+
+#[derive(Debug)]
 pub enum WorkerMessage {
     Starting,
-    LogMessage(String),
+    LogMessage(LogStream, String),
+    Metadata(String),
     Termination(i64),
     AbnormalTermination(String),
 }
@@ -50,7 +57,7 @@ pub fn monitor_thread<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Err
     }
 }
 
-fn append<T: FnMut(String)>(
+fn append<T: FnMut(LogStream, String)>(
     id: &String,
     f: &mut T,
     out: &mut Option<Vec<u8>>,
@@ -65,8 +72,8 @@ fn append<T: FnMut(String)>(
             // This is pretty noisy, so only trace if we have data
             trace!("[{}] read out={} err={}", id, out.len(), err.len());
         }
-        stdout.accept(out, f);
-        stderr.accept(err, f);
+        stdout.accept(out, &mut |s| f(LogStream::StdOut, s));
+        stderr.accept(err, &mut |s| f(LogStream::StdErr, s));
         done
     } else {
         error!("[{}] null reader?", id);
@@ -115,6 +122,27 @@ fn aggressively_wait_for_death(id: &String, mut popen: Popen, duration: Duration
     DeathResult::Wedged(popen)
 }
 
+fn process_log_message<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Error>>>(
+    id: &String,
+    failed: &AtomicBool,
+    stream: LogStream,
+    s: String,
+    sender: &mut T,
+) {
+    const META_PREFIX: &'static str = "@@STYLUS@@";
+
+    let msg = if s.starts_with(META_PREFIX) {
+        let s = s.split_at(META_PREFIX.len()).1;
+        WorkerMessage::Metadata(s.trim().to_owned())
+    } else {
+        WorkerMessage::LogMessage(stream, s)
+    };
+
+    if let Err(_) = sender(id, msg) {
+        failed.store(true, Ordering::SeqCst)
+    }
+}
+
 fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Error>>>(
     id: &String,
     cmd: &Path,
@@ -136,10 +164,8 @@ fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
     let mut popen = exec.popen()?;
 
     let failed = AtomicBool::new(false);
-    let mut f = |s| {
-        if let Err(_) = sender(id, WorkerMessage::LogMessage(s)) {
-            failed.store(true, Ordering::SeqCst)
-        }
+    let mut f = |stream, s| {
+        process_log_message(id, &failed, stream, s, sender);
     };
     let mut stdout = LineBuf::new(80);
     let mut stderr = LineBuf::new(80);
@@ -148,18 +174,25 @@ fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
     let mut comms = popen
         .communicate_start(None)
         .limit_time(Duration::from_millis(250));
+
     while start.elapsed() < timeout {
         let mut r = comms.read();
         if let Err(ref mut err) = r {
             if err.error.kind() == std::io::ErrorKind::TimedOut {
-                append(
+                if append(
                     id,
                     &mut f,
                     &mut err.capture.0,
                     &mut stdout,
                     &mut err.capture.1,
                     &mut stderr,
-                );
+                ) {
+                    // We *might* have a completed process: need to check whether the return value is available or not
+                    if popen.poll().is_some() {
+                        debug!("[{}] Early completion", id);
+                        break;
+                    }
+                }
                 continue;
             }
         }
@@ -169,8 +202,8 @@ fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
         }
     }
 
-    stdout.close(&mut f);
-    stderr.close(&mut f);
+    stdout.close(&mut |s| f(LogStream::StdOut, s));
+    stderr.close(&mut |s| f(LogStream::StdErr, s));
 
     debug!("[{}] Finished read, waiting for status...", id);
 

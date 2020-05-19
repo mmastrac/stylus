@@ -1,6 +1,6 @@
 version: 1
 server:
-  port: 8000
+  port: 8001
   static: static
 
 monitor:

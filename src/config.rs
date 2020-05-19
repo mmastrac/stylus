@@ -39,7 +39,7 @@ pub struct MonitorConfig {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CssConfig {
-    pub metadata: MetadataConfig,
+    pub metadata: CssMetadataConfig,
     pub rules: Vec<CssRule>,
 }
 
@@ -50,10 +50,14 @@ pub struct CssRule {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct MetadataConfig {
+pub struct CssMetadataConfig {
+    #[serde(default)]
     pub blank: Arc<HashMap<String, String>>,
+    #[serde(default)]
     pub red: Arc<HashMap<String, String>>,
+    #[serde(default)]
     pub yellow: Arc<HashMap<String, String>>,
+    #[serde(default)]
     pub green: Arc<HashMap<String, String>>,
 }
 

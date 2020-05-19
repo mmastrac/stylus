@@ -7,9 +7,9 @@ use std::thread;
 use walkdir::WalkDir;
 
 use crate::config::*;
-use crate::interpolate::interpolate_monitor;
+use crate::interpolate::*;
 use crate::status::*;
-use crate::worker::{monitor_thread, WorkerMessage};
+use crate::worker::{monitor_thread, LogStream, WorkerMessage};
 
 #[derive(Debug)]
 struct MonitorThread {
@@ -51,24 +51,18 @@ impl Monitor {
         for monitor_config in &monitor_configs {
             let monitor_config2 = monitor_config.clone();
             let (tx, rx) = channel();
+            let css_config = config.css.metadata.clone();
             let thread = thread::spawn(move || {
                 let thread = rx.recv().expect("Unexpected error receiving mutex");
                 monitor_thread(monitor_config2, move |id, m| {
-                    Self::process_message(id, &thread, m)
+                    Self::process_message(id, &thread, m, &css_config)
                 });
             });
             let thread = Arc::new(Mutex::new(MonitorThread {
                 thread,
                 state: MonitorState {
                     config: monitor_config.clone(),
-                    status: MonitorStatus {
-                        status: StatusState::Blank,
-                        code: 0,
-                        description: "Unknown (initializing)".into(),
-                        css: MonitorCssStatus {
-                            metadata: Default::default(),
-                        },
-                    },
+                    status: MonitorStatus::new(&config),
                     log: Arc::new(Mutex::new(VecDeque::new())),
                 },
             }));
@@ -84,35 +78,54 @@ impl Monitor {
         id: &String,
         monitor: &Arc<Mutex<MonitorThread>>,
         msg: WorkerMessage,
+        config: &CssMetadataConfig,
     ) -> Result<(), Box<dyn Error>> {
         let mut thread = monitor.lock().map_err(|_| "Poisoned mutex")?;
         debug!("[{}] Worker message {:?}", id, msg);
         match msg {
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
+                thread.state.status.pending = None;
             }
-            WorkerMessage::LogMessage(m) => {
+            WorkerMessage::LogMessage(stream, m) => {
                 let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
-                log.push_back(m);
+                let stream = match stream {
+                    LogStream::StdOut => "out",
+                    LogStream::StdErr => "err",
+                };
+                log.push_back(format!("[{}] {}", stream, m));
 
                 // This should be configurable
                 while log.len() > 100 {
                     log.pop_front();
                 }
             }
+            WorkerMessage::Metadata(expr) => {
+                if let Err(err) = interpolate_modify(&mut thread.state.status, &expr) {
+                    let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
+                    log.push_back(format!("[error ] {}", err));
+                } else {
+                    let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
+                    log.push_back(format!("[meta  ] {}", expr));
+                }
+            }
             WorkerMessage::AbnormalTermination(s) => {
-                thread.state.status.code = -1;
-                thread.state.status.description = s;
-                thread.state.status.status = StatusState::Yellow;
+                thread
+                    .state
+                    .status
+                    .finish(StatusState::Yellow, -1, s, &config);
             }
             WorkerMessage::Termination(code) => {
-                thread.state.status.code = code;
                 if code == 0 {
-                    thread.state.status.description = "Success".into();
-                    thread.state.status.status = StatusState::Green;
+                    thread
+                        .state
+                        .status
+                        .finish(StatusState::Green, code, "Success".into(), &config);
                 } else {
-                    thread.state.status.description = "Failed".into();
-                    thread.state.status.status = StatusState::Red;
+                    thread
+                        .state
+                        .status
+                        .finish(StatusState::Red, code, "Failed".into(), &config);
                 }
             }
         }
@@ -144,14 +157,7 @@ impl Monitor {
             let monitor = monitor
                 .lock()
                 .expect("Failed to lock mutex while updating status");
-            let mut state = monitor.state.clone();
-            state.status.css.metadata = match state.status.status {
-                StatusState::Blank => self.config.css.metadata.green.clone(),
-                StatusState::Green => self.config.css.metadata.green.clone(),
-                StatusState::Yellow => self.config.css.metadata.yellow.clone(),
-                StatusState::Red => self.config.css.metadata.red.clone(),
-            };
-            monitors.push(state);
+            monitors.push(monitor.state.clone());
         }
 
         Status {

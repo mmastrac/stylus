@@ -67,7 +67,10 @@ async fn main() -> () {
     let routes = warp::get().and(style.or(status).or(r#static));
 
     // We print one and only one message
-    eprintln!("Stylus {} is listening on 0.0.0.0:{}!", VERSION, config.server.port);
+    eprintln!(
+        "Stylus {} is listening on 0.0.0.0:{}!",
+        VERSION, config.server.port
+    );
 
     warp::serve(routes)
         .run(([0, 0, 0, 0], config.server.port))

@@ -86,14 +86,17 @@ impl Monitor {
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
                 thread.state.status.pending = None;
+                let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
+                log.clear();
             }
             WorkerMessage::LogMessage(stream, m) => {
                 let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
                 let stream = match stream {
-                    LogStream::StdOut => "out",
-                    LogStream::StdErr => "err",
+                    LogStream::StdOut => "stdout",
+                    LogStream::StdErr => "stderr",
                 };
-                log.push_back(format!("[{}] {}", stream, m));
+                // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
+                log.push_back(format!("[{}] {}", stream, m.trim_end()));
 
                 // This should be configurable
                 while log.len() > 100 {

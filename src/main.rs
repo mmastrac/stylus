@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use monitor::Monitor;
 use status::Status;
+use warp::path;
 use warp::Filter;
 
 mod config;
@@ -25,10 +26,30 @@ async fn status_request(monitor: Arc<Monitor>) -> Result<Status, Infallible> {
     Ok(monitor.status())
 }
 
+async fn log_request(monitor: Arc<Monitor>, s: String) -> Result<String, Infallible> {
+    for monitor in monitor.status().monitors {
+        if monitor.config.id == s {
+            let mut logs = String::new();
+            for log in monitor.log.lock().expect("Poisoned mutex").iter() {
+                logs += &log;
+                logs += "\n";
+            }
+            return Ok(logs);
+        }
+    }
+    Ok("Not found".to_owned())
+}
+
 /// Provide the given arc to a warp chain
 fn provide_monitor(monitor: &Arc<Monitor>) -> impl Fn() -> Arc<Monitor> + Clone {
     let monitor = Box::new(monitor.clone());
     move || *monitor.clone()
+}
+
+/// Provide the given arc to a warp chain
+fn provide_monitor_2<T>(monitor: &Arc<Monitor>) -> impl Fn(T) -> (T, Arc<Monitor>) + Clone {
+    let monitor = Box::new(monitor.clone());
+    move |t| (t, *monitor.clone())
 }
 
 #[tokio::main]
@@ -48,12 +69,12 @@ async fn main() -> () {
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
 
     // style.css for formatting
-    let style = warp::path("style.css")
+    let style = path!("style.css")
         .map(provide_monitor(&monitor))
         .and_then(css_request)
         .with(warp::reply::with::header("Content-Type", "text/css"));
     // status.json for advanced integrations
-    let status = warp::path("status.json")
+    let status = path!("status.json")
         .map(provide_monitor(&monitor))
         .and_then(status_request)
         .map(|s| warp::reply::json(&s))
@@ -61,10 +82,14 @@ async fn main() -> () {
             "Content-Type",
             "application/json",
         ));
+    let log = path!("log" / String)
+        .map(provide_monitor_2(&monitor))
+        .and_then(|(s, m)| log_request(m, s))
+        .with(warp::reply::with::header("Content-Type", "text/plain"));
     // static pages
     let r#static = warp::fs::dir(config.server.r#static);
 
-    let routes = warp::get().and(style.or(status).or(r#static));
+    let routes = warp::get().and(style.or(status).or(log).or(r#static));
 
     // We print one and only one message
     eprintln!(

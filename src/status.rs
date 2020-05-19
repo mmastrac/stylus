@@ -7,6 +7,7 @@ use crate::config::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum StatusState {
+    Blank,
     Green,
     Yellow,
     Red,

@@ -51,6 +51,7 @@ pub struct CssRule {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MetadataConfig {
+    pub blank: Arc<HashMap<String, String>>,
     pub red: Arc<HashMap<String, String>>,
     pub yellow: Arc<HashMap<String, String>>,
     pub green: Arc<HashMap<String, String>>,

@@ -62,7 +62,7 @@ impl Monitor {
                 state: MonitorState {
                     config: monitor_config.clone(),
                     status: MonitorStatus {
-                        status: StatusState::Yellow,
+                        status: StatusState::Blank,
                         code: 0,
                         description: "Unknown (initializing)".into(),
                         css: MonitorCssStatus {
@@ -146,6 +146,7 @@ impl Monitor {
                 .expect("Failed to lock mutex while updating status");
             let mut state = monitor.state.clone();
             state.status.css.metadata = match state.status.status {
+                StatusState::Blank => self.config.css.metadata.green.clone(),
                 StatusState::Green => self.config.css.metadata.green.clone(),
                 StatusState::Yellow => self.config.css.metadata.yellow.clone(),
                 StatusState::Red => self.config.css.metadata.red.clone(),

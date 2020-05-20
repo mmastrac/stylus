@@ -138,7 +138,7 @@ connect to hosts and remote tests can be executed.
 
 **Stylus** is very lightweight, both from a processing and memory perspective.
 
-On a Raspberry Pi 1B, **Stylus** uses approximately 7% CPU while refreshing CSS at a rate of 1/s. On a 2015 MacBook Pro, 
+On a Raspberry Pi 1B, **Stylus** uses less than 1% of CPU while refreshing CSS at a rate of 1/s. On a 2015 MacBook Pro, 
 Stylus uses approximately 0.1% of a single core while actively refreshing.
 
 **Stylus** uses approxmately 2MB to monitor 15 services on a Raspberry Pi (according to [ps_mem](https://raw.githubusercontent.com/pixelb/ps_mem/master/ps_mem.py)).

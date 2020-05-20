@@ -14,13 +14,13 @@ use crate::worker::{monitor_thread, LogStream, WorkerMessage};
 #[derive(Debug)]
 struct MonitorThread {
     thread: thread::JoinHandle<()>,
-    state: MonitorState,
+    state: Arc<Mutex<MonitorState>>,
 }
 
-#[derive(Clone)]
+#[derive(Debug)]
 pub struct Monitor {
     config: Config,
-    monitors: Vec<Arc<Mutex<MonitorThread>>>,
+    monitors: Vec<MonitorThread>,
 }
 
 impl Monitor {
@@ -58,16 +58,17 @@ impl Monitor {
                     Self::process_message(id, &thread, m, &css_config)
                 });
             });
-            let thread = Arc::new(Mutex::new(MonitorThread {
+            let thread = MonitorThread {
                 thread,
-                state: MonitorState {
+                state: Arc::new(Mutex::new(MonitorState {
                     config: monitor_config.clone(),
                     status: MonitorStatus::new(&config),
-                    log: Arc::new(Mutex::new(VecDeque::new())),
-                },
-            }));
+                    log: VecDeque::new(),
+                    css: None,
+                })),
+            };
             // Let the thread go!
-            tx.send(thread.clone())
+            tx.send(thread.state.clone())
                 .expect("Unexpected error sending mutex");
             monitors.push(thread);
         }
@@ -76,57 +77,52 @@ impl Monitor {
 
     fn process_message(
         id: &String,
-        monitor: &Arc<Mutex<MonitorThread>>,
+        monitor: &Arc<Mutex<MonitorState>>,
         msg: WorkerMessage,
         config: &CssMetadataConfig,
     ) -> Result<(), Box<dyn Error>> {
-        let mut thread = monitor.lock().map_err(|_| "Poisoned mutex")?;
+        let mut state = monitor.lock().map_err(|_| "Poisoned mutex")?;
         debug!("[{}] Worker message {:?}", id, msg);
         match msg {
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
-                thread.state.status.pending = None;
-                let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
-                log.clear();
+                state.status.pending = None;
+                state.log.clear();
             }
             WorkerMessage::LogMessage(stream, m) => {
-                let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
                 let stream = match stream {
                     LogStream::StdOut => "stdout",
                     LogStream::StdErr => "stderr",
                 };
                 // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
-                log.push_back(format!("[{}] {}", stream, m.trim_end()));
+                state.log.push_back(format!("[{}] {}", stream, m.trim_end()));
 
                 // This should be configurable
-                while log.len() > 100 {
-                    log.pop_front();
+                while state.log.len() > 100 {
+                    state.log.pop_front();
                 }
             }
             WorkerMessage::Metadata(expr) => {
-                if let Err(err) = interpolate_modify(&mut thread.state.status, &expr) {
-                    let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
-                    log.push_back(format!("[error ] {}", err));
+                if let Err(err) = interpolate_modify(&mut state.status, &expr) {
+                    state.log.push_back(format!("[error ] {}", err));
                 } else {
-                    let mut log = thread.state.log.lock().map_err(|_| "Poisoned mutex")?;
-                    log.push_back(format!("[meta  ] {}", expr));
+                    state.log.push_back(format!("[meta  ] {}", expr));
                 }
             }
             WorkerMessage::AbnormalTermination(s) => {
-                thread
-                    .state
+                state.css = None;
+                state
                     .status
                     .finish(StatusState::Yellow, -1, s, &config);
             }
             WorkerMessage::Termination(code) => {
+                state.css = None;
                 if code == 0 {
-                    thread
-                        .state
+                    state
                         .status
                         .finish(StatusState::Green, code, "Success".into(), &config);
                 } else {
-                    thread
-                        .state
+                    state
                         .status
                         .finish(StatusState::Red, code, "Failed".into(), &config);
                 }
@@ -140,32 +136,31 @@ impl Monitor {
         let status = self.status();
         for monitor in status.monitors {
             css += "\n";
-            css += &format!("/* {} */\n", monitor.config.id);
-            for rule in &self.config.css.rules {
-                css += &interpolate_monitor(&monitor, &rule.selectors)
-                    .unwrap_or("/* failed */".into());
-                css += "{\n";
-                css += &interpolate_monitor(&monitor, &rule.declarations)
-                    .unwrap_or("/* failed */".into());
-                css += "}\n\n";
-            }
+            let mut monitor = monitor.lock().expect("Poisoned mutex");
+
+            // Build the css from cache
+            let mut cache = monitor.css.take();
+            css += cache.get_or_insert_with(|| {
+                let mut css = format!("/* {} */\n", monitor.config.id);
+                for rule in &self.config.css.rules {
+                    css += &interpolate_monitor(&monitor, &rule.selectors)
+                        .unwrap_or("/* failed */".into());
+                    css += "{\n";
+                    css += &interpolate_monitor(&monitor, &rule.declarations)
+                        .unwrap_or("/* failed */".into());
+                    css += "}\n\n";
+                }
+                css
+            });
+            monitor.css = cache;
         }
         css
     }
 
     pub fn status(&self) -> Status {
-        let mut monitors = Vec::new();
-
-        for monitor in &self.monitors {
-            let monitor = monitor
-                .lock()
-                .expect("Failed to lock mutex while updating status");
-            monitors.push(monitor.state.clone());
-        }
-
         Status {
             config: self.config.clone(),
-            monitors,
+            monitors: self.monitors.iter().map(|m| m.state.clone()).collect(),
         }
     }
 }

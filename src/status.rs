@@ -17,14 +17,16 @@ pub enum StatusState {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Status {
     pub config: Config,
-    pub monitors: Vec<MonitorState>,
+    pub monitors: Vec<Arc<Mutex<MonitorState>>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorState {
     pub config: MonitorDirConfig,
     pub status: MonitorStatus,
-    pub log: Arc<Mutex<VecDeque<String>>>,
+    pub log: VecDeque<String>,
+    #[serde(skip)]
+    pub css: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

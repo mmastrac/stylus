@@ -72,8 +72,10 @@ monitor:
   dir: monitor.d/
 
 css:
-  # Arbitrary metadata can be associated with the three states
+  # Arbitrary metadata can be associated with the four states
   metadata:
+    blank:
+      color: "white"
     red:
       color: "#fa897b"
     yellow:

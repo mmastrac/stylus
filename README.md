@@ -132,6 +132,18 @@ curl --retry 2 --max-time 5 --connect-timeout 5 http://192.168.1.1:9000
 Tools such as `jq`, `sed`, or `awk` can be used for more advanced tests (ie: APIs). If needed, ssh can be used to
 connect to hosts and remote tests can be executed.
 
+## Performance
+
+**Stylus** is very lightweight, both from a processing and memory perspective.
+
+On a Raspberry Pi 1B, **Stylus** uses approximately 7% CPU while refreshing CSS at a rate of 1/s. On a 2015 MacBook Pro, 
+Stylus uses approximately 0.1% of a single core while actively refreshing.
+
+**Stylus** uses approxmately 2MB to monitor 15 services on a Raspberry Pi (according to [ps_mem](https://raw.githubusercontent.com/pixelb/ps_mem/master/ps_mem.py)).
+
+When not actively monitored, **Stylus** uses a nearly unmeasurable amount of CPU and is pretty much limited by how
+heavyweight your test scripts are.
+
 ## Screenshots
 
 ### Included example

@@ -20,14 +20,14 @@ pub fn interpolate_monitor(monitor: &MonitorState, s: &str) -> Result<String, Bo
 pub fn interpolate_modify(status: &mut MonitorStatus, s: &str) -> Result<(), Box<dyn Error>> {
     let (raw_path, value) = s.splitn(2, '=').next_tuple().ok_or("Invalid expression")?;
     let value: Value = serde_json::from_str(value)?;
-    let mut path = raw_path.split('.').into_iter();
+    let mut path = raw_path.split('.');
     let pending = status
         .pending
-        .get_or_insert_with(|| MonitorPendingStatus::default());
+        .get_or_insert_with(MonitorPendingStatus::default);
 
     match path.next() {
         Some("status") => {}
-        _ => Err(format!("Invalid path: {}", raw_path))?,
+        _ => return Err(format!("Invalid path: {}", raw_path).into()),
     }
     match path.next() {
         Some("status") => {
@@ -38,12 +38,12 @@ pub fn interpolate_modify(status: &mut MonitorStatus, s: &str) -> Result<(), Box
         }
         Some("metadata") => match path.next() {
             Some(s) => {
-                let metadata = pending.metadata.get_or_insert_with(|| HashMap::new());
+                let metadata = pending.metadata.get_or_insert_with(HashMap::new);
                 drop(metadata.insert(s.to_owned(), serde_json::from_value(value)?))
             }
-            _ => Err(format!("Invalid path: {}", raw_path))?,
+            _ => return Err(format!("Invalid path: {}", raw_path).into()),
         },
-        _ => Err(format!("Invalid path: {}", raw_path))?,
+        _ => return Err(format!("Invalid path: {}", raw_path).into()),
     }
 
     Ok(())

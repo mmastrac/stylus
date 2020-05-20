@@ -4,8 +4,8 @@ pub struct LineBuf {
     pending_cr: bool,
 }
 
-const LF: u8 = '\n' as u8;
-const CR: u8 = '\r' as u8;
+const LF: u8 = b'\n';
+const CR: u8 = b'\r';
 
 impl LineBuf {
     pub fn new(buffer_size: usize) -> Self {

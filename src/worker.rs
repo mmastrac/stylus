@@ -25,7 +25,7 @@ pub enum WorkerMessage {
     AbnormalTermination(String),
 }
 
-pub fn monitor_thread<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Error>>>(
+pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
     monitor: MonitorDirConfig,
     mut sender: T,
 ) {
@@ -41,10 +41,12 @@ pub fn monitor_thread<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Err
         if let Err(err) = r {
             // Break the loop on a task failure
             error!("[{}] Task failure: {}", monitor.id, err);
-            if let Err(_) = sender(
+            if sender(
                 &monitor.id,
                 WorkerMessage::AbnormalTermination(err.to_string()),
-            ) {
+            )
+            .is_err()
+            {
                 return;
             }
         }
@@ -58,7 +60,7 @@ pub fn monitor_thread<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Err
 }
 
 fn append<T: FnMut(LogStream, String)>(
-    id: &String,
+    id: &str,
     f: &mut T,
     out: &mut Option<Vec<u8>>,
     stdout: &mut LineBuf,
@@ -67,7 +69,7 @@ fn append<T: FnMut(LogStream, String)>(
 ) -> bool {
     if let (Some(out), Some(err)) = (out, err) {
         // Termination condition: "until read() returns all-empty data, which marks EOF."
-        let done = out.len() == 0 && err.len() == 0;
+        let done = out.is_empty() && err.is_empty();
         if !done {
             // This is pretty noisy, so only trace if we have data
             trace!("[{}] read out={} err={}", id, out.len(), err.len());
@@ -87,7 +89,7 @@ enum DeathResult {
     Wedged(Popen),
 }
 
-fn aggressively_wait_for_death(id: &String, mut popen: Popen, duration: Duration) -> DeathResult {
+fn aggressively_wait_for_death(id: &str, mut popen: Popen, duration: Duration) -> DeathResult {
     let r = popen.wait_timeout(duration);
     if let Ok(Some(status)) = r {
         // Easy, status was available right await
@@ -122,14 +124,14 @@ fn aggressively_wait_for_death(id: &String, mut popen: Popen, duration: Duration
     DeathResult::Wedged(popen)
 }
 
-fn process_log_message<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Error>>>(
-    id: &String,
+fn process_log_message<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
+    id: &str,
     failed: &AtomicBool,
     stream: LogStream,
     s: String,
     sender: &mut T,
 ) {
-    const META_PREFIX: &'static str = "@@STYLUS@@";
+    const META_PREFIX: &str = "@@STYLUS@@";
 
     let msg = if s.starts_with(META_PREFIX) {
         let s = s.split_at(META_PREFIX.len()).1;
@@ -138,13 +140,13 @@ fn process_log_message<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
         WorkerMessage::LogMessage(stream, s)
     };
 
-    if let Err(_) = sender(id, msg) {
+    if sender(id, msg).is_err() {
         failed.store(true, Ordering::SeqCst)
     }
 }
 
-fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Error>>>(
-    id: &String,
+fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
+    id: &str,
     cmd: &Path,
     args: Option<&[impl AsRef<OsStr>]>,
     timeout: Duration,
@@ -221,17 +223,16 @@ fn monitor_thread_impl<T: FnMut(&String, WorkerMessage) -> Result<(), Box<dyn Er
         DeathResult::ExitStatus(ExitStatus::Signaled(code)) => {
             sender(
                 id,
-                WorkerMessage::AbnormalTermination(
-                    format!("Process exited with signal {}", code).into(),
-                ),
+                WorkerMessage::AbnormalTermination(format!("Process exited with signal {}", code)),
             )?;
         }
         DeathResult::ExitStatus(ExitStatus::Other(code)) => {
             sender(
                 id,
-                WorkerMessage::AbnormalTermination(
-                    format!("Process exited for unknown reason {:x}", code).into(),
-                ),
+                WorkerMessage::AbnormalTermination(format!(
+                    "Process exited for unknown reason {:x}",
+                    code
+                )),
             )?;
         }
         DeathResult::ExitStatus(ExitStatus::Undetermined) => {

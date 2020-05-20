@@ -76,7 +76,7 @@ impl Monitor {
     }
 
     fn process_message(
-        id: &String,
+        id: &str,
         monitor: &Arc<Mutex<MonitorState>>,
         msg: WorkerMessage,
         config: &CssMetadataConfig,
@@ -95,7 +95,9 @@ impl Monitor {
                     LogStream::StdErr => "stderr",
                 };
                 // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
-                state.log.push_back(format!("[{}] {}", stream, m.trim_end()));
+                state
+                    .log
+                    .push_back(format!("[{}] {}", stream, m.trim_end()));
 
                 // This should be configurable
                 while state.log.len() > 100 {
@@ -111,9 +113,7 @@ impl Monitor {
             }
             WorkerMessage::AbnormalTermination(s) => {
                 state.css = None;
-                state
-                    .status
-                    .finish(StatusState::Yellow, -1, s, &config);
+                state.status.finish(StatusState::Yellow, -1, s, &config);
             }
             WorkerMessage::Termination(code) => {
                 state.css = None;
@@ -132,7 +132,7 @@ impl Monitor {
     }
 
     pub fn generate_css(&self) -> String {
-        let mut css = format!("/* Generated at {:?} */\n", std::time::Instant::now()).to_owned();
+        let mut css = format!("/* Generated at {:?} */\n", std::time::Instant::now());
         let status = self.status();
         for monitor in status.monitors {
             css += "\n";
@@ -144,10 +144,10 @@ impl Monitor {
                 let mut css = format!("/* {} */\n", monitor.config.id);
                 for rule in &self.config.css.rules {
                     css += &interpolate_monitor(&monitor, &rule.selectors)
-                        .unwrap_or("/* failed */".into());
+                        .unwrap_or_else(|_| "/* failed */".into());
                     css += "{\n";
                     css += &interpolate_monitor(&monitor, &rule.declarations)
-                        .unwrap_or("/* failed */".into());
+                        .unwrap_or_else(|_| "/* failed */".into());
                     css += "}\n\n";
                 }
                 css

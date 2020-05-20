@@ -1,3 +1,4 @@
+#![warn(clippy::all)]
 use std::convert::Infallible;
 use std::sync::Arc;
 
@@ -16,7 +17,7 @@ mod worker;
 #[macro_use]
 extern crate log;
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 async fn css_request(monitor: Arc<Monitor>) -> Result<String, Infallible> {
     Ok(monitor.generate_css())

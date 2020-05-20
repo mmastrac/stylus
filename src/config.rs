@@ -88,10 +88,9 @@ pub fn parse_config(file: String) -> Result<Config, Box<dyn Error>> {
     }
 
     // Canonical paths
-    config.base_path = Path::canonicalize(&config.base_path)?.into();
-    config.server.r#static =
-        Path::canonicalize(&config.base_path.join(&config.server.r#static))?.into();
-    config.monitor.dir = Path::canonicalize(&config.base_path.join(&config.monitor.dir))?.into();
+    config.base_path = Path::canonicalize(&config.base_path)?;
+    config.server.r#static = Path::canonicalize(&config.base_path.join(&config.server.r#static))?;
+    config.monitor.dir = Path::canonicalize(&config.base_path.join(&config.monitor.dir))?;
 
     // Basic checks before we return the config
     if !config.server.r#static.exists() {
@@ -112,8 +111,8 @@ pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Err
     }
 
     // Canonical paths
-    config.base_path = Path::canonicalize(&config.base_path)?.into();
-    config.test.command = Path::canonicalize(&config.base_path.join(&config.test.command))?.into();
+    config.base_path = Path::canonicalize(&config.base_path)?;
+    config.test.command = Path::canonicalize(&config.base_path.join(&config.test.command))?;
 
     if config.id.is_empty() {
         config.id = file

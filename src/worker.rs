@@ -34,6 +34,7 @@ pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>
         let r = monitor_thread_impl(
             &monitor.id,
             &monitor.test.command,
+            &monitor.base_path,
             args,
             monitor.test.timeout,
             &mut sender,
@@ -148,6 +149,7 @@ fn process_log_message<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
 fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
     id: &str,
     cmd: &Path,
+    base_path: &Path,
     args: Option<&[impl AsRef<OsStr>]>,
     timeout: Duration,
     sender: &mut T,
@@ -158,6 +160,8 @@ fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
     debug!("[{}] Starting {:?}", id, cmd);
 
     let mut exec = Exec::cmd(cmd)
+        .cwd(base_path)
+        .env("STYLUS_MONITOR_ID", id)
         .stdout(Redirection::Pipe)
         .stderr(Redirection::Pipe);
     if let Some(args) = args {
@@ -265,6 +269,7 @@ mod tests {
         monitor_thread_impl(
             &"test".to_owned(),
             Path::new("/bin/sleep"),
+            Path::new("/tmp"),
             Some(&["10"]),
             Duration::from_millis(250),
             &mut |_, m| {

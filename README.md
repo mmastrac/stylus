@@ -157,4 +157,4 @@ heavyweight your test scripts are.
 
 ![Screenshot](docs/screenshot-2.png)
 
-[diagrams.net]: https://www.diagrams.net/
+[diagrams.net]: https://app.diagrams.net/?splash=0&p=svgdata

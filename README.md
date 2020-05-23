@@ -132,7 +132,8 @@ curl --retry 2 --max-time 5 --connect-timeout 5 http://192.168.1.1:9000
 ### Advanced techniques
 
 Tools such as `jq`, `sed`, or `awk` can be used for more advanced tests (ie: APIs). If needed, ssh can be used to
-connect to hosts and remote tests can be executed.
+connect to hosts and remote tests can be executed. `snmpwalk` and `snmpget` can also be used to construct tests for
+devices that speak SNMP. 
 
 ## Performance
 

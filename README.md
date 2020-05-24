@@ -22,8 +22,9 @@ cargo install stylus
 Or on docker:
 
 ```
-# Assume that this is started with $PWD in the example/ directory
-docker run --rm -p 8000:8000 -v $PWD:/srv mmastrac/stylus:latest
+# Assume that this is running against the stylus example, this will map the example directory into
+# the container's /srv folder. The container will automatically load config.yaml from this folder!
+docker run --name stylus -p 8000:8000 -v (full path to stylus/example/):/srv mmastrac/stylus:latest
 ```
 
 ## Theory of operation

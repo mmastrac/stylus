@@ -31,12 +31,16 @@ pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>
 ) {
     loop {
         let args: Option<&[OsString]> = None;
+        let test = match monitor.root {
+            MonitorDirRootConfig::Test(ref test) => test,
+            MonitorDirRootConfig::Group(ref group) => &group.test,
+        };
         let r = monitor_thread_impl(
             &monitor.id,
-            &monitor.test.command,
+            &test.command,
             &monitor.base_path,
             args,
-            monitor.test.timeout,
+            test.timeout,
             &mut sender,
         );
         if let Err(err) = r {
@@ -54,9 +58,9 @@ pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>
         trace!(
             "[{}] Sleeping {}ms",
             monitor.id,
-            monitor.test.interval.as_millis()
+            test.interval.as_millis()
         );
-        thread::sleep(monitor.test.interval);
+        thread::sleep(test.interval);
     }
 }
 

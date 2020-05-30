@@ -63,11 +63,38 @@ pub struct CssMetadataConfig {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorDirConfig {
-    pub test: MonitorDirTestConfig,
+    #[serde(flatten)]
+    pub root: MonitorDirRootConfig,
     #[serde(default)]
     pub base_path: PathBuf,
     #[serde(default)]
     pub id: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MonitorDirRootConfig {
+    Test(MonitorDirTestConfig),
+    Group(MonitorDirGroupConfig),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MonitorDirGroupConfig {
+    pub test: MonitorDirTestConfig,
+    pub axes: Vec<MonitorDirAxisConfig>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum MonitorDirAxisValue {
+    String(String),
+    Number(i64),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MonitorDirAxisConfig {
+    pub values: Vec<MonitorDirAxisValue>,
+    pub name: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -80,30 +107,33 @@ pub struct MonitorDirTestConfig {
 }
 
 pub fn parse_config(file: String) -> Result<Config, Box<dyn Error>> {
-    let mut config: Config = serde_yaml::from_str(&std::fs::read_to_string(&file)?)?;
-    if Iterator::count(config.base_path.components()) == 0 {
-        config.base_path = Path::parent(Path::new(&file))
-            .ok_or("Failed to get base path")?
-            .into();
-    }
+    let curr = std::env::current_dir()?;
+    let mut path = Path::new(&file).into();
+    canonicalize("configuration", Some(&curr), &mut path)?;
+    let s = std::fs::read_to_string(&path)?;
+    parse_config_string(file, s)
+}
 
-    // Canonical paths
-    config.base_path = Path::canonicalize(&config.base_path)?;
-    config.server.r#static = Path::canonicalize(&config.base_path.join(&config.server.r#static))?;
-    config.monitor.dir = Path::canonicalize(&config.base_path.join(&config.monitor.dir))?;
+pub fn canonicalize(what: &str, base_path: Option<&Path>, path: &mut PathBuf) -> Result<(), Box<dyn Error>> {
+    let new = match base_path {
+        None => path.clone(),
+        Some(base_path) => base_path.join(&path)
+    };
 
-    // Basic checks before we return the config
-    if !config.server.r#static.exists() {
-        Err("Static directory does not exist".into())
-    } else if !config.monitor.dir.exists() {
-        Err("Monitor directory does not exist".into())
+    if !new.exists() {
+        Err(if let Some(base_path) = base_path {
+            format!("{} does not exist ({}, base path was {})", what, path.to_string_lossy(), base_path.to_string_lossy())
+        } else {
+            format!("{} does not exist ({})", what, path.to_string_lossy())
+        }.into())
     } else {
-        Ok(config)
+        *path = new.canonicalize()?;
+        Ok(())
     }
 }
 
-pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Error>> {
-    let mut config: MonitorDirConfig = serde_yaml::from_str(&std::fs::read_to_string(&file)?)?;
+pub fn parse_config_string(file: String, s: String) -> Result<Config, Box<dyn Error>> {
+    let mut config: Config = serde_yaml::from_str(&s)?;
     if Iterator::count(config.base_path.components()) == 0 {
         config.base_path = Path::parent(Path::new(&file))
             .ok_or("Failed to get base path")?
@@ -111,8 +141,29 @@ pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Err
     }
 
     // Canonical paths
-    config.base_path = Path::canonicalize(&config.base_path)?;
-    config.test.command = Path::canonicalize(&config.base_path.join(&config.test.command))?;
+    canonicalize("base path", None, &mut config.base_path)?;
+    canonicalize("static file path", Some(&config.base_path), &mut config.server.r#static)?;
+    canonicalize("monitor directory path", Some(&config.base_path), &mut config.monitor.dir)?;
+
+    Ok(config)
+}
+
+pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Error>> {
+    let s = std::fs::read_to_string(&file)?;
+    parse_monitor_config_string(file, s)
+}
+
+pub fn parse_monitor_config_string(
+    file: &Path,
+    s: String,
+) -> Result<MonitorDirConfig, Box<dyn Error>> {
+    let mut config: MonitorDirConfig = serde_yaml::from_str(&s)?;
+    if Iterator::count(config.base_path.components()) == 0 {
+        config.base_path = Path::parent(file).ok_or("Failed to get base path")?.into();
+    }
+
+    // Canonical paths
+    canonicalize("base path", None, &mut config.base_path)?;
 
     if config.id.is_empty() {
         config.id = file
@@ -124,10 +175,72 @@ pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Err
             .to_string();
     }
 
-    // Basic checks before we return the config
-    if !config.test.command.exists() {
-        Err("Test command does not exist".into())
+    if let MonitorDirRootConfig::Test(ref mut test) = &mut config.root {
+        test.command = Path::canonicalize(&config.base_path.join(&test.command))?;
+
+        // Basic checks before we return the config
+        if !test.command.exists() {
+            Err("Test command does not exist".into())
+        } else {
+            Ok(config)
+        }
     } else {
         Ok(config)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn deserialize_config_test() -> Result<(), Box<dyn Error>> {
+        let config = parse_config("src/testcases/v1.yaml".into())?;
+        assert_eq!(config.base_path, Path::new("src/testcases").canonicalize()?);
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize_monitor_test() -> Result<(), Box<dyn Error>> {
+        let config = parse_monitor_config_string(
+            &Path::new("/tmp/test.yaml"),
+            r#"
+# Explicitly set the id here
+id: router
+test:
+    interval: 60s
+    timeout: 30s
+    command: /bin/sleep
+          "#
+            .into(),
+        )?;
+
+        // assert_eq!(config.test.command, Path::new("/bin/sleep"));
+        
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize_monitor_group() -> Result<(), Box<dyn Error>> {
+        let config = parse_monitor_config_string(
+            &Path::new("/tmp/test.yaml"),
+            r#"
+# Explicitly set the id here
+id: router
+group:
+    axes:
+        - values: [1, 2, 3]
+          name: index
+    test:
+        interval: 60s
+        timeout: 30s
+        command: /bin/sleep
+          "#
+            .into(),
+        )?;
+
+        // assert_eq!(config.test.command, Path::new("/bin/sleep"));
+        
+        Ok(())
     }
 }

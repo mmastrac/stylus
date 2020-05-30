@@ -1,0 +1,41 @@
+version: 1
+server:
+  port: 8000
+  static: /tmp/
+
+monitor:
+  dir: /tmp/
+
+css:
+  # Use metadata to get prettier colors - note that we can add arbitrary string keys and values here
+  metadata:
+    red:
+      color: "#fa897b"
+    yellow:
+      color: "#ffdd94"
+    green:
+      color: "#d0e6a5"
+  rules:
+    # Style the HTML/SVG with the appropriate status color
+    - selectors: "
+        #{{monitor.config.id}},
+        [data-monitor-id=\"{{monitor.config.id}}\"] > *
+      "
+      declarations: "
+        background-color: {{monitor.status.css.metadata.color}} !important;
+        fill: {{monitor.status.css.metadata.color}} !important;
+      "
+    # Add some text for the status/return value of the script
+    - selectors: "
+        #{{monitor.config.id}} td:nth-child(2)::after
+      "
+      declarations: "
+        content: \"status={{monitor.status.status}} retval={{monitor.status.code}}\"
+      "
+    # Add the full description to the table
+    - selectors: "
+        #{{monitor.config.id}} td:nth-child(3)::after
+      "
+      declarations: "
+        content: \"{{monitor.status.description}}\"
+      " 

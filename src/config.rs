@@ -114,18 +114,28 @@ pub fn parse_config(file: String) -> Result<Config, Box<dyn Error>> {
     parse_config_string(file, s)
 }
 
-pub fn canonicalize(what: &str, base_path: Option<&Path>, path: &mut PathBuf) -> Result<(), Box<dyn Error>> {
+pub fn canonicalize(
+    what: &str,
+    base_path: Option<&Path>,
+    path: &mut PathBuf,
+) -> Result<(), Box<dyn Error>> {
     let new = match base_path {
         None => path.clone(),
-        Some(base_path) => base_path.join(&path)
+        Some(base_path) => base_path.join(&path),
     };
 
     if !new.exists() {
         Err(if let Some(base_path) = base_path {
-            format!("{} does not exist ({}, base path was {})", what, path.to_string_lossy(), base_path.to_string_lossy())
+            format!(
+                "{} does not exist ({}, base path was {})",
+                what,
+                path.to_string_lossy(),
+                base_path.to_string_lossy()
+            )
         } else {
             format!("{} does not exist ({})", what, path.to_string_lossy())
-        }.into())
+        }
+        .into())
     } else {
         *path = new.canonicalize()?;
         Ok(())
@@ -142,8 +152,16 @@ pub fn parse_config_string(file: String, s: String) -> Result<Config, Box<dyn Er
 
     // Canonical paths
     canonicalize("base path", None, &mut config.base_path)?;
-    canonicalize("static file path", Some(&config.base_path), &mut config.server.r#static)?;
-    canonicalize("monitor directory path", Some(&config.base_path), &mut config.monitor.dir)?;
+    canonicalize(
+        "static file path",
+        Some(&config.base_path),
+        &mut config.server.r#static,
+    )?;
+    canonicalize(
+        "monitor directory path",
+        Some(&config.base_path),
+        &mut config.monitor.dir,
+    )?;
 
     Ok(config)
 }
@@ -215,8 +233,11 @@ test:
             .into(),
         )?;
 
-        // assert_eq!(config.test.command, Path::new("/bin/sleep"));
-        
+        match config.root {
+            MonitorDirRootConfig::Test(test) => assert_eq!(test.command, Path::new("/bin/sleep")),
+            _ => panic!(""),
+        }
+
         Ok(())
     }
 
@@ -239,8 +260,13 @@ group:
             .into(),
         )?;
 
-        // assert_eq!(config.test.command, Path::new("/bin/sleep"));
-        
+        match config.root {
+            MonitorDirRootConfig::Group(group) => {
+                assert_eq!(group.test.command, Path::new("/bin/sleep"))
+            }
+            _ => panic!(""),
+        }
+
         Ok(())
     }
 }

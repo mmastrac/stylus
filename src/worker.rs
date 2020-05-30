@@ -55,11 +55,7 @@ pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>
                 return;
             }
         }
-        trace!(
-            "[{}] Sleeping {}ms",
-            monitor.id,
-            test.interval.as_millis()
-        );
+        trace!("[{}] Sleeping {}ms", monitor.id, test.interval.as_millis());
         thread::sleep(test.interval);
     }
 }

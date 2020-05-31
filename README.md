@@ -10,7 +10,7 @@ original deno source is available in the `deno` branch.
 ## Running
 
 ```
-cargo run -- example/config.yaml
+cargo run -- examples/simple_network/config.yaml
 ```
 
 Or install via `cargo`:

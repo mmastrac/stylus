@@ -17,15 +17,17 @@
             }
         </style>
         <script>
-            window.onload = function() {
+            function initialize() {
                 class Status extends React.Component {
                     state = {};
 
                     componentDidMount() {
-                        setInterval(() => 
+                        let request = () => 
                             fetch('/status.json')
                                 .then(response => response.json())
-                                .then(status => this.setState({status: status})), 1000);
+                                .then(status => this.setState({status: status}));
+                        setInterval(request, 1000);
+                        request();
                     }
 
                     render() {
@@ -44,6 +46,8 @@
                     document.getElementById('root')
                 );
             };
+
+            document.addEventListener('DOMContentLoaded', initialize);
         </script>
     </head>
     <body>

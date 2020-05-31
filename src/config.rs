@@ -15,6 +15,7 @@ fn default_server_static() -> PathBuf {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Config {
     pub version: u32,
     pub server: ServerConfig,
@@ -25,6 +26,7 @@ pub struct Config {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ServerConfig {
     #[serde(default = "default_server_port")]
     pub port: u16,
@@ -33,23 +35,27 @@ pub struct ServerConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MonitorConfig {
     pub dir: PathBuf,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CssConfig {
     pub metadata: CssMetadataConfig,
     pub rules: Vec<CssRule>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CssRule {
     pub selectors: String,
     pub declarations: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CssMetadataConfig {
     #[serde(default)]
     pub blank: Arc<HashMap<String, String>>,
@@ -62,6 +68,7 @@ pub struct CssMetadataConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MonitorDirConfig {
     #[serde(flatten)]
     pub root: MonitorDirRootConfig,
@@ -73,12 +80,14 @@ pub struct MonitorDirConfig {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
 pub enum MonitorDirRootConfig {
     Test(MonitorDirTestConfig),
     Group(MonitorDirGroupConfig),
 }
 
 impl MonitorDirRootConfig {
+    /// Get the MonitorDirTestConfig for this.
     pub fn test(&mut self) -> &mut MonitorDirTestConfig {
         match self {
             MonitorDirRootConfig::Test(ref mut test) => test,
@@ -88,25 +97,32 @@ impl MonitorDirRootConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MonitorDirGroupConfig {
+    pub id: String,
     pub test: MonitorDirTestConfig,
     pub axes: Vec<MonitorDirAxisConfig>,
+    #[serde(skip_deserializing)]
+    pub children: Vec<MonitorDirTestConfig>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
+#[serde(deny_unknown_fields)]
 pub enum MonitorDirAxisValue {
     String(String),
     Number(i64),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MonitorDirAxisConfig {
     pub values: Vec<MonitorDirAxisValue>,
     pub name: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MonitorDirTestConfig {
     #[serde(with = "humantime_serde")]
     pub interval: Duration,
@@ -123,6 +139,7 @@ pub fn parse_config(file: String) -> Result<Config, Box<dyn Error>> {
     parse_config_string(file, s)
 }
 
+/// Given a base path and a relative path, gets the full path (or errors out if it doesn't exist).
 pub fn canonicalize(
     what: &str,
     base_path: Option<&Path>,
@@ -250,6 +267,7 @@ test:
 # Explicitly set the id here
 id: router
 group:
+    id: group-{{ index }}
     axes:
         - values: [1, 2, 3]
           name: index

@@ -4,7 +4,10 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+
+use crate::interpolate::*;
 
 fn default_server_port() -> u16 {
     80
@@ -106,7 +109,7 @@ pub struct MonitorDirGroupConfig {
     pub children: Vec<MonitorDirTestConfig>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[serde(untagged)]
 #[serde(deny_unknown_fields)]
 pub enum MonitorDirAxisValue {
@@ -221,6 +224,23 @@ pub fn parse_monitor_config_string(
 
     let test = config.root.test();
     test.command = Path::canonicalize(&config.base_path.join(&test.command))?;
+
+    if let MonitorDirRootConfig::Group(ref group) = config.root {
+        for values in group
+            .axes
+            .iter()
+            .map(|axis| axis.values.iter().map(move |v| (v, &axis.name)))
+            .multi_cartesian_product()
+        {
+            let mut vals = HashMap::new();
+            for val in values {
+                vals.insert(val.1, val.0);
+            }
+
+            let id = interpolate_id(&vals, &group.id)?;
+            eprintln!("{:?} -> {}", vals, id);
+        }
+    }
 
     Ok(config)
 }

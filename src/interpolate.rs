@@ -5,6 +5,7 @@ use handlebars::*;
 use itertools::Itertools;
 use serde_json::value::*;
 
+use crate::config::MonitorDirAxisValue;
 use crate::status::*;
 
 pub fn interpolate_monitor(monitor: &MonitorState, s: &str) -> Result<String, Box<dyn Error>> {
@@ -15,6 +16,17 @@ pub fn interpolate_monitor(monitor: &MonitorState, s: &str) -> Result<String, Bo
     let mut map = BTreeMap::new();
     map.insert("monitor", monitor);
     Ok(handlebars.render("t", &map)?.trim().to_owned())
+}
+
+pub fn interpolate_id(
+    values: &HashMap<&String, &MonitorDirAxisValue>,
+    s: &str,
+) -> Result<String, Box<dyn Error>> {
+    // TODO: avoid creating this handlebars registry every time
+    let mut handlebars = Handlebars::new();
+    handlebars.register_template_string("t", s)?;
+
+    Ok(handlebars.render("t", values)?.trim().to_owned())
 }
 
 pub fn interpolate_modify(status: &mut MonitorStatus, s: &str) -> Result<(), Box<dyn Error>> {

@@ -78,6 +78,15 @@ pub enum MonitorDirRootConfig {
     Group(MonitorDirGroupConfig),
 }
 
+impl MonitorDirRootConfig {
+    pub fn test(&mut self) -> &mut MonitorDirTestConfig {
+        match self {
+            MonitorDirRootConfig::Test(ref mut test) => test,
+            MonitorDirRootConfig::Group(ref mut group) => &mut group.test,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorDirGroupConfig {
     pub test: MonitorDirTestConfig,
@@ -193,18 +202,10 @@ pub fn parse_monitor_config_string(
             .to_string();
     }
 
-    if let MonitorDirRootConfig::Test(ref mut test) = &mut config.root {
-        test.command = Path::canonicalize(&config.base_path.join(&test.command))?;
+    let test = config.root.test();
+    test.command = Path::canonicalize(&config.base_path.join(&test.command))?;
 
-        // Basic checks before we return the config
-        if !test.command.exists() {
-            Err("Test command does not exist".into())
-        } else {
-            Ok(config)
-        }
-    } else {
-        Ok(config)
-    }
+    Ok(config)
 }
 
 #[cfg(test)]

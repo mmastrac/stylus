@@ -27,3 +27,17 @@ docker manifest annotate --os linux --arch arm64 --variant v8 mmastrac/stylus:la
 docker manifest annotate --os linux --arch amd64 mmastrac/stylus:latest mmastrac/stylus:latest-x86_64
 
 docker manifest push mmastrac/stylus:latest
+
+VERSION=`cargo run --example version`
+
+rm -rf ~/.docker/manifests/docker.io_mmastrac_stylus-$VERSION
+docker manifest create mmastrac/stylus:$VERSION \
+    mmastrac/stylus:latest-arm \
+    mmastrac/stylus:latest-arm64 \
+    mmastrac/stylus:latest-x86_64
+
+docker manifest annotate --os linux --arch arm --variant v6 mmastrac/stylus:$VERSION mmastrac/stylus:latest-arm
+docker manifest annotate --os linux --arch arm64 --variant v8 mmastrac/stylus:$VERSION mmastrac/stylus:latest-arm64
+docker manifest annotate --os linux --arch amd64 mmastrac/stylus:$VERSION mmastrac/stylus:latest-x86_64
+
+docker manifest push mmastrac/stylus:$VERSION

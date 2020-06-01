@@ -22,11 +22,13 @@ pub struct Status {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorState {
-    pub config: MonitorDirConfig,
+    pub id: String,
+    pub config: MonitorDirTestConfig,
     pub status: MonitorStatus,
     pub log: VecDeque<String>,
     #[serde(skip)]
     pub css: Option<String>,
+    pub children: HashMap<String, MonitorStatus>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -52,6 +54,25 @@ pub struct MonitorCssStatus {
     pub metadata: Arc<HashMap<String, String>>,
 }
 
+impl MonitorState {
+    pub fn finish(
+        &mut self,
+        status: StatusState,
+        code: i64,
+        description: String,
+        config: &CssMetadataConfig,
+    ) {
+        self.css = None;
+        self.status
+            .finish(status, code, description.clone(), config);
+        for child in self.children.iter_mut() {
+            eprintln!("{:?} ", child);
+            child.1.finish(status, code, description.clone(), &config);
+            eprintln!("{:?} ", child);
+        }
+    }
+}
+
 impl MonitorStatus {
     pub fn new(config: &Config) -> MonitorStatus {
         MonitorStatus {
@@ -66,7 +87,7 @@ impl MonitorStatus {
         }
     }
 
-    pub fn finish(
+    fn finish(
         &mut self,
         status: StatusState,
         code: i64,

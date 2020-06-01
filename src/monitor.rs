@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::error::Error;
 use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
@@ -58,14 +58,21 @@ impl Monitor {
                     Self::process_message(id, &thread, m, &css_config)
                 });
             });
+            let mut state = Self::create_state(
+                monitor_config.id.clone(),
+                &config,
+                &monitor_config.root.test(),
+            );
+            if let MonitorDirRootConfig::Group(ref group) = monitor_config.root {
+                for child in group.children.iter() {
+                    state
+                        .children
+                        .insert(child.0.clone(), MonitorStatus::new(&config));
+                }
+            }
             let thread = MonitorThread {
                 thread,
-                state: Arc::new(Mutex::new(MonitorState {
-                    config: monitor_config.clone(),
-                    status: MonitorStatus::new(&config),
-                    log: VecDeque::new(),
-                    css: None,
-                })),
+                state: Arc::new(Mutex::new(state)),
             };
             // Let the thread go!
             tx.send(thread.state.clone())
@@ -73,6 +80,21 @@ impl Monitor {
             monitors.push(thread);
         }
         Ok(Monitor { config, monitors })
+    }
+
+    fn create_state(
+        id: String,
+        config: &Config,
+        monitor_config: &MonitorDirTestConfig,
+    ) -> MonitorState {
+        MonitorState {
+            id,
+            config: monitor_config.clone(),
+            status: MonitorStatus::new(&config),
+            log: VecDeque::new(),
+            css: None,
+            children: HashMap::new(),
+        }
     }
 
     fn process_message(
@@ -105,26 +127,24 @@ impl Monitor {
                 }
             }
             WorkerMessage::Metadata(expr) => {
-                if let Err(err) = interpolate_modify(&mut state.status, &expr) {
+                // Make borrow checker happy
+                let state = &mut *state;
+                let status = &mut state.status;
+                let children = &mut state.children;
+                if let Err(err) = interpolate_modify(status, children, &expr) {
                     state.log.push_back(format!("[error ] {}", err));
                 } else {
                     state.log.push_back(format!("[meta  ] {}", expr));
                 }
             }
             WorkerMessage::AbnormalTermination(s) => {
-                state.css = None;
-                state.status.finish(StatusState::Yellow, -1, s, &config);
+                state.finish(StatusState::Yellow, -1, s, &config);
             }
             WorkerMessage::Termination(code) => {
-                state.css = None;
                 if code == 0 {
-                    state
-                        .status
-                        .finish(StatusState::Green, code, "Success".into(), &config);
+                    state.finish(StatusState::Green, code, "Success".into(), &config);
                 } else {
-                    state
-                        .status
-                        .finish(StatusState::Red, code, "Failed".into(), &config);
+                    state.finish(StatusState::Red, code, "Failed".into(), &config);
                 }
             }
         }
@@ -140,19 +160,32 @@ impl Monitor {
 
             // Build the css from cache
             let mut cache = monitor.css.take();
-            css += cache.get_or_insert_with(|| {
-                let mut css = format!("/* {} */\n", monitor.config.id);
-                for rule in &self.config.css.rules {
-                    css += &interpolate_monitor(&monitor, &rule.selectors)
-                        .unwrap_or_else(|_| "/* failed */".into());
-                    css += "{\n";
-                    css += &interpolate_monitor(&monitor, &rule.declarations)
-                        .unwrap_or_else(|_| "/* failed */".into());
-                    css += "}\n\n";
-                }
-                css
-            });
+            css +=
+                cache.get_or_insert_with(|| self.generate_css_for_monitor(&monitor.id, &monitor));
             monitor.css = cache;
+        }
+        css
+    }
+
+    fn generate_css_for_monitor(&self, id: &str, monitor: &MonitorState) -> String {
+        let mut css = format!("/* {} */\n", id);
+        for rule in &self.config.css.rules {
+            css += &interpolate_monitor(id, &monitor.config, &monitor.status, &rule.selectors)
+                .unwrap_or_else(|_| "/* failed */".into());
+            css += "{\n";
+            css += &interpolate_monitor(id, &monitor.config, &monitor.status, &rule.declarations)
+                .unwrap_or_else(|_| "/* failed */".into());
+            css += "}\n\n";
+        }
+        for child in monitor.children.iter() {
+            for rule in &self.config.css.rules {
+                css += &interpolate_monitor(child.0, &monitor.config, &child.1, &rule.selectors)
+                    .unwrap_or_else(|_| "/* failed */".into());
+                css += "{\n";
+                css += &interpolate_monitor(child.0, &monitor.config, &child.1, &rule.declarations)
+                    .unwrap_or_else(|_| "/* failed */".into());
+                css += "}\n\n";
+            }
         }
         css
     }

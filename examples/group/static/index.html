@@ -7,12 +7,16 @@
             body {
                 font-family: 'Open Sans', sans-serif;
             }
+            table {
+                padding: 2em;
+            }
             table, table td, table th {
                 border: 1px solid black;
-                border-collapse: collapse;
             }
             td, th {
                 padding: 0.2em;
+                width: 5em;
+                height: 5em;
             }
         </style>
         <link id="status" rel="stylesheet" href="data:;" />
@@ -42,34 +46,22 @@
         </script>
     </head>
     <body>
-        <h1>Providing Metadata</h1>
+        <h1>Group Test</h1>
 
         <h2>Status Table</h2>
 
-        <table>
+        <table id="group">
             <tr>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Description</th>
-                <th>Custom Metadata</th>
+                <td id="port-0"></td>
+                <td id="port-1"></td>
+                <td id="port-2"></td>
+                <td id="port-3"></td>
             </tr>
-            <tr id="metadata1">
-                <td>metadata1</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id="metadata2">
-                <td>metadata2</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id="metadata3">
-                <td>metadata3</td>
-                <td></td>
-                <td></td>
-                <td></td>
+            <tr>
+                <td id="port-4"></td>
+                <td id="port-5"></td>
+                <td id="port-6"></td>
+                <td id="port-7"></td>
             </tr>
         </table>
     </body>

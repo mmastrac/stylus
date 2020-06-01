@@ -91,7 +91,15 @@ pub enum MonitorDirRootConfig {
 
 impl MonitorDirRootConfig {
     /// Get the MonitorDirTestConfig for this.
-    pub fn test(&mut self) -> &mut MonitorDirTestConfig {
+    pub fn test(&self) -> &MonitorDirTestConfig {
+        match self {
+            MonitorDirRootConfig::Test(ref test) => test,
+            MonitorDirRootConfig::Group(ref group) => &group.test,
+        }
+    }
+
+    /// Get the MonitorDirTestConfig for this.
+    pub fn test_mut(&mut self) -> &mut MonitorDirTestConfig {
         match self {
             MonitorDirRootConfig::Test(ref mut test) => test,
             MonitorDirRootConfig::Group(ref mut group) => &mut group.test,
@@ -106,7 +114,7 @@ pub struct MonitorDirGroupConfig {
     pub test: MonitorDirTestConfig,
     pub axes: Vec<MonitorDirAxisConfig>,
     #[serde(skip_deserializing)]
-    pub children: Vec<MonitorDirTestConfig>,
+    pub children: HashMap<String, MonitorDirTestConfig>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -179,6 +187,17 @@ pub fn parse_config_string(file: String, s: String) -> Result<Config, Box<dyn Er
             .into();
     }
 
+    for css in config.css.rules.iter() {
+        if css.declarations.contains("monitor.config.id")
+            || css.selectors.contains("monitor.config.id")
+        {
+            warn!("Found deprecated 'monitor.config.id' in template. Please use 'monitor.id'");
+            return Err(
+                "Found deprecated 'monitor.config.id' in template. Please use 'monitor.id'".into(),
+            );
+        }
+    }
+
     // Canonical paths
     canonicalize("base path", None, &mut config.base_path)?;
     canonicalize(
@@ -222,10 +241,11 @@ pub fn parse_monitor_config_string(
             .to_string();
     }
 
-    let test = config.root.test();
+    let test = config.root.test_mut();
     test.command = Path::canonicalize(&config.base_path.join(&test.command))?;
 
-    if let MonitorDirRootConfig::Group(ref group) = config.root {
+    let mut children = HashMap::new();
+    if let MonitorDirRootConfig::Group(ref mut group) = config.root {
         for values in group
             .axes
             .iter()
@@ -239,7 +259,9 @@ pub fn parse_monitor_config_string(
 
             let id = interpolate_id(&vals, &group.id)?;
             eprintln!("{:?} -> {}", vals, id);
+            children.insert(id, group.test.clone());
         }
+        group.children = children;
     }
 
     Ok(config)

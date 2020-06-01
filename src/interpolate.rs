@@ -3,18 +3,30 @@ use std::error::Error;
 
 use handlebars::*;
 use itertools::Itertools;
+use serde::Serialize;
 use serde_json::value::*;
 
-use crate::config::MonitorDirAxisValue;
+use crate::config::{MonitorDirAxisValue, MonitorDirTestConfig};
 use crate::status::*;
 
-pub fn interpolate_monitor(monitor: &MonitorState, s: &str) -> Result<String, Box<dyn Error>> {
+pub fn interpolate_monitor(
+    id: &str,
+    config: &MonitorDirTestConfig,
+    status: &MonitorStatus,
+    s: &str,
+) -> Result<String, Box<dyn Error>> {
     // TODO: avoid creating this handlebars registry every time
     let mut handlebars = Handlebars::new();
     handlebars.register_template_string("t", s)?;
 
     let mut map = BTreeMap::new();
-    map.insert("monitor", monitor);
+    #[derive(Clone, Debug, Serialize)]
+    struct Monitor<'a> {
+        id: &'a str,
+        config: &'a MonitorDirTestConfig,
+        status: &'a MonitorStatus,
+    };
+    map.insert("monitor", Monitor { id, config, status });
     Ok(handlebars.render("t", &map)?.trim().to_owned())
 }
 
@@ -29,18 +41,30 @@ pub fn interpolate_id(
     Ok(handlebars.render("t", values)?.trim().to_owned())
 }
 
-pub fn interpolate_modify(status: &mut MonitorStatus, s: &str) -> Result<(), Box<dyn Error>> {
+pub fn interpolate_modify<'a>(
+    mut status: &'a mut MonitorStatus,
+    children: &'a mut HashMap<String, MonitorStatus>,
+    s: &str,
+) -> Result<(), Box<dyn Error>> {
     let (raw_path, value) = s.splitn(2, '=').next_tuple().ok_or("Invalid expression")?;
     let value: Value = serde_json::from_str(value)?;
     let mut path = raw_path.split('.');
+
+    match path.next() {
+        Some("status") => {}
+        Some("group") => {
+            let part = path.next().ok_or("Missing group child")?;
+            status = children
+                .get_mut(part)
+                .ok_or(format!("Could not find child '{}'", part))?;
+        }
+        _ => return Err(format!("Invalid path: {}", raw_path).into()),
+    };
+
     let pending = status
         .pending
         .get_or_insert_with(MonitorPendingStatus::default);
 
-    match path.next() {
-        Some("status") => {}
-        _ => return Err(format!("Invalid path: {}", raw_path).into()),
-    }
     match path.next() {
         Some("status") => {
             pending.status = Some(serde_json::from_value(value)?);
@@ -77,7 +101,7 @@ mod tests {
             },
         };
 
-        interpolate_modify(&mut status, s)?;
+        interpolate_modify(&mut status, &mut HashMap::new(), s)?;
         Ok(status)
     }
 

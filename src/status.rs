@@ -66,9 +66,7 @@ impl MonitorState {
         self.status
             .finish(status, code, description.clone(), config);
         for child in self.children.iter_mut() {
-            eprintln!("{:?} ", child);
             child.1.finish(status, code, description.clone(), &config);
-            eprintln!("{:?} ", child);
         }
     }
 }

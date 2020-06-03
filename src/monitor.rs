@@ -133,6 +133,7 @@ impl Monitor {
                 let children = &mut state.children;
                 if let Err(err) = interpolate_modify(status, children, &expr) {
                     state.log.push_back(format!("[error ] {}", err));
+                    error!("Metadata update error: {}", err);
                 } else {
                     state.log.push_back(format!("[meta  ] {}", expr));
                 }

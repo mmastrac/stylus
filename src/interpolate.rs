@@ -57,6 +57,9 @@ pub fn interpolate_modify<'a>(
             status = children
                 .get_mut(part)
                 .ok_or(format!("Could not find child '{}'", part))?;
+            if path.next() != Some("status") {
+                return Err(format!("Invalid path: {}", raw_path).into());
+            }
         }
         _ => return Err(format!("Invalid path: {}", raw_path).into()),
     };

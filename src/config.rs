@@ -258,7 +258,6 @@ pub fn parse_monitor_config_string(
             }
 
             let id = interpolate_id(&vals, &group.id)?;
-            eprintln!("{:?} -> {}", vals, id);
             children.insert(id, group.test.clone());
         }
         group.children = children;

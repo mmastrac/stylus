@@ -58,7 +58,7 @@ fn provide_monitor_2<T>(monitor: &Arc<Monitor>) -> impl Fn(T) -> (T, Arc<Monitor
     move |t| (t, *monitor.clone())
 }
 
-async fn run(config: Config) -> () {
+async fn run(config: Config) {
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
 
     // style.css for formatting

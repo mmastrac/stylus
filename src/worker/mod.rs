@@ -7,8 +7,10 @@ use std::time::{Duration, Instant};
 
 use subprocess::{Exec, ExitStatus, Popen, Redirection};
 
+use self::linebuf::LineBuf;
 use crate::config::*;
-use crate::linebuf::LineBuf;
+
+mod linebuf;
 
 #[derive(Debug)]
 pub enum LogStream {

@@ -11,7 +11,6 @@ use warp::Filter;
 mod args;
 mod config;
 mod interpolate;
-mod linebuf;
 mod monitor;
 mod status;
 mod worker;

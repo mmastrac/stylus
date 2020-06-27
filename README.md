@@ -9,23 +9,7 @@ original deno source is available in the `deno` branch.
 
 ## Running
 
-```
-cargo run -- examples/simple_network/config.yaml
-```
-
-Or install via `cargo`:
-
-```
-cargo install stylus
-```
-
-Or on docker:
-
-```
-# Assume that this is running against the stylus example, this will map the example directory into
-# the container's /srv folder. The container will automatically load config.yaml from this folder!
-docker run --name stylus -p 8000:8000 -v (full path to stylus/example/):/srv mmastrac/stylus:latest
-```
+[See the wiki page on running Stylus here](https://github.com/mmastrac/stylus/wiki/Running-Stylus).
 
 ## Theory of operation
 

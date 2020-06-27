@@ -6,7 +6,9 @@ use monitor::Monitor;
 use status::Status;
 use warp::path;
 use warp::Filter;
+use env_logger::Env;
 
+mod args;
 mod config;
 mod interpolate;
 mod linebuf;
@@ -16,6 +18,8 @@ mod worker;
 
 #[macro_use]
 extern crate log;
+
+use crate::config::{parse_config_from_args, Config, OperationMode};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -54,20 +58,7 @@ fn provide_monitor_2<T>(monitor: &Arc<Monitor>) -> impl Fn(T) -> (T, Arc<Monitor
     move |t| (t, *monitor.clone())
 }
 
-#[tokio::main]
-async fn main() -> () {
-    env_logger::init();
-    let args = std::env::args().collect::<Vec<_>>();
-
-    // TODO: Proper command parser
-    if args.len() < 2 {
-        eprintln!("Usage: stylus [path-to-config.yaml]");
-        return;
-    }
-
-    let file = args.get(1).unwrap().clone();
-    let config = config::parse_config(file).expect("Unable to parse configuration");
-    debug!("{:?}", config);
+async fn run(config: Config) -> () {
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
 
     // style.css for formatting
@@ -102,4 +93,23 @@ async fn main() -> () {
     warp::serve(routes)
         .run(([0, 0, 0, 0], config.server.port))
         .await;
+}
+
+#[tokio::main]
+async fn main() -> () {
+    // Manually bootstrap logging from args
+    let default = match std::env::args().filter(|s| s == "-v").count() {
+        0 => "",
+        1 => "stylus=info",
+        2 => "stylus=debug",
+        _ => "debug",
+    };
+    env_logger::init_from_env(Env::new().filter_or("STYLUS_LOG", default));
+
+    match parse_config_from_args().expect("Unable to parse configuration") {
+        OperationMode::Run(config) => run(config).await,
+        OperationMode::Dump(config) => {
+            println!("{}", serde_json::to_string_pretty(&config).expect("Unable to pretty-print configuration"));
+        },
+    }
 }

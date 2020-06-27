@@ -6,8 +6,38 @@ use std::time::Duration;
 
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use structopt::StructOpt;
 
+use crate::args::*;
 use crate::interpolate::*;
+
+pub enum OperationMode {
+    Run(Config),
+    Dump(Config),
+}
+
+pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
+    let args = Args::from_args();
+    let config_path = if let Some(path) = args.force_container_path {
+        path
+    } else {
+        args.config
+    };
+    let mut config = parse_config(&config_path)?;
+    if let Some(port) = args.force_container_port {
+        config.server.port = port
+    };
+    if args.force_container_listen_all {
+        panic!("--force-container-listen-all is not yet implemented");
+    }
+    debug!("{:?}", config);
+
+    if args.dump {
+        Ok(OperationMode::Dump(config))
+    } else {
+        Ok(OperationMode::Run(config))
+    }
+}
 
 fn default_server_port() -> u16 {
     80
@@ -142,7 +172,7 @@ pub struct MonitorDirTestConfig {
     pub command: PathBuf,
 }
 
-pub fn parse_config(file: String) -> Result<Config, Box<dyn Error>> {
+pub fn parse_config(file: &Path) -> Result<Config, Box<dyn Error>> {
     let curr = std::env::current_dir()?;
     let mut path = Path::new(&file).into();
     canonicalize("configuration", Some(&curr), &mut path)?;
@@ -179,7 +209,7 @@ pub fn canonicalize(
     }
 }
 
-pub fn parse_config_string(file: String, s: String) -> Result<Config, Box<dyn Error>> {
+pub fn parse_config_string(file: &Path, s: String) -> Result<Config, Box<dyn Error>> {
     let mut config: Config = serde_yaml::from_str(&s)?;
     if Iterator::count(config.base_path.components()) == 0 {
         config.base_path = Path::parent(Path::new(&file))
@@ -272,7 +302,7 @@ mod test {
 
     #[test]
     fn deserialize_config_test() -> Result<(), Box<dyn Error>> {
-        let config = parse_config("src/testcases/v1.yaml".into())?;
+        let config = parse_config(Path::new("src/testcases/v1.yaml"))?;
         assert_eq!(config.base_path, Path::new("src/testcases").canonicalize()?);
         Ok(())
     }

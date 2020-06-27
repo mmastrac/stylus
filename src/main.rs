@@ -2,11 +2,11 @@
 use std::convert::Infallible;
 use std::sync::Arc;
 
+use env_logger::Env;
 use monitor::Monitor;
 use status::Status;
 use warp::path;
 use warp::Filter;
-use env_logger::Env;
 
 mod args;
 mod config;
@@ -59,7 +59,7 @@ fn provide_monitor_2<T>(monitor: &Arc<Monitor>) -> impl Fn(T) -> (T, Arc<Monitor
 }
 
 async fn run(config: Config) {
-    let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
+    let monitor = Arc::new(Monitor::new(&config, true).expect("Unable to create monitor"));
 
     // style.css for formatting
     let style = path!("style.css")
@@ -109,7 +109,12 @@ async fn main() -> () {
     match parse_config_from_args().expect("Unable to parse configuration") {
         OperationMode::Run(config) => run(config).await,
         OperationMode::Dump(config) => {
-            println!("{}", serde_json::to_string_pretty(&config).expect("Unable to pretty-print configuration"));
-        },
+            let monitor = Monitor::new(&config, false).expect("Unable to create monitor");
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&monitor.status())
+                    .expect("Unable to pretty-print configuration")
+            );
+        }
     }
 }

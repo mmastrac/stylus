@@ -24,7 +24,7 @@ pub struct Monitor {
 }
 
 impl Monitor {
-    pub fn new(config: &Config) -> Result<Monitor, Box<dyn Error>> {
+    pub fn new(config: &Config, start: bool) -> Result<Monitor, Box<dyn Error>> {
         let config = config.clone();
         let mut monitor_configs = Vec::new();
         for e in WalkDir::new(&config.monitor.dir)
@@ -52,12 +52,6 @@ impl Monitor {
             let monitor_config2 = monitor_config.clone();
             let (tx, rx) = channel();
             let css_config = config.css.metadata.clone();
-            let thread = thread::spawn(move || {
-                let thread = rx.recv().expect("Unexpected error receiving mutex");
-                monitor_thread(monitor_config2, move |id, m| {
-                    Self::process_message(id, &thread, m, &css_config)
-                });
-            });
             let mut state = Self::create_state(
                 monitor_config.id.clone(),
                 &config,
@@ -70,6 +64,15 @@ impl Monitor {
                         .insert(child.0.clone(), MonitorStatus::new(&config));
                 }
             }
+            let thread = thread::spawn(move || {
+                let thread = rx.recv().expect("Unexpected error receiving mutex");
+                // Ideally we wouldn't start a thread if we were only planning on dumping status
+                if start {
+                    monitor_thread(monitor_config2, move |id, m| {
+                        Self::process_message(id, &thread, m, &css_config)
+                    });
+                }
+            });
             let thread = MonitorThread {
                 thread,
                 state: Arc::new(Mutex::new(state)),

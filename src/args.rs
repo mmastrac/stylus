@@ -1,5 +1,5 @@
-use structopt::StructOpt;
 use std::path::PathBuf;
+use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 pub struct Args {
@@ -7,7 +7,6 @@ pub struct Args {
     // /// Daemonize stylus and detact from the tty
     // #[structopt(long, short, parse(from_flag))]
     // pub daemonize: bool,
-
     /// Pass multiple times to increase the level of verbosity (overwritten by STYLUS_LOG)
     #[structopt(
         name = "verbose",

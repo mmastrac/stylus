@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::{BTreeMap, VecDeque};
 use std::sync::{Arc, Mutex};
 
 use serde::{Deserialize, Serialize};
@@ -28,7 +28,7 @@ pub struct MonitorState {
     pub log: VecDeque<String>,
     #[serde(skip)]
     pub css: Option<String>,
-    pub children: HashMap<String, MonitorStatus>,
+    pub children: BTreeMap<String, MonitorStatus>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -37,7 +37,7 @@ pub struct MonitorStatus {
     pub code: i64,
     pub description: String,
     pub css: MonitorCssStatus,
-    pub metadata: HashMap<String, String>,
+    pub metadata: BTreeMap<String, String>,
     #[serde(skip)]
     pub pending: Option<MonitorPendingStatus>,
 }
@@ -46,12 +46,12 @@ pub struct MonitorStatus {
 pub struct MonitorPendingStatus {
     pub status: Option<StatusState>,
     pub description: Option<String>,
-    pub metadata: Option<HashMap<String, String>>,
+    pub metadata: Option<BTreeMap<String, String>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorCssStatus {
-    pub metadata: Arc<HashMap<String, String>>,
+    pub metadata: Arc<BTreeMap<String, String>>,
 }
 
 impl MonitorState {

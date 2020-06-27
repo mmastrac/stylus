@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::error::Error;
 
 use handlebars::*;
@@ -31,7 +31,7 @@ pub fn interpolate_monitor(
 }
 
 pub fn interpolate_id(
-    values: &HashMap<&String, &MonitorDirAxisValue>,
+    values: &BTreeMap<&String, &MonitorDirAxisValue>,
     s: &str,
 ) -> Result<String, Box<dyn Error>> {
     // TODO: avoid creating this handlebars registry every time
@@ -43,7 +43,7 @@ pub fn interpolate_id(
 
 pub fn interpolate_modify<'a>(
     mut status: &'a mut MonitorStatus,
-    children: &'a mut HashMap<String, MonitorStatus>,
+    children: &'a mut BTreeMap<String, MonitorStatus>,
     s: &str,
 ) -> Result<(), Box<dyn Error>> {
     let (raw_path, value) = s.splitn(2, '=').next_tuple().ok_or("Invalid expression")?;
@@ -77,7 +77,7 @@ pub fn interpolate_modify<'a>(
         }
         Some("metadata") => match path.next() {
             Some(s) => {
-                let metadata = pending.metadata.get_or_insert_with(HashMap::new);
+                let metadata = pending.metadata.get_or_insert_with(BTreeMap::new);
                 drop(metadata.insert(s.to_owned(), serde_json::from_value(value)?))
             }
             _ => return Err(format!("Invalid path: {}", raw_path).into()),
@@ -104,7 +104,7 @@ mod tests {
             },
         };
 
-        interpolate_modify(&mut status, &mut HashMap::new(), s)?;
+        interpolate_modify(&mut status, &mut BTreeMap::new(), s)?;
         Ok(status)
     }
 
@@ -115,7 +115,7 @@ mod tests {
         let status = update("status.description=\"foo\"")?;
         assert_eq!(status.pending.unwrap().description.unwrap(), "foo");
         let status = update("status.metadata.foo=\"bar\"")?;
-        let mut map = HashMap::new();
+        let mut map = BTreeMap::new();
         map.insert("foo".to_owned(), "bar".to_owned());
         assert_eq!(status.pending.unwrap().metadata.unwrap(), map);
         Ok(())

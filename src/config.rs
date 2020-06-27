@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -91,13 +91,13 @@ pub struct CssRule {
 #[serde(deny_unknown_fields)]
 pub struct CssMetadataConfig {
     #[serde(default)]
-    pub blank: Arc<HashMap<String, String>>,
+    pub blank: Arc<BTreeMap<String, String>>,
     #[serde(default)]
-    pub red: Arc<HashMap<String, String>>,
+    pub red: Arc<BTreeMap<String, String>>,
     #[serde(default)]
-    pub yellow: Arc<HashMap<String, String>>,
+    pub yellow: Arc<BTreeMap<String, String>>,
     #[serde(default)]
-    pub green: Arc<HashMap<String, String>>,
+    pub green: Arc<BTreeMap<String, String>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -144,7 +144,7 @@ pub struct MonitorDirGroupConfig {
     pub test: MonitorDirTestConfig,
     pub axes: Vec<MonitorDirAxisConfig>,
     #[serde(skip_deserializing)]
-    pub children: HashMap<String, MonitorDirTestConfig>,
+    pub children: BTreeMap<String, MonitorDirTestConfig>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -274,7 +274,7 @@ pub fn parse_monitor_config_string(
     let test = config.root.test_mut();
     test.command = Path::canonicalize(&config.base_path.join(&test.command))?;
 
-    let mut children = HashMap::new();
+    let mut children = BTreeMap::new();
     if let MonitorDirRootConfig::Group(ref mut group) = config.root {
         for values in group
             .axes
@@ -282,7 +282,7 @@ pub fn parse_monitor_config_string(
             .map(|axis| axis.values.iter().map(move |v| (v, &axis.name)))
             .multi_cartesian_product()
         {
-            let mut vals = HashMap::new();
+            let mut vals = BTreeMap::new();
             for val in values {
                 vals.insert(val.1, val.0);
             }

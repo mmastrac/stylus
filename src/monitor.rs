@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::{BTreeMap, VecDeque};
 use std::error::Error;
 use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
@@ -96,7 +96,7 @@ impl Monitor {
             status: MonitorStatus::new(&config),
             log: VecDeque::new(),
             css: None,
-            children: HashMap::new(),
+            children: BTreeMap::new(),
         }
     }
 

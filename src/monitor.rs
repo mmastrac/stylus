@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, VecDeque};
 use std::error::Error;
-use std::sync::mpsc::channel;
+use std::sync::mpsc::{channel, TryRecvError};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -9,11 +9,18 @@ use walkdir::WalkDir;
 use crate::config::*;
 use crate::interpolate::*;
 use crate::status::*;
-use crate::worker::monitor_thread;
+use crate::worker::{monitor_thread, ShuttingDown};
+
+/// We don't want to store the actual sender in the MonitorThread, just a boxed version of it that
+/// will correctly drop to trigger the thread to shut down.
+trait OpaqueSender: std::fmt::Debug + Send + Sync {}
+
+impl<T> OpaqueSender for T where T: std::fmt::Debug + Send + Sync {}
 
 #[derive(Debug)]
 struct MonitorThread {
-    thread: thread::JoinHandle<()>,
+    sender: Option<Arc<dyn OpaqueSender>>,
+    thread: Option<thread::JoinHandle<()>>,
     state: Arc<Mutex<MonitorState>>,
 }
 
@@ -23,8 +30,59 @@ pub struct Monitor {
     monitors: Vec<MonitorThread>,
 }
 
+impl MonitorThread {
+    /// Create a new monitor thread and release it
+    fn create(
+        monitor: MonitorDirConfig,
+        state: MonitorState,
+        css_config: CssMetadataConfig,
+    ) -> Result<Self, Box<dyn Error>> {
+        let (tx, rx) = channel();
+        let state = Arc::new(Mutex::new(state));
+
+        let thread = thread::spawn(move || {
+            let thread: Arc<Mutex<MonitorState>> =
+                rx.recv().expect("Unexpected error receiving mutex");
+            monitor_thread(monitor, move |id, m| {
+                if let Err(TryRecvError::Disconnected) = rx.try_recv() {
+                    return Err(ShuttingDown::default().into());
+                }
+                thread
+                    .lock()
+                    .expect("Poisoned mutex")
+                    .process_message(id, m, &css_config)
+            });
+        });
+
+        // Let the thread go!
+        tx.send(state.clone())
+            .expect("Unexpected error sending mutex");
+
+        let thread = MonitorThread {
+            thread: Some(thread),
+            state,
+            sender: Some(Arc::new(Mutex::new(tx))),
+        };
+
+        Ok(thread)
+    }
+}
+
+impl Drop for MonitorThread {
+    fn drop(&mut self) {
+        // Close the channel
+        self.sender.take();
+        // Join the thread
+        self.thread
+            .take()
+            .unwrap()
+            .join()
+            .expect("Failed to terminate thread");
+    }
+}
+
 impl Monitor {
-    pub fn new(config: &Config, start: bool) -> Result<Monitor, Box<dyn Error>> {
+    pub fn new(config: &Config) -> Result<Monitor, Box<dyn Error>> {
         let config = config.clone();
         let mut monitor_configs = Vec::new();
         for e in WalkDir::new(&config.monitor.dir)
@@ -49,9 +107,6 @@ impl Monitor {
         }
         let mut monitors = Vec::new();
         for monitor_config in &monitor_configs {
-            let monitor_config2 = monitor_config.clone();
-            let (tx, rx) = channel();
-            let css_config = config.css.metadata.clone();
             let mut state = Self::create_state(
                 monitor_config.id.clone(),
                 &config,
@@ -64,27 +119,11 @@ impl Monitor {
                         .insert(child.0.clone(), MonitorStatus::new(&config));
                 }
             }
-            let thread = thread::spawn(move || {
-                let thread: Arc<Mutex<MonitorState>> =
-                    rx.recv().expect("Unexpected error receiving mutex");
-                // Ideally we wouldn't start a thread if we were only planning on dumping status
-                if start {
-                    monitor_thread(monitor_config2, move |id, m| {
-                        thread
-                            .lock()
-                            .expect("Poisoned mutex")
-                            .process_message(id, m, &css_config)
-                    });
-                }
-            });
-            let thread = MonitorThread {
-                thread,
-                state: Arc::new(Mutex::new(state)),
-            };
-            // Let the thread go!
-            tx.send(thread.state.clone())
-                .expect("Unexpected error sending mutex");
-            monitors.push(thread);
+            monitors.push(MonitorThread::create(
+                monitor_config.clone(),
+                state,
+                config.css.metadata.clone(),
+            )?);
         }
         Ok(Monitor { config, monitors })
     }

@@ -110,7 +110,7 @@ impl MonitorState {
         Ok(())
     }
 
-    pub fn finish(
+    fn finish(
         &mut self,
         status: StatusState,
         code: i64,

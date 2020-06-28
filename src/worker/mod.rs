@@ -12,6 +12,9 @@ use crate::config::*;
 
 mod linebuf;
 
+#[derive(Debug, Default, Display, Error)]
+pub struct ShuttingDown {}
+
 #[derive(Debug)]
 pub enum LogStream {
     StdOut,
@@ -46,8 +49,10 @@ pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>
             &mut sender,
         );
         if let Err(err) = r {
-            // Break the loop on a task failure
-            error!("[{}] Task failure: {}", monitor.id, err);
+            // Break the loop on a task failure (but don't log ShuttingDown errors)
+            if err.downcast_ref::<ShuttingDown>().is_none() {
+                error!("[{}] Task failure: {}", monitor.id, err);
+            }
             if sender(
                 &monitor.id,
                 WorkerMessage::AbnormalTermination(err.to_string()),

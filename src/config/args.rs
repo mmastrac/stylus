@@ -1,7 +1,8 @@
 use std::path::PathBuf;
-use structopt::StructOpt;
+use structopt::{clap::ArgGroup, StructOpt};
 
 #[derive(Debug, StructOpt)]
+#[structopt(group = ArgGroup::with_name("path").required(true))]
 pub struct Args {
     // TODO
     // /// Daemonize stylus and detact from the tty

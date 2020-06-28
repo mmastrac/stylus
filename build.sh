@@ -28,7 +28,7 @@ docker manifest annotate --os linux --arch amd64 mmastrac/stylus:latest mmastrac
 
 docker manifest push mmastrac/stylus:latest
 
-VERSION=`cargo run --example version`
+VERSION=`cargo run -- --version | cut -d' ' -f2`
 
 rm -rf ~/.docker/manifests/docker.io_mmastrac_stylus-$VERSION
 docker manifest create mmastrac/stylus:$VERSION \

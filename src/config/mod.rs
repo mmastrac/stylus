@@ -18,14 +18,14 @@ pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
     let config_path = if let Some(path) = args.force_container_path {
         path
     } else {
-        args.config
+        args.config.unwrap()
     };
     let mut config = parse_config(&config_path)?;
     if let Some(port) = args.force_container_port {
         config.server.port = port
     };
-    if args.force_container_listen_all {
-        panic!("--force-container-listen-all is not yet implemented");
+    if let Some(addr) = args.force_container_listen_addr {
+        config.server.listen_addr = addr
     }
     debug!("{:?}", config);
 

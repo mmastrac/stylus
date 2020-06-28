@@ -15,8 +15,12 @@ fn default_server_port() -> u16 {
     80
 }
 
+fn default_listen_addr() -> String {
+    "0.0.0.0".into()
+}
+
 fn default_server_static() -> PathBuf {
-    PathBuf::from("static")
+    "static".into()
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -35,6 +39,8 @@ pub struct Config {
 pub struct ServerConfig {
     #[serde(default = "default_server_port")]
     pub port: u16,
+    #[serde(default = "default_listen_addr")]
+    pub listen_addr: String,
     #[serde(default = "default_server_static")]
     pub r#static: PathBuf,
 }

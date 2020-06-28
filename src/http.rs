@@ -1,4 +1,5 @@
 use std::convert::Infallible;
+use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 
 use warp::path;
@@ -79,13 +80,15 @@ pub async fn run(config: Config) {
 
     let routes = warp::get().and(style.or(status).or(log).or(r#static));
 
-    // We print one and only one message
-    eprintln!(
-        "Stylus {} is listening on 0.0.0.0:{}!",
-        VERSION, config.server.port
-    );
+    let ip_addr = config
+        .server
+        .listen_addr
+        .parse::<IpAddr>()
+        .expect("Failed to parse listen address");
+    let addr = SocketAddr::new(ip_addr, config.server.port);
 
-    warp::serve(routes)
-        .run(([0, 0, 0, 0], config.server.port))
-        .await;
+    // We print one and only one message
+    eprintln!("Stylus {} is listening on {}!", VERSION, addr);
+
+    warp::serve(routes).run(addr).await;
 }

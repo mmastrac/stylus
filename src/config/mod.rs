@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 
 use itertools::Itertools;
 use structopt::StructOpt;
+use walkdir::WalkDir;
 
 use self::args::Args;
 pub use self::structs::*;
@@ -105,6 +106,40 @@ pub fn parse_config_string(file: &Path, s: String) -> Result<Config, Box<dyn Err
     )?;
 
     Ok(config)
+}
+
+pub fn parse_monitor_configs(root: &Path) -> Result<Vec<MonitorDirConfig>, Box<dyn Error>> {
+    let mut monitor_configs = vec![];
+    for e in WalkDir::new(root)
+        .min_depth(1)
+        .max_depth(1)
+        .follow_links(true)
+        .into_iter()
+    {
+        let e = e?;
+        if e.file_type().is_dir() {
+            let mut p = e.into_path();
+            p.push("config.yaml");
+            if p.exists() {
+                monitor_configs.push(parse_monitor_config(&p)?);
+                info!("Found monitor in {:?}", p);
+            } else {
+                debug!("Ignoring {:?} as there was no config.yaml", p);
+            }
+        } else {
+            debug!("Ignoring {:?} as it was not a directory", e.path());
+        }
+    }
+
+    if monitor_configs.is_empty() {
+        Err(format!(
+            "Unable to locate any valid configurations in {}",
+            root.to_string_lossy()
+        )
+        .into())
+    } else {
+        Ok(monitor_configs)
+    }
 }
 
 pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Error>> {

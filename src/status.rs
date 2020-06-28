@@ -76,6 +76,16 @@ impl Default for MonitorCssStatus {
 }
 
 impl MonitorState {
+    pub fn new(id: String, config: MonitorDirTestConfig) -> Self {
+        MonitorState {
+            id,
+            config,
+            status: Default::default(),
+            css: None,
+            children: Default::default(),
+        }
+    }
+
     pub fn process_message(
         &mut self,
         id: &str,
@@ -95,7 +105,9 @@ impl MonitorState {
                     LogStream::StdErr => "stderr",
                 };
                 // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
-                self.status.log.push_back(format!("[{}] {}", stream, m.trim_end()));
+                self.status
+                    .log
+                    .push_back(format!("[{}] {}", stream, m.trim_end()));
 
                 // This should be configurable
                 while self.status.log.len() > 100 {
@@ -143,6 +155,27 @@ impl MonitorState {
                 .status
                 .finish(status, code, description.clone(), &config);
         }
+    }
+}
+
+impl From<&MonitorDirConfig> for MonitorState {
+    fn from(other: &MonitorDirConfig) -> Self {
+        let mut state = MonitorState::new(
+            other.id.clone(),
+            other.root.test().clone(),
+        );
+        if let MonitorDirRootConfig::Group(ref group) = other.root {
+            for child in group.children.iter() {
+                state.children.insert(
+                    child.0.clone(),
+                    MonitorChildStatus {
+                        axes: child.1.axes.clone(),
+                        status: MonitorStatus::default(),
+                    },
+                );
+            }
+        }
+        state
     }
 }
 

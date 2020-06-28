@@ -48,10 +48,12 @@ impl MonitorThread {
                 if let Err(TryRecvError::Disconnected) = rx.try_recv() {
                     return Err(ShuttingDown::default().into());
                 }
-                thread
-                    .lock()
-                    .expect("Poisoned mutex")
-                    .process_message(id, m, &css_config)
+                thread.lock().expect("Poisoned mutex").process_message(
+                    id,
+                    m,
+                    &css_config,
+                    &mut |_| {},
+                )
             });
         });
 

@@ -31,6 +31,8 @@ pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
 
     if args.dump {
         Ok(OperationMode::Dump(config))
+    } else if let Some(test) = args.test {
+        Ok(OperationMode::Test(config, test))
     } else {
         Ok(OperationMode::Run(config))
     }

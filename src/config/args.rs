@@ -33,6 +33,10 @@ pub struct Args {
     #[structopt(long)]
     pub force_container_path: Option<PathBuf>,
 
+    /// If specified, runs the given test immediately and displays the status of the given monitor after it completes
+    #[structopt(long, conflicts_with = "dump")]
+    pub test: Option<String>,
+
     /// The configuration file
     #[structopt(name = "FILE", parse(from_os_str))]
     pub config: PathBuf,

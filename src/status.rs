@@ -86,11 +86,23 @@ impl MonitorState {
         }
     }
 
-    pub fn process_message(
+    fn process_log_message<T: FnMut(&str) -> ()>(
+        &mut self,
+        stream: &str,
+        message: &str,
+        direct_logger: &mut T,
+    ) {
+        let msg = format!("[{}] {}", stream, message);
+        direct_logger(&msg);
+        self.status.log.push_back(msg);
+    }
+
+    pub fn process_message<T: FnMut(&str) -> ()>(
         &mut self,
         id: &str,
         msg: WorkerMessage,
         config: &CssMetadataConfig,
+        direct_logger: &mut T,
     ) -> Result<(), Box<dyn Error>> {
         debug!("[{}] Worker message {:?}", id, msg);
         match msg {
@@ -105,24 +117,17 @@ impl MonitorState {
                     LogStream::StdErr => "stderr",
                 };
                 // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
-                self.status
-                    .log
-                    .push_back(format!("[{}] {}", stream, m.trim_end()));
-
-                // This should be configurable
-                while self.status.log.len() > 100 {
-                    self.status.log.pop_front();
-                }
+                self.process_log_message(stream, m.trim_end(), direct_logger);
             }
             WorkerMessage::Metadata(expr) => {
                 // Make borrow checker happy
                 let status = &mut self.status;
                 let children = &mut self.children;
                 if let Err(err) = interpolate_modify(status, children, &expr) {
-                    self.status.log.push_back(format!("[error ] {}", err));
+                    self.process_log_message("error ", &err.to_string(), direct_logger);
                     error!("Metadata update error: {}", err);
                 } else {
-                    self.status.log.push_back(format!("[meta  ] {}", expr));
+                    self.process_log_message("meta  ", &expr.to_string(), direct_logger);
                 }
             }
             WorkerMessage::AbnormalTermination(s) => {

@@ -35,20 +35,8 @@ pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>
     mut sender: T,
 ) {
     loop {
-        let args: Option<&[OsString]> = None;
-        let test = match monitor.root {
-            MonitorDirRootConfig::Test(ref test) => test,
-            MonitorDirRootConfig::Group(ref group) => &group.test,
-        };
-        let r = monitor_thread_impl(
-            &monitor.id,
-            &test.command,
-            &monitor.base_path,
-            args,
-            test.timeout,
-            &mut sender,
-        );
-        if let Err(err) = r {
+        let (interval, res) = monitor_run(&monitor, &mut sender);
+        if let Err(err) = res {
             // Break the loop on a task failure (but don't log ShuttingDown errors)
             if err.downcast_ref::<ShuttingDown>().is_none() {
                 error!("[{}] Task failure: {}", monitor.id, err);
@@ -62,9 +50,29 @@ pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>
                 return;
             }
         }
-        trace!("[{}] Sleeping {}ms", monitor.id, test.interval.as_millis());
-        thread::sleep(test.interval);
+
+        trace!("[{}] Sleeping {}ms", monitor.id, interval.as_millis());
+        thread::sleep(interval);
     }
+}
+
+pub fn monitor_run<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
+    monitor: &MonitorDirConfig,
+    sender: &mut T,
+) -> (Duration, Result<(), Box<dyn Error>>) {
+    let args: Option<&[OsString]> = None;
+    let test = monitor.root.test();
+    (
+        test.interval,
+        monitor_thread_impl(
+            &monitor.id,
+            &test.command,
+            &monitor.base_path,
+            args,
+            test.timeout,
+            sender,
+        ),
+    )
 }
 
 fn append<T: FnMut(LogStream, String)>(

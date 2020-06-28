@@ -15,10 +15,15 @@ extern crate log;
 extern crate derive_more;
 
 use crate::config::{parse_config_from_args, parse_monitor_configs, OperationMode};
-use crate::status::Status;
+use crate::status::{MonitorState, Status};
+use crate::worker::monitor_run;
 
 #[tokio::main]
 async fn main() -> () {
+    run().await
+}
+
+async fn run() {
     // Manually bootstrap logging from args
     let default = match std::env::args().filter(|s| s == "-v").count() {
         0 => "",
@@ -45,6 +50,33 @@ async fn main() -> () {
                 serde_json::to_string_pretty(&status)
                     .expect("Unable to pretty-print configuration")
             );
+        }
+        OperationMode::Test(config, id) => {
+            let monitors = parse_monitor_configs(&config.monitor.dir)
+                .expect("Unable to parse monitor configurations");
+            for monitor in monitors.iter() {
+                if monitor.id == id {
+                    let mut state: MonitorState = monitor.into();
+                    monitor_run(&monitor, &mut |_, msg| {
+                        state
+                            .process_message(&monitor.id, msg, &config.css.metadata, &mut |m| {
+                                eprintln!("{}", m);
+                            })
+                            .expect("Failed to process message");
+                        Ok(())
+                    })
+                    .1
+                    .expect("Failed to run the monitor");
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&state)
+                            .expect("Unable to pretty-print configuration")
+                    );
+                    return;
+                }
+            }
+
+            panic!("Unable to locate monitor with id '{}'", id)
         }
     }
 }

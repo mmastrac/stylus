@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 pub enum OperationMode {
     Run(Config),
     Dump(Config),
+    Test(Config, String),
 }
 
 fn default_server_port() -> u16 {

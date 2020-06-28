@@ -1,0 +1,9 @@
+group:
+    id: port-{{ index }}
+    axes:
+        - name: index
+          values: [0, 1, 2, 3]
+    test:
+        interval: 60s
+        timeout: 30s
+        command: test.sh

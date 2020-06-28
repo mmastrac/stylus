@@ -78,6 +78,18 @@ pub struct CssMetadataConfig {
     pub green: Arc<BTreeMap<String, String>>,
 }
 
+#[cfg(test)]
+impl Default for CssMetadataConfig {
+    fn default() -> Self {
+        Self {
+            blank: Arc::new(Default::default()),
+            red: Arc::new(Default::default()),
+            yellow: Arc::new(Default::default()),
+            green: Arc::new(Default::default()),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MonitorDirConfig {

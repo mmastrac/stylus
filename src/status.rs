@@ -152,14 +152,17 @@ impl MonitorState {
         config: &CssMetadataConfig,
     ) {
         self.css = None;
-        self.status
-            .finish(status, code, description.clone(), config);
+
         for child in self.children.iter_mut() {
-            child
-                .1
-                .status
-                .finish(status, code, description.clone(), &config);
+            let child_status = &mut child.1.status;
+            if child_status.is_pending_status_set() || status != StatusState::Green {
+                child_status.finish(status, code, description.clone(), &config);
+            } else {
+                child_status.finish(StatusState::Blank, code, "".into(), &config);
+            }
         }
+
+        self.status.finish(status, code, description, config);
     }
 }
 
@@ -186,6 +189,18 @@ impl MonitorStatus {
         self.description = "Unknown (initializing)".into();
         self.status = Some(StatusState::Blank);
         self.css.metadata = config.blank.clone();
+    }
+
+    pub fn is_pending_status_set(&self) -> bool {
+        if let Some(ref pending) = self.pending {
+            if pending.status.is_none() {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        true
     }
 
     pub fn is_uninitialized(&self) -> bool {

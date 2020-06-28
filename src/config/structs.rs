@@ -115,7 +115,14 @@ pub struct MonitorDirGroupConfig {
     pub test: MonitorDirTestConfig,
     pub axes: Vec<MonitorDirAxisConfig>,
     #[serde(skip_deserializing)]
-    pub children: BTreeMap<String, MonitorDirTestConfig>,
+    pub children: BTreeMap<String, MonitorDirChildConfig>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MonitorDirChildConfig {
+    pub axes: BTreeMap<String, MonitorDirAxisValue>,
+    pub test: MonitorDirTestConfig,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq, Ord, PartialOrd, Hash)]

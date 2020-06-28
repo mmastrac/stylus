@@ -145,13 +145,17 @@ pub fn parse_monitor_config_string(
             .map(|axis| axis.values.iter().map(move |v| (v, &axis.name)))
             .multi_cartesian_product()
         {
-            let mut vals = BTreeMap::new();
+            let mut axes = BTreeMap::new();
             for val in values {
-                vals.insert(val.1, val.0);
+                axes.insert(val.1.to_owned(), val.0.to_owned());
             }
 
-            let id = interpolate_id(&vals, &group.id)?;
-            children.insert(id, group.test.clone());
+            let id = interpolate_id(&axes, &group.id)?;
+            let child = MonitorDirChildConfig {
+                axes,
+                test: group.test.clone(),
+            };
+            children.insert(id, child);
         }
         group.children = children;
     }

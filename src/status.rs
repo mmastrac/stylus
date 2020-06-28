@@ -38,11 +38,13 @@ pub struct MonitorState {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorChildStatus {
+    pub axes: BTreeMap<String, MonitorDirAxisValue>,
+
     #[serde(skip_serializing_if = "MonitorStatus::is_uninitialized")]
     pub status: MonitorStatus,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct MonitorStatus {
     pub status: Option<StatusState>,
     pub code: i64,
@@ -63,6 +65,14 @@ pub struct MonitorPendingStatus {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorCssStatus {
     pub metadata: Arc<BTreeMap<String, String>>,
+}
+
+impl Default for MonitorCssStatus {
+    fn default() -> Self {
+        Self {
+            metadata: Arc::new(Default::default()),
+        }
+    }
 }
 
 impl MonitorState {
@@ -137,19 +147,6 @@ impl MonitorState {
 }
 
 impl MonitorStatus {
-    pub fn new() -> MonitorStatus {
-        MonitorStatus {
-            status: None,
-            code: 0,
-            description: Default::default(),
-            metadata: Default::default(),
-            pending: None,
-            css: MonitorCssStatus {
-                metadata: Arc::new(Default::default()),
-            },
-        }
-    }
-
     pub fn initialize(&mut self, config: &CssMetadataConfig) {
         self.description = "Unknown (initializing)".into();
         self.status = Some(StatusState::Blank);

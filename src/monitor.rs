@@ -115,7 +115,8 @@ impl Monitor {
                     state.children.insert(
                         child.0.clone(),
                         MonitorChildStatus {
-                            status: MonitorStatus::new(),
+                            axes: child.1.axes.clone(),
+                            status: MonitorStatus::default(),
                         },
                     );
                 }
@@ -143,7 +144,7 @@ impl Monitor {
         MonitorState {
             id,
             config: monitor_config.clone(),
-            status: MonitorStatus::new(),
+            status: MonitorStatus::default(),
             log: VecDeque::new(),
             css: None,
             children: BTreeMap::new(),

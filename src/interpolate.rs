@@ -31,7 +31,7 @@ pub fn interpolate_monitor(
 }
 
 pub fn interpolate_id(
-    values: &BTreeMap<&String, &MonitorDirAxisValue>,
+    values: &BTreeMap<String, MonitorDirAxisValue>,
     s: &str,
 ) -> Result<String, Box<dyn Error>> {
     // TODO: avoid creating this handlebars registry every time

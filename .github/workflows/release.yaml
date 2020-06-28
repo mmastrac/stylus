@@ -38,7 +38,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./target/arm-unknown-linux-musleabi/release/stylus
-          asset_name: stylus-linux-musleabi
+          asset_name: stylus_linux_arm
           asset_content_type: application/binary
       - name: Upload Release Asset
         id: upload-release-asset-musleabihf
@@ -48,7 +48,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./target/arm-unknown-linux-musleabihf/release/stylus
-          asset_name: stylus-linux-musleabihf
+          asset_name: stylus_linux_armhf
           asset_content_type: application/binary
       - name: Upload Release Asset
         id: upload-release-asset-aarch64
@@ -58,7 +58,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./target/aarch64-unknown-linux-musl/release/stylus
-          asset_name: stylus-linux-aarch64
+          asset_name: stylus_linux_arm64
           asset_content_type: application/binary
       - name: Upload Release Asset
         id: upload-release-asset-x86_64
@@ -68,5 +68,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./target/x86_64-unknown-linux-musl/release/stylus
-          asset_name: stylus-linux-x86_64
+          asset_name: stylus_linux_amd64
           asset_content_type: application/binary

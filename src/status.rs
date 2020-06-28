@@ -76,7 +76,8 @@ impl Default for MonitorCssStatus {
 }
 
 impl MonitorState {
-    pub fn new(id: String, config: MonitorDirTestConfig) -> Self {
+    /// Internal use only
+    fn new_internal(id: String, config: MonitorDirTestConfig) -> Self {
         MonitorState {
             id,
             config,
@@ -168,7 +169,7 @@ impl MonitorState {
 
 impl From<&MonitorDirConfig> for MonitorState {
     fn from(other: &MonitorDirConfig) -> Self {
-        let mut state = MonitorState::new(other.id.clone(), other.root.test().clone());
+        let mut state = MonitorState::new_internal(other.id.clone(), other.root.test().clone());
         if let MonitorDirRootConfig::Group(ref group) = other.root {
             for child in group.children.iter() {
                 state.children.insert(
@@ -226,15 +227,11 @@ impl MonitorStatus {
         self.description = description;
         self.metadata.clear();
 
-        // Metadata can only be updated if the process terminated normally
+        // Metadata/status can only be overwritten if the process terminated normally
         if status == StatusState::Green {
             if let Some(metadata) = pending_metadata {
                 self.metadata = metadata;
             }
-        }
-
-        // Only allow overriding status if it was successful
-        if status == StatusState::Green {
             if let Some(status) = pending_status {
                 self.status = Some(status);
             }

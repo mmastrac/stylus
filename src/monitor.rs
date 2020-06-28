@@ -72,12 +72,9 @@ impl Drop for MonitorThread {
     fn drop(&mut self) {
         // Close the channel
         self.sender.take();
-        // Join the thread
-        self.thread
-            .take()
-            .unwrap()
-            .join()
-            .expect("Failed to terminate thread");
+
+        // Note that we don't try to join the thread here as there's no way to timeout
+        self.thread.take();
     }
 }
 

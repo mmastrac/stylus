@@ -137,17 +137,23 @@ impl MonitorState {
 }
 
 impl MonitorStatus {
-    pub fn new(config: &Config) -> MonitorStatus {
+    pub fn new() -> MonitorStatus {
         MonitorStatus {
             status: None,
             code: 0,
-            description: "Unknown (initializing)".into(),
+            description: Default::default(),
             metadata: Default::default(),
             pending: None,
             css: MonitorCssStatus {
-                metadata: config.css.metadata.blank.clone(),
+                metadata: Arc::new(Default::default()),
             },
         }
+    }
+
+    pub fn initialize(&mut self, config: &CssMetadataConfig) {
+        self.description = "Unknown (initializing)".into();
+        self.status = Some(StatusState::Blank);
+        self.css.metadata = config.blank.clone();
     }
 
     pub fn is_uninitialized(&self) -> bool {

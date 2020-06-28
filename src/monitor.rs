@@ -38,9 +38,9 @@ impl MonitorThread {
         css_config: CssMetadataConfig,
     ) -> Result<Self, Box<dyn Error>> {
         let (tx, rx) = channel();
-        state.status.status = Some(StatusState::Blank);
-        for mut state in &mut state.children {
-            state.1.status.status = Some(StatusState::Blank);
+        state.status.initialize(&css_config);
+        for state in &mut state.children {
+            state.1.status.initialize(&css_config);
         }
         let state = Arc::new(Mutex::new(state));
 
@@ -108,17 +108,14 @@ impl Monitor {
         }
         let mut monitors = Vec::new();
         for monitor_config in &monitor_configs {
-            let mut state = Self::create_state(
-                monitor_config.id.clone(),
-                &config,
-                &monitor_config.root.test(),
-            );
+            let mut state =
+                Self::create_state(monitor_config.id.clone(), &monitor_config.root.test());
             if let MonitorDirRootConfig::Group(ref group) = monitor_config.root {
                 for child in group.children.iter() {
                     state.children.insert(
                         child.0.clone(),
                         MonitorChildStatus {
-                            status: MonitorStatus::new(&config),
+                            status: MonitorStatus::new(),
                         },
                     );
                 }
@@ -142,15 +139,11 @@ impl Monitor {
         Ok(Monitor { config, monitors })
     }
 
-    fn create_state(
-        id: String,
-        config: &Config,
-        monitor_config: &MonitorDirTestConfig,
-    ) -> MonitorState {
+    fn create_state(id: String, monitor_config: &MonitorDirTestConfig) -> MonitorState {
         MonitorState {
             id,
             config: monitor_config.clone(),
-            status: MonitorStatus::new(&config),
+            status: MonitorStatus::new(),
             log: VecDeque::new(),
             css: None,
             children: BTreeMap::new(),

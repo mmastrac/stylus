@@ -3,6 +3,7 @@ use env_logger::Env;
 use std::sync::{Arc, Mutex};
 
 mod config;
+mod css;
 mod http;
 mod interpolate;
 mod monitor;
@@ -57,6 +58,10 @@ async fn run() {
             for monitor in monitors.iter() {
                 if monitor.id == id {
                     let mut state: MonitorState = monitor.into();
+                    println!("Monitor Log");
+                    println!("-----------");
+                    println!();
+
                     monitor_run(&monitor, &mut |_, msg| {
                         state
                             .process_message(&monitor.id, msg, &config.css.metadata, &mut |m| {
@@ -67,10 +72,25 @@ async fn run() {
                     })
                     .1
                     .expect("Failed to run the monitor");
+
+                    println!();
+                    println!("State");
+                    println!("-----");
+                    println!();
                     println!(
                         "{}",
                         serde_json::to_string_pretty(&state)
                             .expect("Unable to pretty-print configuration")
+                    );
+
+                    println!();
+                    println!("CSS");
+                    println!("---");
+                    println!();
+
+                    println!(
+                        "{}",
+                        crate::css::generate_css_for_monitor(&config.css, &state)
                     );
                     return;
                 }

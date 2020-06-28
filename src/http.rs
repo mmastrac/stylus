@@ -5,13 +5,17 @@ use warp::path;
 use warp::Filter;
 
 use crate::config::Config;
+use crate::css::generate_css_for_state;
 use crate::monitor::Monitor;
 use crate::status::Status;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 async fn css_request(monitor: Arc<Monitor>) -> Result<String, Infallible> {
-    Ok(monitor.generate_css())
+    Ok(generate_css_for_state(
+        &monitor.config.css,
+        &monitor.status(),
+    ))
 }
 
 async fn status_request(monitor: Arc<Monitor>) -> Result<Status, Infallible> {

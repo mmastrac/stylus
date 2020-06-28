@@ -4,7 +4,6 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 use crate::config::*;
-use crate::interpolate::*;
 use crate::status::*;
 use crate::worker::{monitor_thread, ShuttingDown};
 
@@ -23,7 +22,7 @@ struct MonitorThread {
 
 #[derive(Debug)]
 pub struct Monitor {
-    config: Config,
+    pub config: Config,
     monitors: Vec<MonitorThread>,
 }
 
@@ -93,55 +92,6 @@ impl Monitor {
             )?);
         }
         Ok(Monitor { config, monitors })
-    }
-
-    pub fn generate_css(&self) -> String {
-        let mut css = format!("/* Generated at {:?} */\n", std::time::Instant::now());
-        let status = self.status();
-        for monitor in status.monitors {
-            css += "\n";
-            let mut monitor = monitor.lock().expect("Poisoned mutex");
-
-            // Build the css from cache
-            let mut cache = monitor.css.take();
-            css +=
-                cache.get_or_insert_with(|| self.generate_css_for_monitor(&monitor.id, &monitor));
-            monitor.css = cache;
-        }
-        css
-    }
-
-    fn generate_css_for_monitor(&self, id: &str, monitor: &MonitorState) -> String {
-        let mut css = format!("/* {} */\n", id);
-        for rule in &self.config.css.rules {
-            css += &interpolate_monitor(id, &monitor.config, &monitor.status, &rule.selectors)
-                .unwrap_or_else(|_| "/* failed */".into());
-            css += "{\n";
-            css += &interpolate_monitor(id, &monitor.config, &monitor.status, &rule.declarations)
-                .unwrap_or_else(|_| "/* failed */".into());
-            css += "}\n\n";
-        }
-        for child in monitor.children.iter() {
-            for rule in &self.config.css.rules {
-                css += &interpolate_monitor(
-                    child.0,
-                    &monitor.config,
-                    &child.1.status,
-                    &rule.selectors,
-                )
-                .unwrap_or_else(|_| "/* failed */".into());
-                css += "{\n";
-                css += &interpolate_monitor(
-                    child.0,
-                    &monitor.config,
-                    &child.1.status,
-                    &rule.declarations,
-                )
-                .unwrap_or_else(|_| "/* failed */".into());
-                css += "}\n\n";
-            }
-        }
-        css
     }
 
     pub fn status(&self) -> Status {

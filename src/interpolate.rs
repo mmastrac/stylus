@@ -94,16 +94,7 @@ mod tests {
     use super::*;
 
     fn update(s: &'static str) -> Result<MonitorStatus, Box<dyn Error>> {
-        let mut status = MonitorStatus {
-            status: None,
-            code: 0,
-            description: "".to_owned(),
-            metadata: Default::default(),
-            pending: None,
-            css: MonitorCssStatus {
-                metadata: Default::default(),
-            },
-        };
+        let mut status = Default::default();
 
         interpolate_modify(&mut status, &mut BTreeMap::new(), s)?;
         Ok(status)

@@ -30,7 +30,6 @@ pub struct MonitorState {
     pub config: MonitorDirTestConfig,
     #[serde(skip_serializing_if = "MonitorStatus::is_uninitialized")]
     pub status: MonitorStatus,
-    pub log: VecDeque<String>,
     #[serde(skip)]
     pub css: Option<String>,
     pub children: BTreeMap<String, MonitorChildStatus>,
@@ -51,6 +50,7 @@ pub struct MonitorStatus {
     pub description: String,
     pub css: MonitorCssStatus,
     pub metadata: BTreeMap<String, String>,
+    pub log: VecDeque<String>,
     #[serde(skip)]
     pub pending: Option<MonitorPendingStatus>,
 }
@@ -87,7 +87,7 @@ impl MonitorState {
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
                 self.status.pending = None;
-                self.log.clear();
+                self.status.log.clear();
             }
             WorkerMessage::LogMessage(stream, m) => {
                 let stream = match stream {
@@ -95,11 +95,11 @@ impl MonitorState {
                     LogStream::StdErr => "stderr",
                 };
                 // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
-                self.log.push_back(format!("[{}] {}", stream, m.trim_end()));
+                self.status.log.push_back(format!("[{}] {}", stream, m.trim_end()));
 
                 // This should be configurable
-                while self.log.len() > 100 {
-                    self.log.pop_front();
+                while self.status.log.len() > 100 {
+                    self.status.log.pop_front();
                 }
             }
             WorkerMessage::Metadata(expr) => {
@@ -107,10 +107,10 @@ impl MonitorState {
                 let status = &mut self.status;
                 let children = &mut self.children;
                 if let Err(err) = interpolate_modify(status, children, &expr) {
-                    self.log.push_back(format!("[error ] {}", err));
+                    self.status.log.push_back(format!("[error ] {}", err));
                     error!("Metadata update error: {}", err);
                 } else {
-                    self.log.push_back(format!("[meta  ] {}", expr));
+                    self.status.log.push_back(format!("[meta  ] {}", expr));
                 }
             }
             WorkerMessage::AbnormalTermination(s) => {

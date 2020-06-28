@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::BTreeMap;
 use std::error::Error;
 use std::sync::mpsc::{channel, TryRecvError};
 use std::sync::{Arc, Mutex};
@@ -145,7 +145,6 @@ impl Monitor {
             id,
             config: monitor_config.clone(),
             status: MonitorStatus::default(),
-            log: VecDeque::new(),
             css: None,
             children: BTreeMap::new(),
         }

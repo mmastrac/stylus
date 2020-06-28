@@ -27,7 +27,7 @@ async fn main() -> () {
 async fn run() {
     // Manually bootstrap logging from args
     let default = match std::env::args().filter(|s| s == "-v").count() {
-        0 => "",
+        0 => "stylus=warn",
         1 => "stylus=info",
         2 => "stylus=debug",
         _ => "debug",

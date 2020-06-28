@@ -42,8 +42,12 @@ pub fn parse_config(file: &Path) -> Result<Config, Box<dyn Error>> {
     let curr = std::env::current_dir()?;
     let mut path = Path::new(&file).into();
     canonicalize("configuration", Some(&curr), &mut path)?;
+    if path.is_dir() {
+        warn!("Passed configuration location {:?} was a directory -- inferring 'config.yaml' in that directory", file);
+        path = path.join("config.yaml");
+    }
     let s = std::fs::read_to_string(&path)?;
-    parse_config_string(file, s)
+    parse_config_string(&path, s)
 }
 
 /// Given a base path and a relative path, gets the full path (or errors out if it doesn't exist).

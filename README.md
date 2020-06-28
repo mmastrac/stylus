@@ -47,7 +47,7 @@ all your rules to override the fill colors created by your SVG editor.
 Example `config.yaml` for a **Stylus** install. This configuration attaches metadata to the various states and has
 selectors that apply to both and HTML (for a status table) and CSS (for a status SVG image).
 
-```
+```yaml
 version: 1
 server:
   port: 8000
@@ -78,7 +78,7 @@ css:
 The monitors are configured by creating a subdirectory in the monitor directory (default `monitor.d/`) and
 placing a `config.yaml` in that monitor subdirectory.
 
-```
+```yaml
 # ID is optional and will be inferred from the directory
 id: router-1
 test:
@@ -97,7 +97,7 @@ running alpine's `apk` tool inside the contain) to handle your specific cases.
 
 Unless you have a particularly lossy connection, a single ping should be enough to test whether a host is up:
 
-```
+```bash
 #!/bin/bash
 set -xeuf -o pipefail
 ping -c 1 8.8.8.8
@@ -108,7 +108,7 @@ ping -c 1 8.8.8.8
 For hosts with services that may be up or down, you may want to use cURL to test whether the service itself
 is reachable.
 
-```
+```bash
 #!/bin/bash
 set -xeuf -o pipefail
 curl --retry 2 --max-time 5 --connect-timeout 5 http://192.168.1.1:9000

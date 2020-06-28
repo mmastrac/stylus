@@ -160,10 +160,7 @@ impl MonitorState {
 
 impl From<&MonitorDirConfig> for MonitorState {
     fn from(other: &MonitorDirConfig) -> Self {
-        let mut state = MonitorState::new(
-            other.id.clone(),
-            other.root.test().clone(),
-        );
+        let mut state = MonitorState::new(other.id.clone(), other.root.test().clone());
         if let MonitorDirRootConfig::Group(ref group) = other.root {
             for child in group.children.iter() {
                 state.children.insert(

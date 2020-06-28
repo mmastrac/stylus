@@ -4,9 +4,9 @@ use std::sync::Arc;
 use warp::path;
 use warp::Filter;
 
+use crate::config::Config;
 use crate::monitor::Monitor;
 use crate::status::Status;
-use crate::config::Config;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 

@@ -31,10 +31,14 @@ async fn main() -> () {
     match parse_config_from_args().expect("Unable to parse configuration") {
         OperationMode::Run(config) => crate::http::run(config).await,
         OperationMode::Dump(config) => {
-            let monitors = parse_monitor_configs(&config.monitor.dir).expect("Unable to parse monitor configurations");
+            let monitors = parse_monitor_configs(&config.monitor.dir)
+                .expect("Unable to parse monitor configurations");
             let status = Status {
                 config,
-                monitors: monitors.iter().map(|m| Arc::new(Mutex::new(m.into()))).collect(),
+                monitors: monitors
+                    .iter()
+                    .map(|m| Arc::new(Mutex::new(m.into())))
+                    .collect(),
             };
             println!(
                 "{}",

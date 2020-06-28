@@ -57,6 +57,7 @@ pub async fn run(config: Config) {
         .map(provide_monitor(&monitor))
         .and_then(css_request)
         .with(warp::reply::with::header("Content-Type", "text/css"));
+
     // status.json for advanced integrations
     let status = path!("status.json")
         .map(provide_monitor(&monitor))
@@ -66,10 +67,13 @@ pub async fn run(config: Config) {
             "Content-Type",
             "application/json",
         ));
+
+    // logging endpoint
     let log = path!("log" / String)
         .map(provide_monitor_2(&monitor))
         .and_then(|(s, m)| log_request(m, s))
         .with(warp::reply::with::header("Content-Type", "text/plain"));
+
     // static pages
     let r#static = warp::fs::dir(config.server.r#static);
 

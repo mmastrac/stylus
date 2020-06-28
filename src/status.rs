@@ -28,16 +28,23 @@ pub struct Status {
 pub struct MonitorState {
     pub id: String,
     pub config: MonitorDirTestConfig,
+    #[serde(skip_serializing_if = "MonitorStatus::is_uninitialized")]
     pub status: MonitorStatus,
     pub log: VecDeque<String>,
     #[serde(skip)]
     pub css: Option<String>,
-    pub children: BTreeMap<String, MonitorStatus>,
+    pub children: BTreeMap<String, MonitorChildStatus>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MonitorChildStatus {
+    #[serde(skip_serializing_if = "MonitorStatus::is_uninitialized")]
+    pub status: MonitorStatus,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MonitorStatus {
-    pub status: StatusState,
+    pub status: Option<StatusState>,
     pub code: i64,
     pub description: String,
     pub css: MonitorCssStatus,
@@ -121,7 +128,10 @@ impl MonitorState {
         self.status
             .finish(status, code, description.clone(), config);
         for child in self.children.iter_mut() {
-            child.1.finish(status, code, description.clone(), &config);
+            child
+                .1
+                .status
+                .finish(status, code, description.clone(), &config);
         }
     }
 }
@@ -129,7 +139,7 @@ impl MonitorState {
 impl MonitorStatus {
     pub fn new(config: &Config) -> MonitorStatus {
         MonitorStatus {
-            status: StatusState::Blank,
+            status: None,
             code: 0,
             description: "Unknown (initializing)".into(),
             metadata: Default::default(),
@@ -138,6 +148,10 @@ impl MonitorStatus {
                 metadata: config.css.metadata.blank.clone(),
             },
         }
+    }
+
+    pub fn is_uninitialized(&self) -> bool {
+        self.status.is_none()
     }
 
     fn finish(
@@ -155,7 +169,7 @@ impl MonitorStatus {
         self.code = code;
 
         // Start with the regular update
-        self.status = status;
+        self.status = Some(status);
         self.description = description;
         self.metadata.clear();
 
@@ -169,7 +183,7 @@ impl MonitorStatus {
         // Only allow overriding status if it was successful
         if status == StatusState::Green {
             if let Some(status) = pending_status {
-                self.status = status;
+                self.status = Some(status);
             }
             if let Some(description) = pending_description {
                 self.description = description;
@@ -177,11 +191,13 @@ impl MonitorStatus {
         }
 
         // Update the CSS metadata with the final status
-        self.css.metadata = match self.status {
-            StatusState::Blank => config.blank.clone(),
-            StatusState::Green => config.green.clone(),
-            StatusState::Yellow => config.yellow.clone(),
-            StatusState::Red => config.red.clone(),
-        };
+        if let Some(status) = self.status {
+            self.css.metadata = match status {
+                StatusState::Blank => config.blank.clone(),
+                StatusState::Green => config.green.clone(),
+                StatusState::Yellow => config.yellow.clone(),
+                StatusState::Red => config.red.clone(),
+            };
+        }
     }
 }

@@ -43,7 +43,7 @@ pub fn interpolate_id(
 
 pub fn interpolate_modify<'a>(
     mut status: &'a mut MonitorStatus,
-    children: &'a mut BTreeMap<String, MonitorStatus>,
+    children: &'a mut BTreeMap<String, MonitorChildStatus>,
     s: &str,
 ) -> Result<(), Box<dyn Error>> {
     let (raw_path, value) = s.splitn(2, '=').next_tuple().ok_or("Invalid expression")?;
@@ -54,9 +54,10 @@ pub fn interpolate_modify<'a>(
         Some("status") => {}
         Some("group") => {
             let part = path.next().ok_or("Missing group child")?;
-            status = children
+            status = &mut children
                 .get_mut(part)
-                .ok_or(format!("Could not find child '{}'", part))?;
+                .ok_or(format!("Could not find child '{}'", part))?
+                .status;
             if path.next() != Some("status") {
                 return Err(format!("Invalid path: {}", raw_path).into());
             }
@@ -94,7 +95,7 @@ mod tests {
 
     fn update(s: &'static str) -> Result<MonitorStatus, Box<dyn Error>> {
         let mut status = MonitorStatus {
-            status: StatusState::Blank,
+            status: None,
             code: 0,
             description: "".to_owned(),
             metadata: Default::default(),

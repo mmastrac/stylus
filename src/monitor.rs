@@ -34,10 +34,14 @@ impl MonitorThread {
     /// Create a new monitor thread and release it
     fn create(
         monitor: MonitorDirConfig,
-        state: MonitorState,
+        mut state: MonitorState,
         css_config: CssMetadataConfig,
     ) -> Result<Self, Box<dyn Error>> {
         let (tx, rx) = channel();
+        state.status.status = Some(StatusState::Blank);
+        for mut state in &mut state.children {
+            state.1.status.status = Some(StatusState::Blank);
+        }
         let state = Arc::new(Mutex::new(state));
 
         let thread = thread::spawn(move || {
@@ -79,7 +83,7 @@ impl Drop for MonitorThread {
 }
 
 impl Monitor {
-    pub fn new(config: &Config) -> Result<Monitor, Box<dyn Error>> {
+    pub fn new(config: &Config, start: bool) -> Result<Monitor, Box<dyn Error>> {
         let config = config.clone();
         let mut monitor_configs = Vec::new();
         for e in WalkDir::new(&config.monitor.dir)
@@ -111,16 +115,29 @@ impl Monitor {
             );
             if let MonitorDirRootConfig::Group(ref group) = monitor_config.root {
                 for child in group.children.iter() {
-                    state
-                        .children
-                        .insert(child.0.clone(), MonitorStatus::new(&config));
+                    state.children.insert(
+                        child.0.clone(),
+                        MonitorChildStatus {
+                            status: MonitorStatus::new(&config),
+                        },
+                    );
                 }
             }
-            monitors.push(MonitorThread::create(
-                monitor_config.clone(),
-                state,
-                config.css.metadata.clone(),
-            )?);
+            if start {
+                monitors.push(MonitorThread::create(
+                    monitor_config.clone(),
+                    state,
+                    config.css.metadata.clone(),
+                )?);
+            } else {
+                // If we're not starting the monitors just push the state. This is not a great solution
+                // to deal with the "dump" mode.
+                monitors.push(MonitorThread {
+                    sender: None,
+                    thread: None,
+                    state: Arc::new(Mutex::new(state)),
+                })
+            }
         }
         Ok(Monitor { config, monitors })
     }
@@ -168,11 +185,21 @@ impl Monitor {
         }
         for child in monitor.children.iter() {
             for rule in &self.config.css.rules {
-                css += &interpolate_monitor(child.0, &monitor.config, &child.1, &rule.selectors)
-                    .unwrap_or_else(|_| "/* failed */".into());
+                css += &interpolate_monitor(
+                    child.0,
+                    &monitor.config,
+                    &child.1.status,
+                    &rule.selectors,
+                )
+                .unwrap_or_else(|_| "/* failed */".into());
                 css += "{\n";
-                css += &interpolate_monitor(child.0, &monitor.config, &child.1, &rule.declarations)
-                    .unwrap_or_else(|_| "/* failed */".into());
+                css += &interpolate_monitor(
+                    child.0,
+                    &monitor.config,
+                    &child.1.status,
+                    &rule.declarations,
+                )
+                .unwrap_or_else(|_| "/* failed */".into());
                 css += "}\n\n";
             }
         }

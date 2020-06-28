@@ -1,9 +1,13 @@
 use std::collections::{BTreeMap, VecDeque};
+use std::error::Error;
 use std::sync::{Arc, Mutex};
 
 use serde::{Deserialize, Serialize};
 
 use crate::config::*;
+use crate::interpolate::interpolate_modify;
+use crate::worker::LogStream;
+use crate::worker::WorkerMessage;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
 #[serde(rename_all(serialize = "lowercase", deserialize = "lowercase"))]
@@ -55,6 +59,57 @@ pub struct MonitorCssStatus {
 }
 
 impl MonitorState {
+    pub fn process_message(
+        &mut self,
+        id: &str,
+        msg: WorkerMessage,
+        config: &CssMetadataConfig,
+    ) -> Result<(), Box<dyn Error>> {
+        debug!("[{}] Worker message {:?}", id, msg);
+        match msg {
+            WorkerMessage::Starting => {
+                // Note that we don't update the state here
+                self.status.pending = None;
+                self.log.clear();
+            }
+            WorkerMessage::LogMessage(stream, m) => {
+                let stream = match stream {
+                    LogStream::StdOut => "stdout",
+                    LogStream::StdErr => "stderr",
+                };
+                // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
+                self.log.push_back(format!("[{}] {}", stream, m.trim_end()));
+
+                // This should be configurable
+                while self.log.len() > 100 {
+                    self.log.pop_front();
+                }
+            }
+            WorkerMessage::Metadata(expr) => {
+                // Make borrow checker happy
+                let status = &mut self.status;
+                let children = &mut self.children;
+                if let Err(err) = interpolate_modify(status, children, &expr) {
+                    self.log.push_back(format!("[error ] {}", err));
+                    error!("Metadata update error: {}", err);
+                } else {
+                    self.log.push_back(format!("[meta  ] {}", expr));
+                }
+            }
+            WorkerMessage::AbnormalTermination(s) => {
+                self.finish(StatusState::Yellow, -1, s, &config);
+            }
+            WorkerMessage::Termination(code) => {
+                if code == 0 {
+                    self.finish(StatusState::Green, code, "Success".into(), &config);
+                } else {
+                    self.finish(StatusState::Red, code, "Failed".into(), &config);
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn finish(
         &mut self,
         status: StatusState,

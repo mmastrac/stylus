@@ -9,7 +9,7 @@ use walkdir::WalkDir;
 use crate::config::*;
 use crate::interpolate::*;
 use crate::status::*;
-use crate::worker::{monitor_thread, LogStream, WorkerMessage};
+use crate::worker::monitor_thread;
 
 #[derive(Debug)]
 struct MonitorThread {
@@ -65,11 +65,15 @@ impl Monitor {
                 }
             }
             let thread = thread::spawn(move || {
-                let thread = rx.recv().expect("Unexpected error receiving mutex");
+                let thread: Arc<Mutex<MonitorState>> =
+                    rx.recv().expect("Unexpected error receiving mutex");
                 // Ideally we wouldn't start a thread if we were only planning on dumping status
                 if start {
                     monitor_thread(monitor_config2, move |id, m| {
-                        Self::process_message(id, &thread, m, &css_config)
+                        thread
+                            .lock()
+                            .expect("Poisoned mutex")
+                            .process_message(id, m, &css_config)
                     });
                 }
             });
@@ -98,61 +102,6 @@ impl Monitor {
             css: None,
             children: BTreeMap::new(),
         }
-    }
-
-    fn process_message(
-        id: &str,
-        monitor: &Arc<Mutex<MonitorState>>,
-        msg: WorkerMessage,
-        config: &CssMetadataConfig,
-    ) -> Result<(), Box<dyn Error>> {
-        let mut state = monitor.lock().map_err(|_| "Poisoned mutex")?;
-        debug!("[{}] Worker message {:?}", id, msg);
-        match msg {
-            WorkerMessage::Starting => {
-                // Note that we don't update the state here
-                state.status.pending = None;
-                state.log.clear();
-            }
-            WorkerMessage::LogMessage(stream, m) => {
-                let stream = match stream {
-                    LogStream::StdOut => "stdout",
-                    LogStream::StdErr => "stderr",
-                };
-                // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
-                state
-                    .log
-                    .push_back(format!("[{}] {}", stream, m.trim_end()));
-
-                // This should be configurable
-                while state.log.len() > 100 {
-                    state.log.pop_front();
-                }
-            }
-            WorkerMessage::Metadata(expr) => {
-                // Make borrow checker happy
-                let state = &mut *state;
-                let status = &mut state.status;
-                let children = &mut state.children;
-                if let Err(err) = interpolate_modify(status, children, &expr) {
-                    state.log.push_back(format!("[error ] {}", err));
-                    error!("Metadata update error: {}", err);
-                } else {
-                    state.log.push_back(format!("[meta  ] {}", expr));
-                }
-            }
-            WorkerMessage::AbnormalTermination(s) => {
-                state.finish(StatusState::Yellow, -1, s, &config);
-            }
-            WorkerMessage::Termination(code) => {
-                if code == 0 {
-                    state.finish(StatusState::Green, code, "Success".into(), &config);
-                } else {
-                    state.finish(StatusState::Red, code, "Failed".into(), &config);
-                }
-            }
-        }
-        Ok(())
     }
 
     pub fn generate_css(&self) -> String {

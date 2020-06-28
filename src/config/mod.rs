@@ -83,15 +83,17 @@ pub fn parse_config_string(file: &Path, s: String) -> Result<Config, Box<dyn Err
             .into();
     }
 
-    for css in config.css.rules.iter() {
+    for mut css in config.css.rules.iter_mut() {
         if css.declarations.contains("monitor.config.id")
             || css.selectors.contains("monitor.config.id")
         {
-            warn!("Found deprecated 'monitor.config.id' in template. Please use 'monitor.id'");
-            return Err(
-                "Found deprecated 'monitor.config.id' in template. Please use 'monitor.id'".into(),
-            );
+            let msg = "Found deprecated 'monitor.config.id' in template. Please use 'monitor.id'";
+            warn!("{}", msg);
+            return Err(msg.into());
         }
+
+        css.declarations = css.declarations.trim().to_string();
+        css.selectors = css.selectors.trim().to_string();
     }
 
     // Canonical paths

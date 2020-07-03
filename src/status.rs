@@ -125,6 +125,7 @@ impl MonitorState {
                 let status = &mut self.status;
                 let children = &mut self.children;
                 if let Err(err) = interpolate_modify(status, children, &expr) {
+                    self.process_log_message("error ", &expr, direct_logger);
                     self.process_log_message("error ", &err.to_string(), direct_logger);
                     error!("Metadata update error: {}", err);
                 } else {

@@ -1,5 +1,1 @@
 *
-!target/aarch64-unknown-linux-musl/release/stylus
-!target/arm-unknown-linux-musleabi/release/stylus
-!target/arm-unknown-linux-musleabihf/release/stylus
-!target/x86_64-unknown-linux-musl/release/stylus

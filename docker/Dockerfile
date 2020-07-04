@@ -8,7 +8,9 @@ VOLUME /srv
 EXPOSE 8000/tcp
 
 # Our useful set of tools from the Alpine repository
-RUN apk update && apk upgrade && apk add jq curl netcat-openbsd bash openssh-client net-snmp-tools tini
+RUN apk update && \
+    apk upgrade && \
+    apk add jq curl netcat-openbsd bash openssh-client net-snmp-tools tini openssl stunnel
 
 # Install pup via curl
 RUN curl -fL https://github.com/ericchiang/pup/releases/download/v${PUPVERSION}/pup_v${PUPVERSION}_${BINARYPLATFORM}.zip \

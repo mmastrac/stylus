@@ -159,7 +159,7 @@ pub struct MonitorDirAxisConfig {
     pub name: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MonitorDirTestConfig {
     #[serde(with = "humantime_serde")]

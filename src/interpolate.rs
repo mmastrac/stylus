@@ -36,6 +36,7 @@ pub fn interpolate_id(
 ) -> Result<String, Box<dyn Error>> {
     // TODO: avoid creating this handlebars registry every time
     let mut handlebars = Handlebars::new();
+    handlebars.set_strict_mode(true);
     handlebars.register_template_string("t", s)?;
 
     Ok(handlebars.render("t", values)?.trim().to_owned())
@@ -92,12 +93,39 @@ pub fn interpolate_modify<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::iter::FromIterator;
+    use std::sync::Arc;
 
     fn update(s: &'static str) -> Result<MonitorStatus, Box<dyn Error>> {
         let mut status = Default::default();
 
         interpolate_modify(&mut status, &mut BTreeMap::new(), s)?;
         Ok(status)
+    }
+
+    #[test]
+    fn test_interpolate_id() -> Result<(), Box<dyn Error>> {
+        let mut values = BTreeMap::new();
+        values.insert("index".to_owned(), MonitorDirAxisValue::Number(2));
+        assert_eq!(interpolate_id(&values, "port-{{ index }}")?, "port-2");
+        Ok(())
+    }
+
+    #[test]
+    fn test_interpolate_error() -> Result<(), Box<dyn Error>> {
+        let mut values = BTreeMap::new();
+        values.insert("index".to_owned(), MonitorDirAxisValue::Number(2));
+        assert!(interpolate_id(&values, "port-{{ ondex }}").is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn test_replace() -> Result<(), Box<dyn Error>> {
+        let config = Default::default();
+        let mut status = MonitorStatus::default();
+        status.css.metadata = Arc::new(BTreeMap::from_iter(vec![("color".to_owned(), "blue".to_owned())]));
+        assert_eq!(interpolate_monitor("id", &config, &status, "{{monitor.status.css.metadata.color}}")?, "blue");
+        Ok(())
     }
 
     #[test]

@@ -38,30 +38,19 @@ async fn log_request(monitor: Arc<Monitor>, s: String) -> Result<String, Infalli
     Ok("Not found".to_owned())
 }
 
-/// Provide the given arc to a warp chain
-fn provide_monitor(monitor: &Arc<Monitor>) -> impl Fn() -> Arc<Monitor> + Clone {
-    let monitor = Box::new(monitor.clone());
-    move || *monitor.clone()
-}
-
-/// Provide the given arc to a warp chain
-fn provide_monitor_2<T>(monitor: &Arc<Monitor>) -> impl Fn(T) -> (T, Arc<Monitor>) + Clone {
-    let monitor = Box::new(monitor.clone());
-    move |t| (t, *monitor.clone())
-}
-
 pub async fn run(config: Config) {
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
+    let with_monitor = warp::any().map(move || monitor.clone());
 
     // style.css for formatting
     let style = path!("style.css")
-        .map(provide_monitor(&monitor))
+        .and(with_monitor.clone())
         .and_then(css_request)
         .with(warp::reply::with::header("Content-Type", "text/css"));
 
     // status.json for advanced integrations
     let status = path!("status.json")
-        .map(provide_monitor(&monitor))
+        .and(with_monitor.clone())
         .and_then(status_request)
         .map(|s| warp::reply::json(&s))
         .with(warp::reply::with::header(
@@ -71,8 +60,8 @@ pub async fn run(config: Config) {
 
     // logging endpoint
     let log = path!("log" / String)
-        .map(provide_monitor_2(&monitor))
-        .and_then(|(s, m)| log_request(m, s))
+        .and(with_monitor.clone())
+        .and_then(|s, m| log_request(m, s))
         .with(warp::reply::with::header("Content-Type", "text/plain"));
 
     // static pages

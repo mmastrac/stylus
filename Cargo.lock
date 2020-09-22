@@ -1472,9 +1472,9 @@ dependencies = [
 
 [[package]]
 name = "structopt-flags"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a26f96efb515f322853b3d957c9d7ab65561aecbefc6ca74d271bd11b572273"
+checksum = "4654ef901a3897697bc76c48c1d0e73f925e5d801959db6d870d39a87beeae85"
 dependencies = [
  "log 0.4.8",
  "skeptic",

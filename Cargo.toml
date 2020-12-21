@@ -15,7 +15,7 @@ derive_more = "0.99.11"
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_yaml = "0.8"
 serde_json = { version = "1.0.60", features = ["raw_value"] }
-serde-aux = "1.1.0"
+serde-aux = "2.0.0"
 humantime-serde = "1.0.0"
 walkdir = "2.3.1"
 handlebars = "3.5.1"

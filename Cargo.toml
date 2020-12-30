@@ -18,7 +18,7 @@ serde_json = { version = "1.0.61", features = ["raw_value"] }
 serde-aux = "2.1.0"
 humantime-serde = "1.0.0"
 walkdir = "2.3.1"
-handlebars = "3.5.1"
+handlebars = "3.5.2"
 subprocess = "0.2.4"
 log = "0.4.8"
 env_logger = "0.8.2"

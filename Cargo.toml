@@ -9,7 +9,7 @@ repository = "https://github.com/mmastrac/stylus"
 readme = "README.md"
 
 [dependencies]
-tokio = { version = "1.2.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.3.0", features = ["macros", "rt-multi-thread"] }
 warp = { git = "https://github.com/seanmonstar/warp/", rev = "ffefea0" }
 derive_more = "0.99.11"
 serde = { version = "1.0", features = ["derive", "rc"] }

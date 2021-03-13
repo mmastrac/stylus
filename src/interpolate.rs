@@ -123,8 +123,19 @@ mod tests {
     fn test_replace() -> Result<(), Box<dyn Error>> {
         let config = Default::default();
         let mut status = MonitorStatus::default();
-        status.css.metadata = Arc::new(BTreeMap::from_iter(vec![("color".to_owned(), "blue".to_owned())]));
-        assert_eq!(interpolate_monitor("id", &config, &status, "{{monitor.status.css.metadata.color}}")?, "blue");
+        status.css.metadata = Arc::new(BTreeMap::from_iter(vec![(
+            "color".to_owned(),
+            "blue".to_owned(),
+        )]));
+        assert_eq!(
+            interpolate_monitor(
+                "id",
+                &config,
+                &status,
+                "{{monitor.status.css.metadata.color}}"
+            )?,
+            "blue"
+        );
         Ok(())
     }
 

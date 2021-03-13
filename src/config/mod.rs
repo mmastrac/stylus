@@ -233,7 +233,9 @@ test:
         )?;
 
         match config.root {
-            MonitorDirRootConfig::Test(test) => assert_eq!(test.command, Path::new("/bin/sleep")),
+            MonitorDirRootConfig::Test(test) => {
+                assert_eq!(test.command, Path::new("/bin/sleep").canonicalize()?)
+            }
             _ => panic!(""),
         }
 
@@ -262,7 +264,7 @@ group:
 
         match config.root {
             MonitorDirRootConfig::Group(group) => {
-                assert_eq!(group.test.command, Path::new("/bin/sleep"))
+                assert_eq!(group.test.command, Path::new("/bin/sleep").canonicalize()?)
             }
             _ => panic!(""),
         }

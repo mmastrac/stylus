@@ -11,7 +11,7 @@ readme = "README.md"
 [dependencies]
 tokio = { version = "1.4.0", features = ["macros", "rt-multi-thread"] }
 warp = "0.3.0"
-derive_more = "0.99.11"
+derive_more = "0.99.13"
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_yaml = "0.8"
 serde_json = { version = "1.0.64", features = ["raw_value"] }

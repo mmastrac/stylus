@@ -2,7 +2,7 @@
 name = "stylus"
 version = "0.9.14"
 authors = ["Matt Mastracci <matthew@mastracci.com>"]
-edition = "2018"
+edition = "2021"
 description = "Stylus (style + status) is a lightweight status page for home infrastructure."
 license = "MIT"
 repository = "https://github.com/mmastrac/stylus"

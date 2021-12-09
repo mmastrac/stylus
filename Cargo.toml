@@ -10,7 +10,7 @@ readme = "README.md"
 
 [dependencies]
 tokio = { version = "1.6.1", features = ["macros", "rt-multi-thread"] }
-warp = "0.3.1"
+warp = "0.3.2"
 derive_more = "0.99.17"
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_yaml = "0.8"

@@ -34,7 +34,7 @@
                         return React.createElement('table', null, React.createElement('tbody', null, this.state.status?.monitors?.map(
                             (monitor) => React.createElement('tr', { key: monitor.id, id: monitor.id }, [
                                 React.createElement('td', { key: "id" }, monitor.id),
-                                React.createElement('td', { key: "status" }, monitor.status.status),
+                                React.createElement('td', { key: "status", style: {backgroundColor: monitor.status.status} }, monitor.status.status),
                                 React.createElement('td', { key: "log" }, React.createElement('a', { href: "/log/" + monitor.id }, "log")),
                             ])
                         ) || []));

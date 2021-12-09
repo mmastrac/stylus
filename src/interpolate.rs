@@ -25,7 +25,7 @@ pub fn interpolate_monitor(
         id: &'a str,
         config: &'a MonitorDirTestConfig,
         status: &'a MonitorStatus,
-    };
+    }
     map.insert("monitor", Monitor { id, config, status });
     Ok(handlebars.render("t", &map)?.trim().to_owned())
 }

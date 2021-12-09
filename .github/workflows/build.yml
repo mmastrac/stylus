@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Update rust
-      run: sudo apt update && sudo apt upgrade -y cargo
+      run: sudo apt update && sudo apt --only-upgrade install -y cargo rustc
 
     # Build!
     - name: Build it

@@ -90,8 +90,8 @@ test:
 ## Test scripts
 
 The test scripts are usually pretty simple. Note that the docker container ships with a number of useful utilities,
-but you can consider manually installing additional packages (either creating an addition docker container or manually
-running alpine's `apk` tool inside the contain) to handle your specific cases.
+but you can consider manually installing additional packages (either creating an additional docker container or manually
+running alpine's `apk` tool inside the container) to handle your specific cases.
 
 ### Ping
 

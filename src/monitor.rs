@@ -55,12 +55,9 @@ impl MonitorThread {
                     info!("Shutting down monitor {}", id);
                     return Err(ShuttingDown::default().into());
                 }
-                monitor_state.write().process_message(
-                    id,
-                    m,
-                    &css_config,
-                    &mut |_| {},
-                )
+                monitor_state
+                    .write()
+                    .process_message(id, m, &css_config, &mut |_| {})
             });
             info!("Shutting down thread {}", id);
         });
@@ -68,7 +65,7 @@ impl MonitorThread {
         let thread = MonitorThread {
             thread,
             state,
-            drop_detect
+            drop_detect,
         };
 
         Ok(thread)
@@ -104,7 +101,7 @@ impl Monitor {
         }
         for handle in handles.into_iter() {
             match handle.join() {
-                Ok(_) => {},
+                Ok(_) => {}
                 Err(_) => error!("Failed to join handle!"),
             }
         }

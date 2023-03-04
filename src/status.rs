@@ -112,8 +112,7 @@ impl MonitorState {
             debug!("[{}] Worker message {:?}", id, msg);
         }
         match msg {
-            WorkerMessage::Idle => {
-            }
+            WorkerMessage::Idle => {}
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
                 self.status.pending = None;

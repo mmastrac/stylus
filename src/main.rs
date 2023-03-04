@@ -41,10 +41,7 @@ async fn run() {
                 .expect("Unable to parse monitor configurations");
             let status = Status {
                 config,
-                monitors: monitors
-                    .iter()
-                    .map(|m| SharedMut::new(m.into()))
-                    .collect(),
+                monitors: monitors.iter().map(|m| SharedMut::new(m.into())).collect(),
             };
             println!(
                 "{}",

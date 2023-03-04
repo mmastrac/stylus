@@ -2,7 +2,7 @@ use std::convert::Infallible;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use keepcalm::{SharedMut, Shared};
+use keepcalm::{Shared, SharedMut};
 use warp::path;
 use warp::Filter;
 
@@ -80,7 +80,10 @@ pub async fn run(config: Config) {
 
     let once = AtomicBool::new(false);
     ctrlc::set_handler(move || {
-        if once.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
+        if once
+            .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+            .is_ok()
+        {
             eprintln!("Ctrl-C pressed, attempting to shut down. Press Ctrl-C again to force.");
             monitor.write().close();
             std::process::exit(0);
@@ -88,7 +91,8 @@ pub async fn run(config: Config) {
             eprintln!("Ctrl-C pressed again, exiting.");
             std::process::exit(1);
         }
-    }).expect("Failed to set Ctrl-C handler");
+    })
+    .expect("Failed to set Ctrl-C handler");
 
     // We print one and only one message
     eprintln!("Stylus {} is listening on {}", VERSION, addr);

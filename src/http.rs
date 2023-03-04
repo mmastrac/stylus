@@ -25,7 +25,7 @@ async fn status_request(monitor: Arc<Monitor>) -> Result<Status, Infallible> {
 
 async fn log_request(monitor: Arc<Monitor>, s: String) -> Result<String, Infallible> {
     for monitor in monitor.status().monitors {
-        let monitor = monitor.lock().expect("Poisoned mutex");
+        let monitor = monitor.read();
         if monitor.id == s {
             let mut logs = String::new();
             for log in &monitor.status.log {

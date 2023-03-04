@@ -1,7 +1,7 @@
 use std::error::Error;
-use std::sync::mpsc::{channel, TryRecvError};
-use std::sync::{Arc, Mutex};
 use std::thread;
+
+use keepcalm::SharedMut;
 
 use crate::config::*;
 use crate::status::*;
@@ -15,9 +15,10 @@ impl<T> OpaqueSender for T where T: std::fmt::Debug + Send + Sync {}
 
 #[derive(Debug)]
 struct MonitorThread {
-    sender: Option<Arc<dyn OpaqueSender>>,
-    thread: Option<thread::JoinHandle<()>>,
-    state: Arc<Mutex<MonitorState>>,
+    /// This is solely used to detect when [`MonitorThread`] is dropped.
+    #[allow(unused)]
+    drop_detect: SharedMut<()>,
+    state: SharedMut<MonitorState>,
 }
 
 #[derive(Debug)]
@@ -33,21 +34,30 @@ impl MonitorThread {
         mut state: MonitorState,
         css_config: CssMetadataConfig,
     ) -> Result<Self, Box<dyn Error>> {
-        let (tx, rx) = channel();
         state.status.initialize(&css_config);
         for state in &mut state.children {
             state.1.status.initialize(&css_config);
         }
-        let state = Arc::new(Mutex::new(state));
+        let state = SharedMut::new(state);
 
-        let thread = thread::spawn(move || {
-            let thread: Arc<Mutex<MonitorState>> =
-                rx.recv().expect("Unexpected error receiving mutex");
+        let monitor_state = state.clone();
+        let drop_detect = SharedMut::new(());
+        let mut drop_detect_clone = Some(drop_detect.clone());
+        let _thread = thread::spawn(move || {
             monitor_thread(monitor, move |id, m| {
-                if let Err(TryRecvError::Disconnected) = rx.try_recv() {
+                drop_detect_clone = if let Some(drop_detect) = drop_detect_clone.take() {
+                    match drop_detect.try_unwrap() {
+                        Ok(_) => None,
+                        Err(drop_detect) => Some(drop_detect),
+                    }
+                } else {
+                    None
+                };
+
+                if drop_detect_clone.is_none() {
                     return Err(ShuttingDown::default().into());
                 }
-                thread.lock().expect("Poisoned mutex").process_message(
+                monitor_state.write().process_message(
                     id,
                     m,
                     &css_config,
@@ -56,27 +66,12 @@ impl MonitorThread {
             });
         });
 
-        // Let the thread go!
-        tx.send(state.clone())
-            .expect("Unexpected error sending mutex");
-
         let thread = MonitorThread {
-            thread: Some(thread),
             state,
-            sender: Some(Arc::new(Mutex::new(tx))),
+            drop_detect
         };
 
         Ok(thread)
-    }
-}
-
-impl Drop for MonitorThread {
-    fn drop(&mut self) {
-        // Close the channel
-        self.sender.take();
-
-        // Note that we don't try to join the thread here as there's no way to timeout
-        self.thread.take();
     }
 }
 

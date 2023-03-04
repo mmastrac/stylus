@@ -1,6 +1,6 @@
 #![warn(clippy::all)]
 use env_logger::Env;
-use std::sync::{Arc, Mutex};
+use keepcalm::SharedMut;
 
 mod config;
 mod css;
@@ -43,7 +43,7 @@ async fn run() {
                 config,
                 monitors: monitors
                     .iter()
-                    .map(|m| Arc::new(Mutex::new(m.into())))
+                    .map(|m| SharedMut::new(m.into()))
                     .collect(),
             };
             println!(

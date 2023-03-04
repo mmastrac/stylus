@@ -6,7 +6,7 @@ pub fn generate_css_for_state(config: &CssConfig, status: &Status) -> String {
     let mut css = format!("/* Generated at {:?} */\n", std::time::Instant::now());
     for monitor in &status.monitors {
         css += "\n";
-        let mut monitor = monitor.lock().expect("Poisoned mutex");
+        let mut monitor = monitor.write();
 
         // Build the css from cache
         let mut cache = monitor.css.take();

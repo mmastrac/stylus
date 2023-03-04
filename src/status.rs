@@ -1,7 +1,8 @@
 use std::collections::{BTreeMap, VecDeque};
 use std::error::Error;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
+use keepcalm::SharedMut;
 use serde::{Deserialize, Serialize};
 
 use crate::config::*;
@@ -18,10 +19,10 @@ pub enum StatusState {
     Red,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Status {
     pub config: Config,
-    pub monitors: Vec<Arc<Mutex<MonitorState>>>,
+    pub monitors: Vec<SharedMut<MonitorState>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

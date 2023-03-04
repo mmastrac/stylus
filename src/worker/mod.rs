@@ -23,6 +23,7 @@ pub enum LogStream {
 
 #[derive(Debug)]
 pub enum WorkerMessage {
+    Idle,
     Starting,
     LogMessage(LogStream, String),
     Metadata(String),
@@ -52,7 +53,16 @@ pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>
         }
 
         trace!("[{}] Sleeping {}ms", monitor.id, interval.as_millis());
-        thread::sleep(interval);
+        let mut sleep = interval;
+        const IDLE_TIME: Duration = Duration::from_secs(1);
+        while sleep > IDLE_TIME {
+            thread::sleep(IDLE_TIME);
+            sleep = sleep.saturating_sub(IDLE_TIME);
+            if sender(&monitor.id, WorkerMessage::Idle).is_err() {
+                return;
+            }
+        }
+        thread::sleep(sleep);
     }
 }
 

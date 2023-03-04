@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::thread;
+use std::thread::JoinHandle;
 
 use keepcalm::SharedMut;
 
@@ -7,18 +8,13 @@ use crate::config::*;
 use crate::status::*;
 use crate::worker::{monitor_thread, ShuttingDown};
 
-/// We don't want to store the actual sender in the MonitorThread, just a boxed version of it that
-/// will correctly drop to trigger the thread to shut down.
-trait OpaqueSender: std::fmt::Debug + Send + Sync {}
-
-impl<T> OpaqueSender for T where T: std::fmt::Debug + Send + Sync {}
-
 #[derive(Debug)]
 struct MonitorThread {
     /// This is solely used to detect when [`MonitorThread`] is dropped.
     #[allow(unused)]
     drop_detect: SharedMut<()>,
     state: SharedMut<MonitorState>,
+    thread: JoinHandle<()>,
 }
 
 #[derive(Debug)]
@@ -43,7 +39,8 @@ impl MonitorThread {
         let monitor_state = state.clone();
         let drop_detect = SharedMut::new(());
         let mut drop_detect_clone = Some(drop_detect.clone());
-        let _thread = thread::spawn(move || {
+        let thread = thread::spawn(move || {
+            let id = monitor.id.clone();
             monitor_thread(monitor, move |id, m| {
                 drop_detect_clone = if let Some(drop_detect) = drop_detect_clone.take() {
                     match drop_detect.try_unwrap() {
@@ -55,6 +52,7 @@ impl MonitorThread {
                 };
 
                 if drop_detect_clone.is_none() {
+                    info!("Shutting down monitor {}", id);
                     return Err(ShuttingDown::default().into());
                 }
                 monitor_state.write().process_message(
@@ -64,9 +62,11 @@ impl MonitorThread {
                     &mut |_| {},
                 )
             });
+            info!("Shutting down thread {}", id);
         });
 
         let thread = MonitorThread {
+            thread,
             state,
             drop_detect
         };
@@ -94,6 +94,21 @@ impl Monitor {
             config: self.config.clone(),
             monitors: self.monitors.iter().map(|m| m.state.clone()).collect(),
         }
+    }
+
+    pub fn close(&mut self) {
+        info!("Shutting down monitors...");
+        let mut handles = vec![];
+        for monitor in self.monitors.drain(..) {
+            handles.push(monitor.thread);
+        }
+        for handle in handles.into_iter() {
+            match handle.join() {
+                Ok(_) => {},
+                Err(_) => error!("Failed to join handle!"),
+            }
+        }
+        info!("All threads exited.");
     }
 }
 

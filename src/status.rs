@@ -106,8 +106,14 @@ impl MonitorState {
         config: &CssMetadataConfig,
         direct_logger: &mut T,
     ) -> Result<(), Box<dyn Error>> {
-        debug!("[{}] Worker message {:?}", id, msg);
+        if let WorkerMessage::Idle = msg {
+            // Don't log these, even in debug mode
+        } else {
+            debug!("[{}] Worker message {:?}", id, msg);
+        }
         match msg {
+            WorkerMessage::Idle => {
+            }
             WorkerMessage::Starting => {
                 // Note that we don't update the state here
                 self.status.pending = None;

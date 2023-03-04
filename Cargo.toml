@@ -26,6 +26,7 @@ itertools = "0.10"
 structopt = "0.3"
 structopt-flags = "0.3"
 keepcalm = { version = "0.1.5", features = ["serde"] }
+ctrlc = "3"
 
 [profile.release]
 codegen-units = 1

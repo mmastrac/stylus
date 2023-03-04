@@ -1351,7 +1351,7 @@ dependencies = [
 
 [[package]]
 name = "stylus"
-version = "0.9.14"
+version = "0.10.0"
 dependencies = [
  "ctrlc",
  "derive_more",

@@ -17,7 +17,7 @@ serde_yaml = "0.9"
 serde_json = { version = "1", features = ["raw_value"] }
 serde-aux = "4"
 humantime-serde = "1.1.1"
-walkdir = "2.3.2"
+walkdir = "2.3.3"
 handlebars = "4.2.2"
 subprocess = "0.2.8"
 log = "0.4.17"

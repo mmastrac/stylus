@@ -4,8 +4,9 @@
 the various parts of your infrastructure, set up HTML/SVG with a diagram of your network, and stylus will
 generate you a dynamic stylesheet to give you a visual overview of the current state.
 
-Note that this project was originally written using deno, but was rewritten in Rust to support Raspberry Pis. The
-original deno source is available in the `deno` branch.
+![Screenshot](docs/screenshot-2.png)
+
+[diagrams.net]: https://app.diagrams.net/?splash=0&p=svgdata
 
 ## Running
 
@@ -143,3 +144,8 @@ heavyweight your test scripts are.
 ![Screenshot](docs/screenshot-2.png)
 
 [diagrams.net]: https://app.diagrams.net/?splash=0&p=svgdata
+
+## Historical Note
+
+Note that this project was originally written using deno, but was rewritten in Rust to support Raspberry Pis. The
+original deno source is available in the `deno` branch.

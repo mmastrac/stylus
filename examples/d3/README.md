@@ -56,3 +56,7 @@ d3/
 │   └── index.html       # Main status page with diagram
 └── monitor.d/           # Monitor scripts
 ``` 
+
+## Caveats
+
+This example uses CDN resources for external libraries. This is not recommended for production.

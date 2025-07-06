@@ -1,0 +1,5 @@
+id: web-server-1
+test:
+  interval: 3s
+  timeout: 10s
+  command: test.sh 

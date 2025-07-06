@@ -1,0 +1,717 @@
+{
+  "version": "1.0",
+  "title": "Infrastructure Diagram",
+  "description": "Example infrastructure diagram with load balancer, web servers, database, and cache",
+  "colors": [
+    {
+      "id": "green",
+      "value": "#4CAF50"
+    },
+    {
+      "id": "blue",
+      "value": "#2196F3"
+    },
+    {
+      "id": "orange",
+      "value": "#FF9800"
+    },
+    {
+      "id": "purple",
+      "value": "#9C27B0"
+    },
+    {
+      "id": "gray",
+      "value": "#666666"
+    },
+    {
+      "id": "red",
+      "value": "#F44336"
+    },
+    {
+      "id": "yellow",
+      "value": "#FFEB3B"
+    }
+  ],
+  "icons": [
+    {
+      "id": "load-balancer-icon",
+      "name": "Load Balancer",
+      "url": "/icons/loadbalancer.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "web-server-icon",
+      "name": "Web Server",
+      "url": "/icons/server.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "database-icon",
+      "name": "Database",
+      "url": "/icons/storage.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "cache-icon",
+      "name": "Cache",
+      "url": "/icons/cache.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "firewall-icon",
+      "name": "Firewall",
+      "url": "/icons/firewall.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "router-icon",
+      "name": "Router",
+      "url": "/icons/router.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "cloud-icon",
+      "name": "Cloud",
+      "url": "/icons/cloud.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "desktop-icon",
+      "name": "Desktop",
+      "url": "/icons/desktop.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "laptop-icon",
+      "name": "Laptop",
+      "url": "/icons/laptop.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "block-icon",
+      "name": "Block Storage",
+      "url": "/icons/block.svg",
+      "isIsometric": true
+    },
+    {
+      "id": "cube-icon",
+      "name": "Cube",
+      "url": "/icons/cube.svg",
+      "isIsometric": true
+    }
+  ],
+  "items": [
+    {
+      "id": "load-balancer",
+      "name": "Load Balancer",
+      "description": "<p><br></p>",
+      "icon": "load-balancer-icon"
+    },
+    {
+      "id": "web-server-1",
+      "name": "Web Server 1",
+      "description": "<p>Primary web server instance</p>",
+      "icon": "web-server-icon"
+    },
+    {
+      "id": "web-server-2",
+      "name": "Web Server 2",
+      "description": "<p>Secondary web server instance</p>",
+      "icon": "web-server-icon"
+    },
+    {
+      "id": "database",
+      "name": "Database",
+      "description": "<p>Central data storage</p>",
+      "icon": "database-icon"
+    },
+    {
+      "id": "cache",
+      "name": "Cache",
+      "description": "<p>Performance optimization layer</p>",
+      "icon": "cache-icon"
+    },
+    {
+      "id": "firewall",
+      "name": "Firewall",
+      "description": "<p>Network security</p>",
+      "icon": "firewall-icon"
+    },
+    {
+      "id": "router",
+      "name": "Router",
+      "description": "<p>Network routing</p>",
+      "icon": "router-icon"
+    },
+    {
+      "id": "cloud",
+      "name": "Cloud Service",
+      "description": "<p>External cloud service</p>",
+      "icon": "cloud-icon"
+    }
+  ],
+  "views": [
+    {
+      "id": "main-view",
+      "name": "Infrastructure Overview",
+      "description": "Main infrastructure diagram",
+      "items": [
+        {
+          "id": "firewall",
+          "tile": {
+            "x": -4,
+            "y": -1
+          },
+          "labelHeight": 100
+        },
+        {
+          "id": "load-balancer",
+          "tile": {
+            "x": -2,
+            "y": -3
+          },
+          "labelHeight": 160
+        },
+        {
+          "id": "web-server-1",
+          "tile": {
+            "x": 1,
+            "y": -3
+          },
+          "labelHeight": 60
+        },
+        {
+          "id": "web-server-2",
+          "tile": {
+            "x": 1,
+            "y": -5
+          },
+          "labelHeight": 60
+        },
+        {
+          "id": "database",
+          "tile": {
+            "x": 4,
+            "y": -2
+          },
+          "labelHeight": 100
+        },
+        {
+          "id": "cache",
+          "tile": {
+            "x": 2,
+            "y": 1
+          },
+          "labelHeight": 60
+        },
+        {
+          "id": "router",
+          "tile": {
+            "x": -5,
+            "y": 0
+          },
+          "labelHeight": 100
+        },
+        {
+          "id": "cloud",
+          "tile": {
+            "x": -1,
+            "y": 1
+          },
+          "labelHeight": 100
+        }
+      ],
+      "connectors": [
+        {
+          "id": "router-to-firewall",
+          "color": "gray",
+          "width": 2,
+          "style": "SOLID",
+          "anchors": [
+            {
+              "id": "anchor1",
+              "ref": {
+                "item": "router"
+              },
+              "ordering": 0
+            },
+            {
+              "id": "600b52f4-bdf7-4a0e-9da1-c476a8964996",
+              "ref": {
+                "item": "router"
+              },
+              "ordering": 0
+            },
+            {
+              "id": "d6208eb2-8821-4036-aff0-fa26574f82e9",
+              "ref": {
+                "item": "router"
+              },
+              "ordering": 0
+            },
+            {
+              "id": "8e55b1a6-2388-4e8d-866a-5337caca3823",
+              "ref": {
+                "item": "firewall"
+              },
+              "ordering": 4
+            },
+            {
+              "id": "anchor2",
+              "ref": {
+                "item": "firewall"
+              },
+              "ordering": 6
+            }
+          ],
+          "description": "",
+          "path": {
+            "tiles": [
+              {
+                "x": 5,
+                "y": 1
+              },
+              {
+                "x": 5,
+                "y": 1
+              },
+              {
+                "x": 5,
+                "y": 1
+              },
+              {
+                "x": 4,
+                "y": 2
+              },
+              {
+                "x": 3,
+                "y": 3
+              },
+              {
+                "x": 2,
+                "y": 4
+              },
+              {
+                "x": 2,
+                "y": 4
+              },
+              {
+                "x": 1,
+                "y": 4
+              }
+            ],
+            "rectangle": {
+              "from": {
+                "x": 0,
+                "y": 1
+              },
+              "to": {
+                "x": -6,
+                "y": -4
+              }
+            }
+          }
+        },
+        {
+          "id": "firewall-to-lb",
+          "color": "gray",
+          "width": 2,
+          "style": "SOLID",
+          "anchors": [
+            {
+              "id": "anchor3",
+              "ref": {
+                "item": "firewall"
+              },
+              "ordering": 0
+            },
+            {
+              "id": "3f9abdf1-eeef-40b7-be63-06e68864fcc0",
+              "ref": {
+                "item": "firewall"
+              },
+              "ordering": 0
+            },
+            {
+              "id": "a88bc0b8-82f5-4905-a992-e338393b02d7",
+              "ref": {
+                "item": "firewall"
+              },
+              "ordering": 4
+            },
+            {
+              "id": "anchor4",
+              "ref": {
+                "item": "load-balancer"
+              },
+              "ordering": 6
+            }
+          ],
+          "description": "",
+          "path": {
+            "tiles": [
+              {
+                "x": 6,
+                "y": 1
+              },
+              {
+                "x": 6,
+                "y": 1
+              },
+              {
+                "x": 6,
+                "y": 2
+              },
+              {
+                "x": 6,
+                "y": 2
+              },
+              {
+                "x": 5,
+                "y": 3
+              },
+              {
+                "x": 4,
+                "y": 3
+              },
+              {
+                "x": 3,
+                "y": 3
+              },
+              {
+                "x": 2,
+                "y": 3
+              },
+              {
+                "x": 1,
+                "y": 3
+              }
+            ],
+            "rectangle": {
+              "from": {
+                "x": 2,
+                "y": 0
+              },
+              "to": {
+                "x": -5,
+                "y": -4
+              }
+            }
+          }
+        },
+        {
+          "id": "web-server-1",
+          "color": "gray",
+          "width": 10,
+          "style": "DASHED",
+          "anchors": [
+            {
+              "id": "anchor5",
+              "ref": {
+                "item": "load-balancer"
+              }
+            },
+            {
+              "id": "anchor6",
+              "ref": {
+                "item": "web-server-1"
+              }
+            }
+          ],
+          "description": "RPS2"
+        },
+        {
+          "id": "web-server-2",
+          "color": "gray",
+          "width": 10,
+          "style": "DASHED",
+          "anchors": [
+            {
+              "id": "anchor7",
+              "ref": {
+                "item": "load-balancer"
+              },
+              "ordering": 0
+            },
+            {
+              "id": "fbc990f5-2299-48f6-8ca7-e2410cc3b1a2",
+              "ref": {
+                "item": "load-balancer"
+              },
+              "ordering": 0
+            },
+            {
+              "id": "29c9e4f3-82fa-4098-b8d6-d232f4935358",
+              "ref": {
+                "tile": {
+                  "x": -1,
+                  "y": -4
+                }
+              },
+              "ordering": 3
+            },
+            {
+              "id": "2d444088-67e7-4b57-ab46-7e75688778fe",
+              "ref": {
+                "item": "web-server-2"
+              },
+              "ordering": 4
+            },
+            {
+              "id": "e6a7b692-5e45-4462-8e56-767e5e50bb39",
+              "ref": {
+                "item": "web-server-2"
+              },
+              "ordering": 4
+            },
+            {
+              "id": "c0b1d530-2d8f-4c56-a372-c48dc480e380",
+              "ref": {
+                "item": "web-server-2"
+              },
+              "ordering": 4
+            },
+            {
+              "id": "anchor8",
+              "ref": {
+                "item": "web-server-2"
+              },
+              "ordering": 4
+            }
+          ],
+          "description": "RPS1",
+          "path": {
+            "tiles": [
+              {
+                "x": 4,
+                "y": 1
+              },
+              {
+                "x": 4,
+                "y": 1
+              },
+              {
+                "x": 3,
+                "y": 2
+              },
+              {
+                "x": 3,
+                "y": 3
+              },
+              {
+                "x": 3,
+                "y": 3
+              },
+              {
+                "x": 2,
+                "y": 3
+              },
+              {
+                "x": 1,
+                "y": 3
+              },
+              {
+                "x": 1,
+                "y": 3
+              },
+              {
+                "x": 1,
+                "y": 3
+              },
+              {
+                "x": 1,
+                "y": 3
+              }
+            ],
+            "rectangle": {
+              "from": {
+                "x": 2,
+                "y": -2
+              },
+              "to": {
+                "x": -3,
+                "y": -6
+              }
+            }
+          }
+        },
+        {
+          "id": "ws1-to-db",
+          "color": "gray",
+          "width": 2,
+          "style": "SOLID",
+          "anchors": [
+            {
+              "id": "anchor9",
+              "ref": {
+                "item": "web-server-1"
+              }
+            },
+            {
+              "id": "anchor10",
+              "ref": {
+                "item": "database"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ws2-to-db",
+          "color": "gray",
+          "width": 2,
+          "style": "SOLID",
+          "anchors": [
+            {
+              "id": "anchor11",
+              "ref": {
+                "item": "web-server-2"
+              }
+            },
+            {
+              "id": "anchor12",
+              "ref": {
+                "item": "database"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ws1-to-cache",
+          "color": "gray",
+          "width": 2,
+          "style": "SOLID",
+          "anchors": [
+            {
+              "id": "anchor13",
+              "ref": {
+                "item": "web-server-1"
+              }
+            },
+            {
+              "id": "anchor14",
+              "ref": {
+                "item": "cache"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ws2-to-cache",
+          "color": "gray",
+          "width": 2,
+          "style": "SOLID",
+          "anchors": [
+            {
+              "id": "anchor15",
+              "ref": {
+                "item": "web-server-2"
+              }
+            },
+            {
+              "id": "anchor16",
+              "ref": {
+                "item": "cache"
+              }
+            }
+          ]
+        },
+        {
+          "id": "lb-to-cloud",
+          "color": "blue",
+          "width": 2,
+          "style": "DASHED",
+          "anchors": [
+            {
+              "id": "anchor17",
+              "ref": {
+                "item": "load-balancer"
+              },
+              "ordering": 0
+            },
+            {
+              "id": "59a8f2d5-aea3-42cf-93f2-ececa9d6be64",
+              "ref": {
+                "item": "cloud"
+              },
+              "ordering": 3
+            },
+            {
+              "id": "9e05a7f1-ab0b-4e86-a961-9cebcb0e3ee4",
+              "ref": {
+                "item": "cloud"
+              },
+              "ordering": 4
+            },
+            {
+              "id": "c75958dd-ded5-452a-a418-f17e5195924e",
+              "ref": {
+                "item": "cloud"
+              },
+              "ordering": 4
+            },
+            {
+              "id": "anchor18",
+              "ref": {
+                "item": "cloud"
+              },
+              "ordering": 4
+            }
+          ],
+          "description": "",
+          "path": {
+            "tiles": [
+              {
+                "x": 3,
+                "y": 5
+              },
+              {
+                "x": 2,
+                "y": 4
+              },
+              {
+                "x": 1,
+                "y": 3
+              },
+              {
+                "x": 1,
+                "y": 2
+              },
+              {
+                "x": 1,
+                "y": 1
+              },
+              {
+                "x": 1,
+                "y": 1
+              },
+              {
+                "x": 2,
+                "y": 1
+              },
+              {
+                "x": 2,
+                "y": 1
+              },
+              {
+                "x": 2,
+                "y": 1
+              }
+            ],
+            "rectangle": {
+              "from": {
+                "x": 1,
+                "y": 2
+              },
+              "to": {
+                "x": -3,
+                "y": -4
+              }
+            }
+          }
+        }
+      ],
+      "lastUpdated": "2025-07-06T19:23:20.127Z",
+      "textBoxes": []
+    }
+  ]
+}

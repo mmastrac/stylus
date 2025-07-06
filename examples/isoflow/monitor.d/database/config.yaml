@@ -1,0 +1,5 @@
+id: database
+test:
+  interval: 5s
+  timeout: 15s
+  command: test.sh 

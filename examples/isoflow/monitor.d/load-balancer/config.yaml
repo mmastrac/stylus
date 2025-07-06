@@ -1,0 +1,5 @@
+id: load-balancer
+test:
+  interval: 20s
+  timeout: 8s
+  command: test.sh 

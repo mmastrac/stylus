@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React + Isoflow Skeleton</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .isoflow-container {
+            width: 100%;
+            height: 80vh;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Isoflow Status</h1>
+        <div id="root"></div>
+    </div>
+
+    <!-- Load React and ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Load Babel for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Simple module loader for require compatibility -->
+    <script>
+        window.EDITABLE = location.search.includes('editor');
+        if (window.EDITABLE) {
+            console.log('Using editable mode');
+        }
+
+        // Create a simple require function for browser compatibility
+        window.require = function(moduleName) {
+            console.log('require', moduleName);
+
+            // Map common Node.js modules to browser equivalents
+            const moduleMap = {
+                'react': React,
+                'react-dom': ReactDOM,
+            };
+            
+            if (moduleMap[moduleName]) {
+                return moduleMap[moduleName];
+            }
+            
+            // For other modules, try to find them in window
+            if (window[moduleName]) {
+                return window[moduleName];
+            }
+            
+            console.warn('Module not found:', moduleName);
+            return {};
+        };
+        
+        // Mock module.exports
+        window.module = { exports: {} };
+        window.exports = window.module.exports;
+    </script>
+    
+    <script src="https://unpkg.com/isoflow@1.1.1/dist/index.js"></script>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function mapInitialData(originalInitialData, statusData) {
+            if (!statusData) {
+                return originalInitialData;
+            }
+
+            // Deep clone
+            let initialData = JSON.parse(JSON.stringify(originalInitialData));
+
+            const view = initialData.views[0];
+            const items = view.items;
+            const connectors = view.connectors;
+            const rectangles = view.rectangles || (view.rectangles = []);
+
+            // For each of our status items, create a rectangle
+            // for the item with a matching id.
+            for (const item of items) {
+                let monitor;
+                for (const monitorItem of statusData.monitors) {
+                    if (item.id.startsWith(monitorItem.id)) {
+                        monitor = monitorItem;
+                        break;
+                    }
+                }
+
+                if (monitor && monitor.status.status !== 'blank') {
+                    const rectangle = {
+                        "id": `status-${item.id}`,
+                        "color": monitor.status.status,
+                        "from": item.tile,
+                        "to": item.tile
+                    };
+                    rectangles.push(rectangle);
+                }
+            }
+
+            for (const connector of connectors) {
+                let monitor;
+                for (const monitorItem of statusData.monitors) {
+                    if (connector.id.startsWith(monitorItem.id)) {
+                        monitor = monitorItem;
+                        break;
+                    }
+                }
+
+                if (monitor) {
+                    connector.description = monitor.status.metadata.rps;
+                }
+            }
+
+            return initialData;
+        }
+
+        // Basic Isoflow component placeholder
+        const IsoflowComponent = () => {
+            const [isoflowLoaded, setIsoflowLoaded] = useState(false);
+            const [isoflowError, setIsoflowError] = useState(null);
+            const [isoflowElement, setIsoflowElement] = useState(null);
+            const [initialData, setInitialData] = useState(null);
+            const [statusData, setStatusData] = useState(null);
+
+            useEffect(() => {
+                // Load initial data and set it globally before loading Isoflow
+                fetch('/initial-data.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        setInitialData(data);
+                    })
+                    .catch(error => {
+                        console.error('Error loading initial data:', error);
+                    });
+
+                // Check if Isoflow is available
+                try {
+                    if (window.module && window.module.exports && window.module.exports.Isoflow) {
+                        setIsoflowLoaded(true);
+                        console.log('Isoflow loaded successfully:', window.module.exports.Isoflow);
+                        setIsoflowElement({ factory: window.module.exports.Isoflow });
+                    } else {
+                        setIsoflowError('Isoflow not found in window object');
+                    }
+                } catch (error) {
+                    setIsoflowError(error.message);
+                    console.error('Error loading Isoflow:', error);
+                }
+            }, []);
+
+            // Fetch status data every second
+            useEffect(() => {
+                if (window.EDITABLE) {
+                    return;
+                }
+
+                const fetchStatus = async () => {
+                    try {
+                        const response = await fetch('/status.json');
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('Status data:', data);
+                            setStatusData(data);
+                        } else {
+                            console.error('Failed to fetch status:', response.status);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching status:', error);
+                    }
+                };
+
+                // Fetch immediately
+                fetchStatus();
+
+                // Set up interval to fetch every second
+                const interval = setInterval(fetchStatus, 1000);
+
+                // Cleanup interval on unmount
+                return () => clearInterval(interval);
+            }, []);
+            
+            return (
+                <div className="isoflow-container">
+                    {isoflowLoaded ? (
+                        <div style={{ width: '100%', height: '100%' }}>
+                            {isoflowElement && initialData ? (
+                                <div style={{ width: '100%', height: '80vh', border: '1px solid #ddd', borderRadius: '4px' }}>
+                                    {React.createElement(isoflowElement.factory, { 
+                                        initialData: mapInitialData(initialData, statusData),
+                                        editorMode: window.EDITABLE ? undefined : "EXPLORABLE_READONLY"
+                                    })}
+                                </div>
+                            ) : (
+                                <div style={{ border: '1px solid #ddd', borderRadius: '4px', padding: '10px' }}>
+                                    <p><strong>Loading...</strong></p>
+                                    <p>Isoflow Element: {isoflowElement ? 'Available' : 'Loading...'}</p>
+                                </div>
+                            )}
+                        </div>
+                    ) : isoflowError ? (
+                        <div>
+                            <h3>❌ Isoflow Loading Error</h3>
+                            <p>Error: {isoflowError}</p>
+                            <p>Check console for details</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <h3>⏳ Loading Isoflow...</h3>
+                            <p>Checking for Isoflow library...</p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Main App component
+        const App = () => {
+            return (
+                <div>
+                    <IsoflowComponent />
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html> 

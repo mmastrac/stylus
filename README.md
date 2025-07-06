@@ -1,4 +1,4 @@
-# stylus ![CI](https://github.com/mmastrac/stylus/workflows/CI/badge.svg?branch=master) [![crates.io](https://img.shields.io/crates/v/stylus.svg)](https://crates.io/crates/stylus)
+# stylus [![CI](https://github.com/mmastrac/stylus/actions/workflows/build.yml/badge.svg)](https://github.com/mmastrac/stylus/actions/workflows/build.yml) [![crates.io](https://img.shields.io/crates/v/stylus.svg)](https://crates.io/crates/stylus)
 
 **Stylus** (_style + status_) is a lightweight status page for home
 infrastructure. Configure a set of bash scripts that test the various parts of
@@ -34,6 +34,11 @@ The `style.css` endpoint may be linked by a HTML or SVG file served from the
 `static` directory that is configured. If desired, the HTML page can dynamically
 refresh the CSS periodically using Javascript. See the included example for a
 sample of how this might work.
+
+If you need more flexibility than CSS can provide, you can use the `status.json`
+endpoint to get the current status of the various services and dynamically
+update the HTML DOM, SVG images, a React.js application or something more
+complex.
 
 ## Getting started
 

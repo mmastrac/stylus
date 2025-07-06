@@ -12,7 +12,7 @@ readme = "README.md"
 tokio = { version = "1.46", features = ["macros", "rt-multi-thread"] }
 warp = "0.3"
 hyper = { version = "0.14", features = ["full"] }
-tower = { version = "0.4", features = ["util", "make"] }
+tower = { version = "0.5", features = ["util", "make"] }
 derive_more = { version = "2", features = ["full"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_yaml = "0.9"

@@ -3,14 +3,12 @@ use std::convert::Infallible;
 use std::hash::{Hash, Hasher};
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
-use std::time::Duration;
 
 use tower::make::Shared;
 use tower::util::MapRequestLayer;
 use tower::ServiceBuilder;
 use warp::http::StatusCode;
 use warp::path;
-use warp::reply::Reply;
 use warp::Filter;
 
 use crate::config::Config;

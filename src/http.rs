@@ -1,4 +1,6 @@
+use std::collections::hash_map::DefaultHasher;
 use std::convert::Infallible;
+use std::hash::{Hash, Hasher};
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 
@@ -38,6 +40,24 @@ async fn log_request(monitor: Arc<Monitor>, s: String) -> Result<String, Infalli
     Ok("Not found".to_owned())
 }
 
+/// Generate an ETag from file content hash
+fn generate_etag_from_file(file: &warp::filters::fs::File) -> String {
+    let mut hasher = DefaultHasher::new();
+
+    // Hash the file path and modification time for a more stable ETag
+    if let Ok(metadata) = std::fs::metadata(file.path()) {
+        if let Ok(modified) = metadata.modified() {
+            modified.hash(&mut hasher);
+        }
+        metadata.len().hash(&mut hasher);
+    }
+
+    // Also hash the path as a fallback
+    file.path().hash(&mut hasher);
+
+    format!("\"{:x}\"", hasher.finish())
+}
+
 pub async fn run(config: Config) {
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
     let with_monitor = warp::any().map(move || monitor.clone());
@@ -64,10 +84,14 @@ pub async fn run(config: Config) {
         .and_then(|s, m| log_request(m, s))
         .with(warp::reply::with::header("Content-Type", "text/plain"));
 
-    // static pages
-    let r#static = warp::fs::dir(config.server.r#static);
+    // static files with ETags
+    let static_files =
+        warp::fs::dir(config.server.r#static).map(|file: warp::filters::fs::File| {
+            let etag = generate_etag_from_file(&file);
+            warp::reply::with_header(file, "ETag", etag)
+        });
 
-    let routes = warp::get().and(style.or(status).or(log).or(r#static));
+    let routes = warp::get().and(style.or(status).or(log).or(static_files));
 
     let ip_addr = config
         .server

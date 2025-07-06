@@ -3,7 +3,7 @@ use std::error::Error;
 use std::path::{Path, PathBuf};
 
 use itertools::Itertools;
-use structopt::StructOpt;
+use clap::Parser;
 use walkdir::WalkDir;
 
 use self::args::Args;
@@ -14,7 +14,7 @@ mod args;
 mod structs;
 
 pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
-    let args = Args::from_args();
+    let args = Args::parse();
     let config_path = if let Some(path) = args.force_container_path {
         path
     } else {

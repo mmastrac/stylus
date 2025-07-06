@@ -23,8 +23,7 @@ subprocess = "0.2.8"
 log = "0.4.17"
 env_logger = "0.11"
 itertools = "0.14"
-structopt = "0.3"
-structopt-flags = "0.3"
+clap = { version = "4.5", features = ["derive", "env"] }
 keepcalm = { version = "0.4.1", features = ["serde"] }
 
 [profile.release]

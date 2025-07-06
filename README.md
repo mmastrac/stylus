@@ -4,7 +4,7 @@
 the various parts of your infrastructure, set up HTML/SVG with a diagram of your network, and stylus will
 generate you a dynamic stylesheet to give you a visual overview of the current state.
 
-![Screenshot](docs/screenshot-2.png)
+![Screenshot](docs/screenshot-3.png)
 
 [diagrams.net]: https://app.diagrams.net/?splash=0&p=svgdata
 
@@ -139,7 +139,11 @@ heavyweight your test scripts are.
 
 ![Screenshot](docs/screenshot-1.png)
 
-### My personal network
+### D3.js example
+
+![Screenshot](docs/screenshot-3.png)
+
+### A basic home network diagram
 
 ![Screenshot](docs/screenshot-2.png)
 

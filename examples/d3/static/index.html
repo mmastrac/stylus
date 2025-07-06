@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylus - D3 Status Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .dashboard-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .status-section {
+            flex: 1;
+        }
+        .diagram-section {
+            flex: 2;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, table td, table th {
+            border: 1px solid #ddd;
+        }
+        td, th {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 700;
+        }
+        #d3-container {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        @media (max-width: 768px) {
+            .dashboard-layout {
+                flex-direction: column;
+            }
+            .diagram-section {
+                order: -1;
+            }
+        }
+    </style>
+    <link id="status" rel="stylesheet" href="data:;" />
+    <script>
+        function reloadCss() {
+            var old = document.getElementById('status');
+            var css = document.createElement('link');
+            css.rel = "stylesheet";
+            css.href = "/style.css?t=" + new Date().valueOf();
+            css.onload = function() {
+                old.remove();
+                css.id = "status";
+                setTimeout(function() {
+                    reloadCss();
+                }, 1000);
+            }
+            css.onerror = function() {
+                css.remove();
+                setTimeout(function() {
+                    reloadCss();
+                }, 1000);
+            }
+            old.insertAdjacentElement("afterend", css);
+        }
+
+        reloadCss();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>D3.js Infrastructure Status</h1>
+
+        <div class="dashboard-layout">
+            <div class="status-section">
+                <h2>Status Table</h2>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr id="web-server">
+                        <td>Web Server</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr id="database">
+                        <td>Database</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr id="load-balancer">
+                        <td>Load Balancer</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr id="cache">
+                        <td>Cache</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="diagram-section">
+                <h2>Infrastructure Diagram</h2>
+                <div id="d3-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load D3.js for SVG manipulation -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        // Initialize infrastructure diagram using D3.js
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('d3-container');
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            
+            // Create SVG
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .style('background-color', '#ffffff');
+            
+            // Define infrastructure components
+            const components = [
+                {
+                    id: 'load-balancer',
+                    x: width / 2,
+                    y: 80,
+                    width: 120,
+                    height: 60,
+                    label: 'Load Balancer',
+                    monitorId: 'load-balancer',
+                    type: 'rect'
+                },
+                {
+                    id: 'web-server-1',
+                    x: width / 2 - 150,
+                    y: 200,
+                    width: 100,
+                    height: 50,
+                    label: 'Web Server 1',
+                    monitorId: 'web-server',
+                    type: 'rect'
+                },
+                {
+                    id: 'web-server-2',
+                    x: width / 2 + 50,
+                    y: 200,
+                    width: 100,
+                    height: 50,
+                    label: 'Web Server 2',
+                    monitorId: 'web-server',
+                    type: 'rect'
+                },
+                {
+                    id: 'database',
+                    x: width / 2,
+                    y: 350,
+                    width: 100,
+                    height: 60,
+                    label: 'Database',
+                    monitorId: 'database',
+                    type: 'ellipse'
+                },
+                {
+                    id: 'cache',
+                    x: width / 2 + 200,
+                    y: 200,
+                    width: 80,
+                    height: 60,
+                    label: 'Cache',
+                    monitorId: 'cache',
+                    type: 'polygon'
+                }
+            ];
+            
+            // Define connections
+            const connections = [
+                { from: 'load-balancer', to: 'web-server-1' },
+                { from: 'load-balancer', to: 'web-server-2' },
+                { from: 'web-server-1', to: 'database' },
+                { from: 'web-server-2', to: 'database' },
+                { from: 'web-server-1', to: 'cache' },
+                { from: 'web-server-2', to: 'cache' }
+            ];
+            
+            // Draw connections
+            svg.selectAll('.connection')
+                .data(connections)
+                .enter()
+                .append('line')
+                .attr('class', 'connection')
+                .attr('x1', d => {
+                    const from = components.find(c => c.id === d.from);
+                    return from.x + from.width / 2;
+                })
+                .attr('y1', d => {
+                    const from = components.find(c => c.id === d.from);
+                    return from.y + from.height / 2;
+                })
+                .attr('x2', d => {
+                    const to = components.find(c => c.id === d.to);
+                    return to.x + to.width / 2;
+                })
+                .attr('y2', d => {
+                    const to = components.find(c => c.id === d.to);
+                    return to.y + to.height / 2;
+                })
+                .attr('stroke', '#666')
+                .attr('stroke-width', 2);
+            
+            // Draw components
+            components.forEach(component => {
+                let element;
+                
+                if (component.type === 'rect') {
+                    element = svg.append('rect')
+                        .attr('id', component.id)
+                        .attr('x', component.x)
+                        .attr('y', component.y)
+                        .attr('width', component.width)
+                        .attr('height', component.height)
+                        .attr('fill', '#e0e0e0')
+                        .attr('stroke', '#333')
+                        .attr('stroke-width', 2)
+                        .attr('data-monitor-id', component.monitorId);
+                } else if (component.type === 'ellipse') {
+                    element = svg.append('ellipse')
+                        .attr('id', component.id)
+                        .attr('cx', component.x + component.width / 2)
+                        .attr('cy', component.y + component.height / 2)
+                        .attr('rx', component.width / 2)
+                        .attr('ry', component.height / 2)
+                        .attr('fill', '#e0e0e0')
+                        .attr('stroke', '#333')
+                        .attr('stroke-width', 2)
+                        .attr('data-monitor-id', component.monitorId);
+                } else if (component.type === 'polygon') {
+                    // Create hexagon for cache
+                    const points = [
+                        [component.x + component.width / 2, component.y],
+                        [component.x + component.width, component.y + component.height / 3],
+                        [component.x + component.width, component.y + 2 * component.height / 3],
+                        [component.x + component.width / 2, component.y + component.height],
+                        [component.x, component.y + 2 * component.height / 3],
+                        [component.x, component.y + component.height / 3]
+                    ].join(' ');
+                    
+                    element = svg.append('polygon')
+                        .attr('id', component.id)
+                        .attr('points', points)
+                        .attr('fill', '#e0e0e0')
+                        .attr('stroke', '#333')
+                        .attr('stroke-width', 2)
+                        .attr('data-monitor-id', component.monitorId);
+                }
+                
+                // Add labels
+                svg.append('text')
+                    .attr('x', component.x + component.width / 2)
+                    .attr('y', component.y + component.height / 2)
+                    .attr('text-anchor', 'middle')
+                    .attr('dominant-baseline', 'middle')
+                    .attr('font-size', '12px')
+                    .attr('font-weight', 'bold')
+                    .text(component.label);
+            });
+        });
+    </script>
+</body>
+</html> 

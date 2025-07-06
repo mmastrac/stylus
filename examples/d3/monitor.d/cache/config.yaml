@@ -1,0 +1,5 @@
+id: cache
+test:
+  interval: 25s
+  timeout: 5s
+  command: test.sh 

@@ -9,23 +9,23 @@ repository = "https://github.com/mmastrac/stylus"
 readme = "README.md"
 
 [dependencies]
-tokio = { version = "1.6", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.46", features = ["macros", "rt-multi-thread"] }
 warp = "0.3"
-derive_more = "0.99"
+derive_more = { version = "2", features = ["full"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_yaml = "0.9"
 serde_json = { version = "1", features = ["raw_value"] }
 serde-aux = "4"
 humantime-serde = "1.1.1"
 walkdir = "2.3.2"
-handlebars = "4.2.2"
+handlebars = "6.3"
 subprocess = "0.2.8"
 log = "0.4.17"
-env_logger = "0.10"
-itertools = "0.10"
+env_logger = "0.11"
+itertools = "0.14"
 structopt = "0.3"
 structopt-flags = "0.3"
-keepcalm = { version = "0.3.5", features = ["serde"] }
+keepcalm = { version = "0.4.1", features = ["serde"] }
 
 [profile.release]
 codegen-units = 1

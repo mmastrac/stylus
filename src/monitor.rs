@@ -46,10 +46,7 @@ impl MonitorThread {
         let _thread = thread::spawn(move || {
             monitor_thread(monitor, move |id, m| {
                 drop_detect_clone = if let Some(drop_detect) = drop_detect_clone.take() {
-                    match drop_detect.try_unwrap() {
-                        Ok(_) => None,
-                        Err(drop_detect) => Some(drop_detect),
-                    }
+                    drop_detect.try_unwrap().err()
                 } else {
                     None
                 };
@@ -57,19 +54,13 @@ impl MonitorThread {
                 if drop_detect_clone.is_none() {
                     return Err(ShuttingDown::default().into());
                 }
-                monitor_state.write().process_message(
-                    id,
-                    m,
-                    &css_config,
-                    &mut |_| {},
-                )
+                monitor_state
+                    .write()
+                    .process_message(id, m, &css_config, &mut |_| {})
             });
         });
 
-        let thread = MonitorThread {
-            state,
-            drop_detect
-        };
+        let thread = MonitorThread { state, drop_detect };
 
         Ok(thread)
     }

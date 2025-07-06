@@ -20,7 +20,7 @@ use crate::status::{MonitorState, Status};
 use crate::worker::monitor_run;
 
 #[tokio::main]
-async fn main() -> () {
+async fn main() {
     run().await
 }
 
@@ -41,10 +41,7 @@ async fn run() {
                 .expect("Unable to parse monitor configurations");
             let status = Status {
                 config,
-                monitors: monitors
-                    .iter()
-                    .map(|m| SharedMut::new(m.into()))
-                    .collect(),
+                monitors: monitors.iter().map(|m| SharedMut::new(m.into())).collect(),
             };
             println!(
                 "{}",
@@ -62,7 +59,7 @@ async fn run() {
                     println!("-----------");
                     println!();
 
-                    monitor_run(&monitor, &mut |_, msg| {
+                    monitor_run(monitor, &mut |_, msg| {
                         state
                             .process_message(&monitor.id, msg, &config.css.metadata, &mut |m| {
                                 eprintln!("{}", m);

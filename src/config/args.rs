@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use clap::{ArgGroup, Parser};
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[command(group = ArgGroup::new("path").required(true))]

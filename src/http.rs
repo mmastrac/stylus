@@ -31,7 +31,7 @@ async fn log_request(monitor: Arc<Monitor>, s: String) -> Result<String, Infalli
         if monitor.id == s {
             let mut logs = String::new();
             for log in &monitor.status.log {
-                logs += &log;
+                logs += log;
                 logs += "\n";
             }
             return Ok(logs);

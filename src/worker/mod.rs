@@ -282,7 +282,7 @@ mod tests {
     fn test_timeout() {
         let (tx, rx) = channel();
         monitor_thread_impl(
-            &"test".to_owned(),
+            "test",
             Path::new("/bin/sleep"),
             Path::new("/tmp"),
             Some(&["10"]),

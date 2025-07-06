@@ -88,7 +88,7 @@ impl MonitorState {
         }
     }
 
-    fn process_log_message<T: FnMut(&str) -> ()>(
+    fn process_log_message<T: FnMut(&str)>(
         &mut self,
         stream: &str,
         message: &str,
@@ -99,7 +99,7 @@ impl MonitorState {
         self.status.log.push_back(msg);
     }
 
-    pub fn process_message<T: FnMut(&str) -> ()>(
+    pub fn process_message<T: FnMut(&str)>(
         &mut self,
         id: &str,
         msg: WorkerMessage,
@@ -134,13 +134,13 @@ impl MonitorState {
                 }
             }
             WorkerMessage::AbnormalTermination(s) => {
-                self.finish(StatusState::Yellow, -1, s, &config);
+                self.finish(StatusState::Yellow, -1, s, config);
             }
             WorkerMessage::Termination(code) => {
                 if code == 0 {
-                    self.finish(StatusState::Green, code, "Success".into(), &config);
+                    self.finish(StatusState::Green, code, "Success".into(), config);
                 } else {
-                    self.finish(StatusState::Red, code, "Failed".into(), &config);
+                    self.finish(StatusState::Red, code, "Failed".into(), config);
                 }
             }
         }
@@ -159,9 +159,9 @@ impl MonitorState {
         for child in self.children.iter_mut() {
             let child_status = &mut child.1.status;
             if child_status.is_pending_status_set() || status != StatusState::Green {
-                child_status.finish(status, code, description.clone(), &config);
+                child_status.finish(status, code, description.clone(), config);
             } else {
-                child_status.finish(StatusState::Blank, code, "".into(), &config);
+                child_status.finish(StatusState::Blank, code, "".into(), config);
             }
         }
 

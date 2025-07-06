@@ -10,7 +10,7 @@ pub fn generate_css_for_state(config: &CssConfig, status: &Status) -> String {
 
         // Build the css from cache
         let mut cache = monitor.css.take();
-        css += cache.get_or_insert_with(|| generate_css_for_monitor(&config, &monitor));
+        css += cache.get_or_insert_with(|| generate_css_for_monitor(config, &monitor));
         monitor.css = cache;
     }
     css

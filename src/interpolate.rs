@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 use std::error::Error;
 
 use handlebars::*;
-use itertools::Itertools;
 use serde::Serialize;
 use serde_json::value::*;
 
@@ -47,7 +46,7 @@ pub fn interpolate_modify<'a>(
     children: &'a mut BTreeMap<String, MonitorChildStatus>,
     s: &str,
 ) -> Result<(), Box<dyn Error>> {
-    let (raw_path, value) = s.splitn(2, '=').next_tuple().ok_or("Invalid expression")?;
+    let (raw_path, value) = s.split_once('=').ok_or("Invalid expression")?;
     let value: Value = serde_json::from_str(value)?;
     let mut path = raw_path.split('.');
 

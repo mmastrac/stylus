@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 
-use itertools::Itertools;
 use clap::Parser;
+use itertools::Itertools;
 use walkdir::WalkDir;
 
 use self::args::Args;
@@ -87,7 +87,7 @@ pub fn parse_config_string(file: &Path, s: String) -> Result<Config, Box<dyn Err
             .into();
     }
 
-    for mut css in config.css.rules.iter_mut() {
+    for css in config.css.rules.iter_mut() {
         if css.declarations.contains("monitor.config.id")
             || css.selectors.contains("monitor.config.id")
         {
@@ -151,7 +151,7 @@ pub fn parse_monitor_configs(root: &Path) -> Result<Vec<MonitorDirConfig>, Box<d
 }
 
 pub fn parse_monitor_config(file: &Path) -> Result<MonitorDirConfig, Box<dyn Error>> {
-    let s = std::fs::read_to_string(&file)?;
+    let s = std::fs::read_to_string(file)?;
     parse_monitor_config_string(file, s)
 }
 
@@ -220,7 +220,7 @@ mod test {
     #[test]
     fn deserialize_monitor_test() -> Result<(), Box<dyn Error>> {
         let config = parse_monitor_config_string(
-            &Path::new("/tmp/test.yaml"),
+            Path::new("/tmp/test.yaml"),
             r#"
 # Explicitly set the id here
 id: router
@@ -245,7 +245,7 @@ test:
     #[test]
     fn deserialize_monitor_group() -> Result<(), Box<dyn Error>> {
         let config = parse_monitor_config_string(
-            &Path::new("/tmp/test.yaml"),
+            Path::new("/tmp/test.yaml"),
             r#"
 # Explicitly set the id here
 id: router

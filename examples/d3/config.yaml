@@ -1,13 +1,13 @@
 version: 1
 server:
-  port: 8001
+  port: 8000
   static: static
 
 monitor:
   dir: monitor.d
 
 css:
-  # Use metadata to get prettier colors for the isoflow diagram
+  # Use metadata to get prettier colors for the d3 diagram
   metadata:
     red:
       color: "#fa897b"

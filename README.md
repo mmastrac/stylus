@@ -1,4 +1,4 @@
-# stylus [![CI](https://github.com/mmastrac/stylus/actions/workflows/build.yml/badge.svg)](https://github.com/mmastrac/stylus/actions/workflows/build.yml) [![crates.io](https://img.shields.io/crates/v/stylus.svg)](https://crates.io/crates/stylus)
+# stylus [![CI](https://github.com/mmastrac/stylus/actions/workflows/build.yml/badge.svg)](https://github.com/mmastrac/stylus/actions/workflows/build.yml) [![crates.io](https://img.shields.io/crates/v/stylus.svg)](https://crates.io/crates/stylus) [![Docker Pulls](https://img.shields.io/docker/pulls/mmastrac/stylus.svg)](https://hub.docker.com/r/mmastrac/stylus)
 
 **Stylus** (_style + status_) is a lightweight status page for home
 infrastructure. Configure a set of bash scripts that test the various parts of

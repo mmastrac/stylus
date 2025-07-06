@@ -3,8 +3,14 @@ use std::convert::Infallible;
 use std::hash::{Hash, Hasher};
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
+use std::time::Duration;
 
+use tower::make::Shared;
+use tower::util::MapRequestLayer;
+use tower::ServiceBuilder;
+use warp::http::StatusCode;
 use warp::path;
+use warp::reply::Reply;
 use warp::Filter;
 
 use crate::config::Config;
@@ -42,20 +48,63 @@ async fn log_request(monitor: Arc<Monitor>, s: String) -> Result<String, Infalli
 
 /// Generate an ETag from file content hash
 fn generate_etag_from_file(file: &warp::filters::fs::File) -> String {
-    let mut hasher = DefaultHasher::new();
-
-    // Hash the file path and modification time for a more stable ETag
-    if let Ok(metadata) = std::fs::metadata(file.path()) {
-        if let Ok(modified) = metadata.modified() {
-            modified.hash(&mut hasher);
+    if let Ok(content) = std::fs::read_to_string(file.path()) {
+        let mut hasher = DefaultHasher::new();
+        content.hash(&mut hasher);
+        let hash1 = hasher.finish();
+        // Stretch the hash by using the file size. This isn't
+        // cryptographic by any means.
+        content.len().hash(&mut hasher);
+        content.hash(&mut hasher);
+        let hash2 = hasher.finish();
+        format!("\"{:x}{:x}\"", hash1, hash2)
+    } else {
+        let mut hasher = DefaultHasher::new();
+        if let Ok(metadata) = std::fs::metadata(file.path()) {
+            if let Ok(modified) = metadata.modified() {
+                modified.hash(&mut hasher);
+            }
+            metadata.len().hash(&mut hasher);
         }
-        metadata.len().hash(&mut hasher);
+
+        file.path().hash(&mut hasher);
+        format!("\"W/{:x}\"", hasher.finish())
+    }
+}
+
+/// Handle ETag cache validation
+async fn handle_etag_cache(
+    reply: warp::filters::fs::File,
+    if_none_match: Option<String>,
+) -> Result<Box<dyn warp::Reply>, Infallible> {
+    let etag = generate_etag_from_file(&reply);
+    let cache_control = "no-cache, must-revalidate";
+
+    // Check if client sent If-None-Match header
+    if let Some(client_etag) = if_none_match {
+        // Remove quotes if present for comparison
+        let client_etag = client_etag.trim_matches('"');
+        let server_etag = etag.trim_matches('"');
+
+        if client_etag == server_etag {
+            // ETags match, return 304 Not Modified
+            let reply = warp::reply::with_header(
+                warp::reply::with_header("", "ETag", etag),
+                "Cache-Control",
+                cache_control,
+            );
+            return Ok(Box::new(warp::reply::with_status(
+                reply,
+                StatusCode::NOT_MODIFIED,
+            )));
+        }
     }
 
-    // Also hash the path as a fallback
-    file.path().hash(&mut hasher);
-
-    format!("\"{:x}\"", hasher.finish())
+    Ok(Box::new(warp::reply::with_header(
+        warp::reply::with_header(reply, "Cache-Control", cache_control),
+        "ETag",
+        etag,
+    )))
 }
 
 pub async fn run(config: Config) {
@@ -84,14 +133,30 @@ pub async fn run(config: Config) {
         .and_then(|s, m| log_request(m, s))
         .with(warp::reply::with::header("Content-Type", "text/plain"));
 
-    // static files with ETags
-    let static_files =
-        warp::fs::dir(config.server.r#static).map(|file: warp::filters::fs::File| {
-            let etag = generate_etag_from_file(&file);
-            warp::reply::with_header(file, "ETag", etag)
-        });
+    // static files with ETags and cache validation
+    let static_files = warp::fs::dir(config.server.r#static)
+        .and(warp::header::optional::<String>("if-none-match"))
+        .and_then(
+            move |file: warp::filters::fs::File, if_none_match: Option<String>| {
+                handle_etag_cache(file, if_none_match)
+            },
+        );
 
     let routes = warp::get().and(style.or(status).or(log).or(static_files));
+
+    // Convert warp routes to tower service
+    let warp_service = warp::service(routes);
+
+    // Apply tower middleware to remove If-Modified-Since headers
+    let service = ServiceBuilder::new()
+        .layer(MapRequestLayer::new(|mut req: hyper::Request<_>| {
+            req.headers_mut().remove("if-modified-since");
+            req
+        }))
+        .service(warp_service);
+
+    // Wrap with Shared to make it a MakeService
+    let make_service = Shared::new(service);
 
     let ip_addr = config
         .server
@@ -103,5 +168,6 @@ pub async fn run(config: Config) {
     // We print one and only one message
     eprintln!("Stylus {} is listening on {}!", VERSION, addr);
 
-    warp::serve(routes).run(addr).await;
+    // Run with hyper instead of warp::serve
+    _ = hyper::Server::bind(&addr).serve(make_service).await;
 }

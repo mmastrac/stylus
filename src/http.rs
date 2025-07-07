@@ -170,7 +170,9 @@ pub async fn run(config: Config) {
             )
             .boxed()
     } else {
-        path!()
+        // This is really just a fake path so we can return something here.
+        // These filters need a cleanup.ß
+        warp::path("static")
             .and_then(|| async {
                 Ok::<_, Infallible>(Box::new(warp::reply::with_status(
                     "Not found",

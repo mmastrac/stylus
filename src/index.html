@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <meta http-equiv="refresh" content="5">
+        <title>Stylus</title>
+        <style>
+            table {
+                border-collapse: collapse;
+                border: 1px solid #000;
+            }
+            th, td {
+                border: 1px solid #000;
+                padding: 0.5em;
+                background-color: var(--monitor-status);
+            }
+        </style>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <h1>Stylus</h1>
+
+        <script>document.write(`<p>Updated at ${new Date().toISOString()}</p>`);</script>
+
+        <table>
+            <tr>
+                <th>Monitor</th>
+                <th>Status</th>
+                <th>Exit</th>
+                <th>Log</th>
+            </tr>
+            {{#each monitors}}
+            <tr data-monitor-id="{{ id }}">
+                <td>{{ id }}</td>
+                <td>{{ status.status }}</td>
+                <td>{{ status.description }} ({{ status.code }})</td>
+                <td><a href="/log/{{ id }}">Log</a></td>
+            </tr>
+            {{/each}}
+        </table>
+    </body>
+
+    <ul>
+        <li><a href="/status.json">Status JSON</a></li>
+        <li><a href="/style.css">Style CSS</a></li>
+    </ul>
+</html>

@@ -19,8 +19,12 @@ fn default_listen_addr() -> String {
     "0.0.0.0".into()
 }
 
-fn default_server_static() -> PathBuf {
+pub fn default_server_static() -> PathBuf {
     "static".into()
+}
+
+fn default_monitor_dir() -> PathBuf {
+    "monitor.d".into()
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -28,7 +32,9 @@ fn default_server_static() -> PathBuf {
 pub struct Config {
     pub version: u32,
     pub server: ServerConfig,
+    #[serde(default)]
     pub monitor: MonitorConfig,
+    #[serde(default)]
     pub css: CssConfig,
     #[serde(default)]
     pub base_path: PathBuf,
@@ -41,17 +47,26 @@ pub struct ServerConfig {
     pub port: u16,
     #[serde(default = "default_listen_addr")]
     pub listen_addr: String,
-    #[serde(default = "default_server_static")]
-    pub r#static: PathBuf,
+    #[serde(default, rename = "static")]
+    pub static_path: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MonitorConfig {
+    #[serde(default = "default_monitor_dir")]
     pub dir: PathBuf,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+impl Default for MonitorConfig {
+    fn default() -> Self {
+        Self {
+            dir: default_monitor_dir(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CssConfig {
     pub metadata: CssMetadataConfig,
@@ -78,7 +93,6 @@ pub struct CssMetadataConfig {
     pub green: Arc<BTreeMap<String, String>>,
 }
 
-#[cfg(test)]
 impl Default for CssMetadataConfig {
     fn default() -> Self {
         Self {
@@ -167,4 +181,6 @@ pub struct MonitorDirTestConfig {
     #[serde(with = "humantime_serde")]
     pub timeout: Duration,
     pub command: PathBuf,
+    #[serde(skip)]
+    pub args: Vec<String>,
 }

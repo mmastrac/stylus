@@ -10,7 +10,7 @@ use crate::interpolate::interpolate_modify;
 use crate::worker::LogStream;
 use crate::worker::WorkerMessage;
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Display, Serialize, Deserialize, PartialEq, PartialOrd)]
 #[serde(rename_all(serialize = "lowercase", deserialize = "lowercase"))]
 pub enum StatusState {
     Blank,
@@ -94,7 +94,12 @@ impl MonitorState {
         message: &str,
         direct_logger: &mut T,
     ) {
-        let msg = format!("[{}] {}", stream, message);
+        let msg = format!(
+            "{} [{}] {}",
+            chrono::Utc::now().to_rfc3339(),
+            stream,
+            message
+        );
         direct_logger(&msg);
         self.status.log.push_back(msg);
     }
@@ -112,6 +117,7 @@ impl MonitorState {
                 // Note that we don't update the state here
                 self.status.pending = None;
                 self.status.log.clear();
+                self.process_log_message("exec  ", "Starting".into(), direct_logger);
             }
             WorkerMessage::LogMessage(stream, m) => {
                 let stream = match stream {
@@ -134,9 +140,15 @@ impl MonitorState {
                 }
             }
             WorkerMessage::AbnormalTermination(s) => {
+                self.process_log_message("exec  ", &format!("Termination: {}", s), direct_logger);
                 self.finish(StatusState::Yellow, -1, s, config);
             }
             WorkerMessage::Termination(code) => {
+                self.process_log_message(
+                    "exec  ",
+                    &format!("Termination: {}", code),
+                    direct_logger,
+                );
                 if code == 0 {
                     self.finish(StatusState::Green, code, "Success".into(), config);
                 } else {

@@ -102,11 +102,20 @@ pub fn parse_config_string(file: &Path, s: String) -> Result<Config, Box<dyn Err
 
     // Canonical paths
     canonicalize("base path", None, &mut config.base_path)?;
-    canonicalize(
-        "static file path",
-        Some(&config.base_path),
-        &mut config.server.r#static,
-    )?;
+    if let Some(static_path) = &mut config.server.static_path {
+        canonicalize("static file path", Some(&config.base_path), static_path)?;
+    } else {
+        let mut static_path = config.base_path.join(default_server_static());
+        if canonicalize(
+            "static file path",
+            Some(&config.base_path),
+            &mut static_path,
+        )
+        .is_ok()
+        {
+            config.server.static_path = Some(static_path);
+        }
+    }
     canonicalize(
         "monitor directory path",
         Some(&config.base_path),
@@ -117,6 +126,14 @@ pub fn parse_config_string(file: &Path, s: String) -> Result<Config, Box<dyn Err
 }
 
 pub fn parse_monitor_configs(root: &Path) -> Result<Vec<MonitorDirConfig>, Box<dyn Error>> {
+    if !root.exists() {
+        return Err(format!(
+            "Monitor directory {} does not exist",
+            root.to_string_lossy()
+        )
+        .into());
+    }
+
     let mut monitor_configs = vec![];
     for e in WalkDir::new(root)
         .min_depth(1)
@@ -124,6 +141,7 @@ pub fn parse_monitor_configs(root: &Path) -> Result<Vec<MonitorDirConfig>, Box<d
         .follow_links(true)
         .into_iter()
     {
+        debug!("Got entry: {e:?}");
         let e = e?;
         if e.file_type().is_dir() {
             let mut p = e.into_path();
@@ -141,7 +159,7 @@ pub fn parse_monitor_configs(root: &Path) -> Result<Vec<MonitorDirConfig>, Box<d
 
     if monitor_configs.is_empty() {
         Err(format!(
-            "Unable to locate any valid configurations in {}",
+            "Unable to locate any valid monitor config.yaml files in {}",
             root.to_string_lossy()
         )
         .into())
@@ -178,7 +196,13 @@ pub fn parse_monitor_config_string(
     }
 
     let test = config.root.test_mut();
-    test.command = Path::canonicalize(&config.base_path.join(&test.command))?;
+    let executable = config.base_path.join(&test.command);
+    if executable.exists() {
+        test.command = Path::canonicalize(&executable)?;
+    } else {
+        test.args = vec!["-c".to_string(), test.command.to_string_lossy().to_string()];
+        test.command = PathBuf::from("/bin/sh");
+    }
 
     let mut children = BTreeMap::new();
     if let MonitorDirRootConfig::Group(ref mut group) = config.root {

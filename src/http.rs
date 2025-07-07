@@ -1,20 +1,25 @@
 use std::collections::hash_map::DefaultHasher;
-use std::convert::Infallible;
+use std::convert::{identity, Infallible};
 use std::hash::{Hash, Hasher};
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 
+use handlebars::Handlebars;
+use keepcalm::SharedMut;
+use serde::Serialize;
 use tower::make::Shared;
 use tower::util::MapRequestLayer;
 use tower::ServiceBuilder;
+use warp::filters::BoxedFilter;
 use warp::http::StatusCode;
 use warp::path;
+use warp::reply::Reply;
 use warp::Filter;
 
 use crate::config::Config;
 use crate::css::generate_css_for_state;
 use crate::monitor::Monitor;
-use crate::status::Status;
+use crate::status::{MonitorState, Status};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -42,6 +47,29 @@ async fn log_request(monitor: Arc<Monitor>, s: String) -> Result<String, Infalli
         }
     }
     Ok("Not found".to_owned())
+}
+
+async fn default_index(monitor: Arc<Monitor>) -> Result<String, Infallible> {
+    let mut handlebars = Handlebars::new();
+    if let Err(e) = handlebars.register_template_string("t", include_str!("./index.html")) {
+        return Ok(e.to_string());
+    }
+
+    let mut monitors = vec![];
+    for monitor in monitor.status().monitors {
+        monitors.push(monitor);
+    }
+
+    #[derive(Serialize)]
+    struct Model {
+        monitors: Vec<SharedMut<MonitorState>>,
+    }
+
+    Ok(handlebars
+        .render("t", &Model { monitors })
+        .map_or_else(|e| e.to_string(), identity)
+        .trim()
+        .to_owned())
 }
 
 /// Generate an ETag from file content hash
@@ -132,14 +160,22 @@ pub async fn run(config: Config) {
         .with(warp::reply::with::header("Content-Type", "text/plain"));
 
     // static files with ETags and cache validation
-    let static_files = warp::fs::dir(config.server.r#static)
-        .and(warp::header::optional::<String>("if-none-match"))
-        .and_then(
-            move |file: warp::filters::fs::File, if_none_match: Option<String>| {
-                handle_etag_cache(file, if_none_match)
-            },
-        );
-
+    let static_files: BoxedFilter<_> = if let Some(static_path) = config.server.static_path {
+        warp::fs::dir(static_path)
+            .and(warp::header::optional::<String>("if-none-match"))
+            .and_then(
+                move |file: warp::filters::fs::File, if_none_match: Option<String>| {
+                    handle_etag_cache(file, if_none_match)
+                },
+            )
+            .boxed()
+    } else {
+        path!()
+            .and(with_monitor.clone())
+            .and_then(default_index)
+            .map(|s| Box::new(warp::reply::html(s)) as Box<dyn Reply>)
+            .boxed()
+    };
     let routes = warp::get().and(style.or(status).or(log).or(static_files));
 
     // Convert warp routes to tower service

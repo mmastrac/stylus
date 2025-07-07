@@ -1,0 +1,5 @@
+test:
+  interval: 1s
+  timeout: 1s
+  command: |
+    exit 0

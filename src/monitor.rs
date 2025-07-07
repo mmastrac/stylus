@@ -7,12 +7,6 @@ use crate::config::*;
 use crate::status::*;
 use crate::worker::{monitor_thread, ShuttingDown};
 
-/// We don't want to store the actual sender in the MonitorThread, just a boxed version of it that
-/// will correctly drop to trigger the thread to shut down.
-trait OpaqueSender: std::fmt::Debug + Send + Sync {}
-
-impl<T> OpaqueSender for T where T: std::fmt::Debug + Send + Sync {}
-
 #[derive(Debug)]
 struct MonitorThread {
     /// This is solely used to detect when [`MonitorThread`] is dropped.

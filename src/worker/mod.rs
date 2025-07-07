@@ -60,7 +60,14 @@ pub fn monitor_run<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
     monitor: &MonitorDirConfig,
     sender: &mut T,
 ) -> (Duration, Result<(), Box<dyn Error>>) {
-    let args: Option<&[OsString]> = None;
+    let args = monitor
+        .root
+        .test()
+        .args
+        .iter()
+        .map(|s| OsString::from(s))
+        .collect::<Vec<_>>();
+    let args: Option<&[OsString]> = Some(args.as_slice());
     let test = monitor.root.test();
     (
         test.interval,
@@ -165,14 +172,12 @@ fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
     id: &str,
     cmd: &Path,
     base_path: &Path,
-    args: Option<&[impl AsRef<OsStr>]>,
+    args: Option<&[impl AsRef<OsStr> + std::fmt::Debug]>,
     timeout: Duration,
     sender: &mut T,
 ) -> Result<(), Box<dyn Error>> {
     // This will fail if we're supposed to shut down
     sender(id, WorkerMessage::Starting)?;
-
-    debug!("[{}] Starting {:?}", id, cmd);
 
     let mut exec = Exec::cmd(cmd)
         .cwd(base_path)
@@ -181,6 +186,9 @@ fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
         .stderr(Redirection::Pipe);
     if let Some(args) = args {
         exec = exec.args(args);
+        debug!("[{}] Starting {:?} {args:?}", id, cmd);
+    } else {
+        debug!("[{}] Starting {:?}", id, cmd);
     }
     let mut popen = exec.popen()?;
 

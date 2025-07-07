@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 pub enum OperationMode {
     Run(Config),
     Dump(Config),
+    Init(PathBuf),
     Test(Config, String),
 }
 
@@ -27,7 +28,7 @@ fn default_monitor_dir() -> PathBuf {
     "monitor.d".into()
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
     pub version: u32,
@@ -36,8 +37,12 @@ pub struct Config {
     pub monitor: MonitorConfig,
     #[serde(default)]
     pub css: CssConfig,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "default")]
     pub base_path: PathBuf,
+}
+
+fn default<T: Default + PartialEq>(t: &T) -> bool {
+    *t == Default::default()
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -49,6 +54,16 @@ pub struct ServerConfig {
     pub listen_addr: String,
     #[serde(default, rename = "static")]
     pub static_path: Option<PathBuf>,
+}
+
+impl Default for ServerConfig {
+    fn default() -> Self {
+        Self {
+            port: default_server_port(),
+            listen_addr: default_listen_addr(),
+            static_path: Some(default_server_static()),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -83,13 +98,13 @@ pub struct CssRule {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CssMetadataConfig {
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "default")]
     pub blank: Arc<BTreeMap<String, String>>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "default")]
     pub red: Arc<BTreeMap<String, String>>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "default")]
     pub yellow: Arc<BTreeMap<String, String>>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "default")]
     pub green: Arc<BTreeMap<String, String>>,
 }
 
@@ -109,10 +124,20 @@ impl Default for CssMetadataConfig {
 pub struct MonitorDirConfig {
     #[serde(flatten)]
     pub root: MonitorDirRootConfig,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "default")]
     pub base_path: PathBuf,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "default")]
     pub id: String,
+}
+
+impl Default for MonitorDirConfig {
+    fn default() -> Self {
+        Self {
+            root: MonitorDirRootConfig::Test(MonitorDirTestConfig::default()),
+            base_path: Default::default(),
+            id: Default::default(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

@@ -26,6 +26,10 @@ pub struct Args {
     #[arg(long, conflicts_with = "dump")]
     pub test: Option<String>,
 
+    /// Initialize a new stylus directory
+    #[arg(long)]
+    pub init: Option<PathBuf>,
+
     /// The configuration file
     #[arg(name = "FILE", group = "path")]
     pub config: Option<PathBuf>,

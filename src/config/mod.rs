@@ -33,6 +33,8 @@ pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
         Ok(OperationMode::Dump(config))
     } else if let Some(test) = args.test {
         Ok(OperationMode::Test(config, test))
+    } else if let Some(init) = args.init {
+        Ok(OperationMode::Init(init))
     } else {
         Ok(OperationMode::Run(config))
     }
@@ -200,7 +202,11 @@ pub fn parse_monitor_config_string(
     if executable.exists() {
         test.command = Path::canonicalize(&executable)?;
     } else {
-        test.args = vec!["-c".to_string(), test.command.to_string_lossy().to_string()];
+        let command_line = test.command.to_string_lossy().to_string();
+        if !command_line.contains(' ') {
+            return Err(format!("Command {} is not available", command_line).into());
+        }
+        test.args = vec!["-c".to_string(), command_line];
         test.command = PathBuf::from("/bin/sh");
     }
 

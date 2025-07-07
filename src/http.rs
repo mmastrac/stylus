@@ -171,12 +171,21 @@ pub async fn run(config: Config) {
             .boxed()
     } else {
         path!()
-            .and(with_monitor.clone())
-            .and_then(default_index)
-            .map(|s| Box::new(warp::reply::html(s)) as Box<dyn Reply>)
+            .and_then(|| async {
+                Ok::<_, Infallible>(Box::new(warp::reply::with_status(
+                    "Not found",
+                    StatusCode::NOT_FOUND,
+                )) as Box<dyn Reply>)
+            })
             .boxed()
     };
-    let routes = warp::get().and(style.or(status).or(log).or(static_files));
+
+    let default_index = path!()
+        .and(with_monitor.clone())
+        .and_then(default_index)
+        .map(|s| Box::new(warp::reply::html(s)) as Box<dyn Reply>);
+
+    let routes = warp::get().and(style.or(status).or(log).or(static_files).or(default_index));
 
     // Convert warp routes to tower service
     let warp_service = warp::service(routes);

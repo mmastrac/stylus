@@ -1,0 +1,9 @@
+[book]
+authors = ["Matt Mastracci"]
+language = "en"
+src = "src"
+title = "Stylus Documentation"
+
+[output.html]
+
+[output.markdown] 

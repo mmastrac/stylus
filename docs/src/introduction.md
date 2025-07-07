@@ -6,5 +6,5 @@ generate you a dynamic stylesheet to give you a visual overview of the current s
 ## Sections
 
 * [Getting Started](getting-started/overview.md)
-* [Configuration](configuration/basic.md)
-* [Examples](examples/overview.md)
+* [Configuration](configuration/server/README.md)
+* [Examples](examples/general/README.md)

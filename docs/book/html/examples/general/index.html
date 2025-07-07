@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Overview - Stylus Documentation</title>
+        <title>General Tips - Stylus Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -12,33 +12,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -102,7 +102,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -137,7 +137,7 @@
                     <h1 class="menu-title">Stylus Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -166,143 +166,28 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p>There's a few approaches you can take to monitoring. This is not a comprehensive list, but should support most devices you wish to monitor.</p>
-<ul>
-<li><a href="#general-tips">General tips</a></li>
-<li><a href="#htmlapi-scraping">HTML/API scraping</a> (via <a href="https://github.com/stedolan/jq">jq</a> and <a href="https://github.com/ericchiang/pup">pup</a>)</li>
-<li><a href="#ping">Ping</a></li>
-<li><a href="#ssh">SSH</a> (<a href="https://en.wikipedia.org/wiki/Secure_Shell">secure shell</a>)</li>
-<li><a href="#snmp">SNMP</a> (<a href="https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol">simple network management protocol</a>)</li>
-</ul>
-<h1 id="general-tips"><a class="header" href="#general-tips">General tips</a></h1>
+                        <h1 id="general-tips"><a class="header" href="#general-tips">General Tips</a></h1>
+<p>There are several approaches you can take to monitoring with Stylus. This section covers general best practices and tips for writing effective monitor scripts.</p>
 <h2 id="safe-scripting"><a class="header" href="#safe-scripting">Safe Scripting</a></h2>
-<p>Because monitor scripts may have a large number of moving parts, consider using <a href="https://sipb.mit.edu/doc/safe-shell/">safe shell scripting</a> techniques
-to ensure that any failure of any kind will return an error code.</p>
-<p>In addition <code>set -x</code> can be useful to print all commands that run as part of a monitor script. These are available in the logging endpoints and will
-show you the expansion of environment variables.</p>
+<p>Because monitor scripts may have a large number of moving parts, consider using <a href="https://sipb.mit.edu/doc/safe-shell/">safe shell scripting</a> techniques to ensure that any failure of any kind will return an error code.</p>
+<p>In addition <code>set -x</code> can be useful to print all commands that run as part of a monitor script. These are available in the logging endpoints and will show you the expansion of environment variables.</p>
 <pre><code class="language-bash">#!/bin/bash
 set -xeuf -o pipefail
 </code></pre>
-<h2 id="testing-your-configurations"><a class="header" href="#testing-your-configurations">Testing your configurations</a></h2>
-<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em> includes a <code>--test</code> command-line argument to allow you to develop
-your test script in a slightly more interactive manner. The output from <code>--test</code> will include the test script's stdout and stderr streams, plus the
-parsed monitor state as JSON, and the final rendered CSS.</p>
-<h1 id="htmlapi-scraping"><a class="header" href="#htmlapi-scraping">HTML/API scraping</a></h1>
-<p>Some devices can be tested using a simple cURL script:</p>
-<pre><code class="language-bash">curl --silent --max-time 2 &lt;url&gt;
-</code></pre>
-<p>In other cases you may want to scrape HTML. The <code>pup</code> tool is included in the docker image to make this easier. You can use the <code>json{}</code> filter to pass
-a pre-processed HTML DOM tree to <code>jq</code> for further processing.</p>
-<p>This example scrapes the power state from a Web Power Switch 7:</p>
-<pre><code class="language-bash">#!/bin/bash
-set -euf -o pipefail
-
-function fetch() {
-    curl --silent --max-time 2 --basic -u &lt;credentials&gt; &lt;url&gt; \
-        | pup -c "table table tr[bgcolor=#F4F4F4] json{}" \
-        | jq "[.[] | [.children | .. | .text? | select(. != null)] | { \"name\": .[1], \"state\": (.[2]==\"ON\") }]"
-}
-
-n=0
-until [ "$n" -ge 10 ]
-do
-   HTML=`fetch` &amp;&amp; break
-   n=$((n+1)) 
-done
-
-echo $HTML | \
-    jq -r -e ". | to_entries | .[] | \"@@STYLUS@@ group.power-\" + (.key + 1 | tostring) + \".status.status=\" + if .value.state then \"\\\"green\\\"\" else \"\\\"blank\\\"\" end"
-</code></pre>
-<h1 id="ping"><a class="header" href="#ping">Ping</a></h1>
-<p>The simplest monitor is a ping script. One ping is usually enough for most cases. You can pass a timeout to ping, but <em>Stylus</em> will automatically kill
-processes if they run too long.</p>
-<pre><code class="language-bash">#!/bin/bash
-ping -c 1 ${STYLUS_MONITOR_ID}
-</code></pre>
-<h1 id="snmp"><a class="header" href="#snmp">SNMP</a></h1>
-<p>SNMP is a useful way to write more complex checks, but the output of the tools requires some massaging.</p>
-<pre><code class="language-bash">snmp_check () {
-    local host="$STYLUS_MONITOR_ID"
-    ARR=`snmpbulkwalk -OsQ -c public $host ifTable`
-    jq -n --arg inarr "${ARR}" '[$inarr | split("\n")
-        | .[]
-        | capture("(?&lt;key&gt;[^\\.]+)\\.(?&lt;idx&gt;\\d+)\\s+=\\s+(?&lt;value&gt;.*)")
-    ] | group_by(.idx) | .[] | from_entries'
-}
-
-# Some legacy devices only respond to SNMP v1
-snmp_v1_check () {
-    local host="$STYLUS_MONITOR_ID"
-    ARR=`snmpwalk -v1 -OsQ -c public $host ifTable`
-    jq -n --arg inarr "${ARR}" '[$inarr | split("\n")
-        | .[]
-        | capture("(?&lt;key&gt;[^\\.]+)\\.(?&lt;idx&gt;\\d+)\\s+=\\s+(?&lt;value&gt;.*)")
-    ] | group_by(.idx) | .[] | from_entries'
-}
-
-
-snmp_parse () {
-    cat - | jq -r '
-        # Only parse ethernet ports and omit anything that looks like a vlan port (ending with a .xxxx)
-        select(.ifType=="ethernetCsmacd" and (.ifDescr | test("\\.\\d+$") | not)) 
-        | "@@STYLUS@@ group.'$STYLUS_MONITOR_ID'-" 
-            + .ifIndex 
-            + ".status.status=" 
-            + (if .ifOperStatus == "up" then "\"green\"" else "\"blank\"" end)' 
-}
-
-# Map the SNMP JSON output to @@STYLUS@@ metadata updates
-snmp_check | snmp_parse
-</code></pre>
-<h1 id="ssh"><a class="header" href="#ssh">SSH</a></h1>
-<p>Depending on your security requirements, you may wish to loosen some of your SSH client's security check requirements. By disabling strict host key checking and host IP checking, your monitors will be more reliable but there will be <a href="https://security.stackexchange.com/questions/161520/what-is-the-actual-drawback-of-checkhostip-no">some tradeoffs</a>.</p>
-<pre><code class="language-bash">ssh &lt;...&gt; -oStrictHostKeyChecking=no -oCheckHostIP=no
-</code></pre>
-<h2 id="ssh-configuration"><a class="header" href="#ssh-configuration">SSH Configuration</a></h2>
-<p>To make your life easier, you can collect all of your SSH credentials in <a href="https://www.ssh.com/ssh/config/">a configuration file</a>. The examples in this section will assume you've got a central SSH configuration file.</p>
-<pre><code>host pi-*
-	User matt
-host tower
-	User root
-host unifi-*
-	User admin
-host *
-	IdentityFile /srv/ssh_id_rsa
-</code></pre>
-<h2 id="basic-ssh-check"><a class="header" href="#basic-ssh-check">Basic SSH check</a></h2>
-<pre><code class="language-bash"># Assumes that `ssh_config` lives in the same folder as this script 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwd )"
-SSH_CONFIG=$DIR/ssh_config
-
-ssh_check () {
-    local host="$STYLUS_MONITOR_ID"
-    ssh -F $SSH_CONFIG $host -oStrictHostKeyChecking=no -oCheckHostIP=no "true"
-}
-
-ssh_check
-</code></pre>
-<h2 id="ssh--gather-basic-hardware-info"><a class="header" href="#ssh--gather-basic-hardware-info">SSH + gather basic hardware info</a></h2>
-<pre><code class="language-bash"># Assumes that `ssh_config` lives in the same folder as this script 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwd )"
-SSH_CONFIG=$DIR/ssh_config
-
-ssh_check () {
-    local host="$STYLUS_MONITOR_ID"
-    ssh -F $SSH_CONFIG $host -oStrictHostKeyChecking=no -oCheckHostIP=no \
-        "uname -a &amp;&amp; uptime &amp;&amp; cat /proc/cpuinfo | grep -i -E '(hardware|model|stepping|revision)' | sort | uniq"
-}
-
-ssh_check
-</code></pre>
+<h2 id="testing-your-configurations"><a class="header" href="#testing-your-configurations">Testing Your Configurations</a></h2>
+<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em> includes a <code>--test</code> command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from <code>--test</code> will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../configuration/advanced.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../configuration/advanced.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="../../examples/ping/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -310,10 +195,13 @@ ssh_check
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../configuration/advanced.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../configuration/advanced.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="../../examples/ping/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
@@ -342,13 +230,13 @@ ssh_check
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

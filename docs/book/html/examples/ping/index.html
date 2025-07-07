@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Basic Configuration - Stylus Documentation</title>
+        <title>Ping Monitoring - Stylus Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -12,33 +12,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -102,7 +102,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -137,7 +137,7 @@
                     <h1 class="menu-title">Stylus Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -166,124 +166,39 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p>The <em>Stylus</em> configuration is split into two categories:</p>
-<h2 id="server-configuration"><a class="header" href="#server-configuration">Server Configuration</a></h2>
-<p>The first is the main server configuration, stored in <code>config.yaml</code> in the root directory of the configuration. This controls the overall server behaviour (including listening ports) and the CSS layout. It also points <em>Stylus</em> to the monitoring directory (<code>monitor.d</code> by default).</p>
-<pre><code class="language-yaml"># Stylus will fail to load any configuration without a version of 1 (for future extensibility)
-version: 1
-
-# HTTP server configuration
-server:
-  # Listen port
-  port: 8000
-  # Static file directory
-  static: static
-
-# Monitor configuration
-monitor:
-  # The top-level directory that stylus looks for monitor directories
-  dir: monitor.d
-
-css:
-  # Arbitrary metadata can be associated with each of the four states: blank (no state),
-  # red (failed), yellow (timed out) or green (success).
-
-  # Use metadata to get prettier colors - note that we can add arbitrary string keys and values here
-  metadata:
-    blank:
-      color: "white"
-    red:
-      color: "#fa897b"
-    yellow:
-      color: "#ffdd94"
-    green:
-      color: "#d0e6a5"
-
-  # Specify a number of rules - selector/declaration pairs. Each pair will generate a CSS block.
-  rules:
-    # Style the HTML/SVG with the appropriate status color
-    - selectors: "
-        #{{monitor.id}},
-        [data-monitor-id=\"{{monitor.id}}\"] &gt; *
-      "
-      declarations: "
-        background-color: {{monitor.status.css.metadata.color}} !important;
-        fill: {{monitor.status.css.metadata.color}} !important;
-      "
-    # Add some text for the status/return value of the script
-    - selectors: "
-        #{{monitor.id}} td:nth-child(2)::after
-      "
-      declarations: "
-        content: \"status={{monitor.status.status}} retval={{monitor.status.code}}\"
-      "
-
+                        <h1 id="ping-monitoring"><a class="header" href="#ping-monitoring">Ping Monitoring</a></h1>
+<p>The simplest monitor is a ping script. One ping is usually enough for most cases. You can pass a timeout to ping, but <em>Stylus</em> will automatically kill processes if they run too long.</p>
+<h2 id="basic-ping-script"><a class="header" href="#basic-ping-script">Basic Ping Script</a></h2>
+<pre><code class="language-bash">#!/bin/bash
+ping -c 1 ${STYLUS_MONITOR_ID}
 </code></pre>
-<h2 id="monitor-configuration"><a class="header" href="#monitor-configuration">Monitor Configuration</a></h2>
-<h3 id="standard-monitor"><a class="header" href="#standard-monitor">Standard Monitor</a></h3>
-<p>A standard monitor consists of a single test for a single host.</p>
-<pre><code class="language-yaml">test:
-  # (optional) The internal ID to use for this test. If omitted, the ID is inferred from the monitor directory's name.
-  id: foo
-  # How often the test is run. The interval restarts from the last success or failure of the test.
-  interval: 60s
-  # How long the script will be given to run before it is killed.
-  timeout: 30s
-  # The test command to run, relative to the monitor directory. The PATH is not used and the file must be
-  # directly executable.
-  command: test.sh
+<h2 id="ping-with-custom-host"><a class="header" href="#ping-with-custom-host">Ping with Custom Host</a></h2>
+<pre><code class="language-bash">#!/bin/bash
+ping -c 1 8.8.8.8
 </code></pre>
-<p>Output from the test's standard output and standard error streams are captured and available from the logging endpoint.
-A test that has not run or completed yet will be in a blank state. A test that has timed out will be in the yellow state.
-Tests that fail by returning a value other than zero will be red, and those that return zero will be in the green state.</p>
-<p>Tests scripts may also set metadata associated with the run. More information on this is available in [[Advanced Configuration]].</p>
-<h3 id="group-monitor"><a class="header" href="#group-monitor">Group Monitor</a></h3>
-<p>A group may be configured such that a single script may update states for multiple monitors. See [[Advanced Configuration]] for examples
-of configuring such a group monitor.</p>
-<h2 id="css-interpolation"><a class="header" href="#css-interpolation">CSS Interpolation</a></h2>
-<p>Interpolation is used in the <code>css</code> block to control the display. The interpolation library under the hood is
-<a href="https://github.com/sunng87/handlebars-rust">handlebars-rust</a> and any of the advanced syntaxes may be used.</p>
-<p>Generally a monitor's output is interpolated from its status JSON, which will have a following form like the given
-example below:</p>
-<pre><code class="language-json">{
-  "id": "my-id",
-  "config": {
-    "interval": "1m",
-    "timeout": "30s",
-    "command": "/full/path/to/test.sh"
-  },
-  "status": {
-    "status": "green",
-    "code": 0,
-    "description": "Success",
-    "css": {
-      "metadata": {
-        "color": "#d0e6a5"
-      }
-    },
-    "metadata": {
-      "key": "value1"
-    }
-  }
-}
+<h2 id="ping-with-timeout"><a class="header" href="#ping-with-timeout">Ping with Timeout</a></h2>
+<pre><code class="language-bash">#!/bin/bash
+ping -c 1 -W 5 ${STYLUS_MONITOR_ID}
 </code></pre>
-<p>The root object is named <code>monitor</code>, and you may choose to use any of the keys as such:</p>
-<pre><code>{{monitor.id}} = my-id
-{{monitor.status.status}} = green
-{{monitor.status.css.metadata.color}} = #d0e6a5
-{{monitor.status.metadata.key}} = value1
-</code></pre>
-<p>You may use additional text content around the interpolation blocks. For example, <code>background-color: {{monitor.status.css.metadata.color}} !important;</code> will interpolate to <code>background-color: #d0e6a5 !important</code>.</p>
+<h2 id="when-to-use-ping"><a class="header" href="#when-to-use-ping">When to Use Ping</a></h2>
+<p>Ping monitoring is ideal for:</p>
+<ul>
+<li>Basic connectivity testing</li>
+<li>Simple network reachability checks</li>
+<li>Quick health checks for network devices</li>
+<li>Testing internet connectivity</li>
+</ul>
+<p>For more complex monitoring scenarios, consider using <a href="../ssh/">SSH</a>, <a href="../snmp/">SNMP</a>, or <a href="../scraping/">HTML/API scraping</a>.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../getting-started/creating-monitors.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../examples/general/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../configuration/advanced.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../examples/ssh/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -293,11 +208,11 @@ example below:</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../getting-started/creating-monitors.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../examples/general/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../configuration/advanced.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../examples/ssh/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -328,13 +243,13 @@ example below:</p>
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

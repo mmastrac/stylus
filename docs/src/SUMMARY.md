@@ -8,8 +8,14 @@
 - [Creating Monitor Pages](getting-started/creating-monitors.md)
 
 # Configuration
-- [Basic Configuration](configuration/basic.md)
+- [Server Configuration](configuration/server/README.md)
+- [CSS Configuration](configuration/css/README.md)
+- [Monitor Configuration](configuration/monitor/README.md)
 - [Advanced Configuration](configuration/advanced.md)
 
 # Examples
-- [Overview](examples/overview.md) 
+- [General Tips](examples/general/README.md)
+- [Ping Monitoring](examples/ping/README.md)
+- [SSH Monitoring](examples/ssh/README.md)
+- [SNMP Monitoring](examples/snmp/README.md)
+- [HTML/API Scraping](examples/scraping/README.md) 

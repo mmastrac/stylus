@@ -173,15 +173,15 @@ generate you a dynamic stylesheet to give you a visual overview of the current s
 <h2 id="sections"><a class="header" href="#sections">Sections</a></h2>
 <ul>
 <li><a href="getting-started/overview.html">Getting Started</a></li>
-<li><a href="configuration/basic.html">Configuration</a></li>
-<li><a href="examples/overview.html">Examples</a></li>
+<li><a href="configuration/server/README.html">Configuration</a></li>
+<li><a href="examples/general/README.html">Examples</a></li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><p>To begin, <em>Stylus</em> ships with a number of <a href="getting-started/examples/overview.html">examples</a> that can be found in the <a href="https://github.com/mmastrac/stylus/archive/master.zip">source bundle</a>. Copy the <code>simple_network</code> folder to a location of your choice. In this guide we will assume that it will appear in <code>~/stylus/</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><p>To begin, <em>Stylus</em> ships with a number of <a href="getting-started/examples/general/README.html">examples</a> that can be found in the <a href="https://github.com/mmastrac/stylus/archive/master.zip">source bundle</a>. Copy the <code>simple_network</code> folder to a location of your choice. In this guide we will assume that it will appear in <code>~/stylus/</code>.</p>
 <p>Once you've got the example set up locally, we can walk though...</p>
 <ul>
 <li><a href="getting-started/running.html">Running Stylus</a></li>
 <li><a href="getting-started/creating-monitors.html">Creating Monitor Pages</a></li>
-<li><a href="getting-started/../configuration/basic.html">Configuration</a></li>
+<li><a href="getting-started/../configuration/server/README.html">Configuration</a></li>
 <li><a href="getting-started/../configuration/advanced.html">Advanced Configuration</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><p>There are a number of options for running <em>Stylus</em>.</p>
@@ -254,9 +254,8 @@ all your rules to override the fill colors created by your SVG editor.</p>
 &lt;/g&gt;
 &lt;/svg&gt;
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><p>The <em>Stylus</em> configuration is split into two categories:</p>
-<h2 id="server-configuration"><a class="header" href="#server-configuration">Server Configuration</a></h2>
-<p>The first is the main server configuration, stored in <code>config.yaml</code> in the root directory of the configuration. This controls the overall server behaviour (including listening ports) and the CSS layout. It also points <em>Stylus</em> to the monitoring directory (<code>monitor.d</code> by default).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="server-configuration"><a class="header" href="#server-configuration">Server Configuration</a></h1>
+<p>The server configuration is stored in <code>config.yaml</code> in the root directory of the configuration. This controls the overall server behaviour (including listening ports) and points <em>Stylus</em> to the monitoring directory (<code>monitor.d</code> by default).</p>
 <pre><code class="language-yaml"># Stylus will fail to load any configuration without a version of 1 (for future extensibility)
 version: 1
 
@@ -307,32 +306,50 @@ css:
       "
 
 </code></pre>
-<h2 id="monitor-configuration"><a class="header" href="#monitor-configuration">Monitor Configuration</a></h2>
-<h3 id="standard-monitor"><a class="header" href="#standard-monitor">Standard Monitor</a></h3>
-<p>A standard monitor consists of a single test for a single host.</p>
-<pre><code class="language-yaml">test:
-  # (optional) The internal ID to use for this test. If omitted, the ID is inferred from the monitor directory's name.
-  id: foo
-  # How often the test is run. The interval restarts from the last success or failure of the test.
-  interval: 60s
-  # How long the script will be given to run before it is killed.
-  timeout: 30s
-  # The test command to run, relative to the monitor directory. The PATH is not used and the file must be
-  # directly executable.
-  command: test.sh
+<div style="break-before: page; page-break-before: always;"></div><h1 id="css-configuration"><a class="header" href="#css-configuration">CSS Configuration</a></h1>
+<p>The CSS configuration controls how Stylus generates dynamic stylesheets based on monitor status. This includes metadata for different states and CSS rules for styling your HTML/SVG elements.</p>
+<pre><code class="language-yaml"># config.yaml
+# version: 1
+# server: ...
+# monitor: ...
+
+css:
+  # Arbitrary metadata can be associated with each of the four states: blank (no state),
+  # red (failed), yellow (timed out) or green (success).
+
+  # Use metadata to get prettier colors - note that we can add arbitrary string keys and values here
+  metadata:
+    blank:
+      color: "white"
+    red:
+      color: "#fa897b"
+    yellow:
+      color: "#ffdd94"
+    green:
+      color: "#d0e6a5"
+
+  # Specify a number of rules - selector/declaration pairs. Each pair will generate a CSS block.
+  rules:
+    # Style the HTML/SVG with the appropriate status color
+    - selectors: "
+        #{{monitor.id}},
+        [data-monitor-id=\"{{monitor.id}}\"] &gt; *
+      "
+      declarations: "
+        background-color: {{monitor.status.css.metadata.color}} !important;
+        fill: {{monitor.status.css.metadata.color}} !important;
+      "
+    # Add some text for the status/return value of the script
+    - selectors: "
+        #{{monitor.id}} td:nth-child(2)::after
+      "
+      declarations: "
+        content: \"status={{monitor.status.status}} retval={{monitor.status.code}}\"
+      "
 </code></pre>
-<p>Output from the test's standard output and standard error streams are captured and available from the logging endpoint.
-A test that has not run or completed yet will be in a blank state. A test that has timed out will be in the yellow state.
-Tests that fail by returning a value other than zero will be red, and those that return zero will be in the green state.</p>
-<p>Tests scripts may also set metadata associated with the run. More information on this is available in [[Advanced Configuration]].</p>
-<h3 id="group-monitor"><a class="header" href="#group-monitor">Group Monitor</a></h3>
-<p>A group may be configured such that a single script may update states for multiple monitors. See [[Advanced Configuration]] for examples
-of configuring such a group monitor.</p>
 <h2 id="css-interpolation"><a class="header" href="#css-interpolation">CSS Interpolation</a></h2>
-<p>Interpolation is used in the <code>css</code> block to control the display. The interpolation library under the hood is
-<a href="https://github.com/sunng87/handlebars-rust">handlebars-rust</a> and any of the advanced syntaxes may be used.</p>
-<p>Generally a monitor's output is interpolated from its status JSON, which will have a following form like the given
-example below:</p>
+<p>Interpolation is used in the <code>css</code> block to control the display. The interpolation library under the hood is <a href="https://github.com/sunng87/handlebars-rust">handlebars-rust</a> and any of the advanced syntaxes may be used.</p>
+<p>Generally a monitor's output is interpolated from its status JSON, which will have a following form like the given example below:</p>
 <pre><code class="language-json">{
   "id": "my-id",
   "config": {
@@ -362,8 +379,39 @@ example below:</p>
 {{monitor.status.metadata.key}} = value1
 </code></pre>
 <p>You may use additional text content around the interpolation blocks. For example, <code>background-color: {{monitor.status.css.metadata.color}} !important;</code> will interpolate to <code>background-color: #d0e6a5 !important</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="monitor-configuration"><a class="header" href="#monitor-configuration">Monitor Configuration</a></h1>
+<p>Monitor configurations define how Stylus tests your infrastructure components. Each monitor consists of a test script that runs on a schedule and reports the status back to Stylus.</p>
+<h2 id="standard-monitor"><a class="header" href="#standard-monitor">Standard Monitor</a></h2>
+<p>A standard monitor consists of a single test for a single host.</p>
+<pre><code class="language-yaml">test:
+  # (optional) The internal ID to use for this test. If omitted, the ID is inferred from the monitor directory's name.
+  id: foo
+  # How often the test is run. The interval restarts from the last success or failure of the test.
+  interval: 60s
+  # How long the script will be given to run before it is killed.
+  timeout: 30s
+  # The test command to run, relative to the monitor directory. The PATH is not used and the file must be
+  # directly executable.
+  command: test.sh
+</code></pre>
+<h2 id="monitor-states"><a class="header" href="#monitor-states">Monitor States</a></h2>
+<p>Output from the test's standard output and standard error streams are captured and available from the logging endpoint.</p>
+<ul>
+<li><strong>Blank</strong>: A test that has not run or completed yet</li>
+<li><strong>Yellow</strong>: A test that has timed out</li>
+<li><strong>Red</strong>: Tests that fail by returning a value other than zero</li>
+<li><strong>Green</strong>: Tests that return zero (success)</li>
+</ul>
+<h2 id="group-monitor"><a class="header" href="#group-monitor">Group Monitor</a></h2>
+<p>A group may be configured such that a single script may update states for multiple monitors. See <a href="configuration/monitor/../advanced.html">Advanced Configuration</a> for examples of configuring such a group monitor.</p>
+<h2 id="testing-your-configurations"><a class="header" href="#testing-your-configurations">Testing Your Configurations</a></h2>
+<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em> includes a <code>--test</code> command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from <code>--test</code> will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.</p>
+<p>Tests scripts may also set metadata associated with the run. More information on this is available in <a href="configuration/monitor/../advanced.html">Advanced Configuration</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="group-monitors"><a class="header" href="#group-monitors">Group Monitors</a></h2>
-<p>A group monitor allows a single test script's execution to update the state for multiple hosts.</p>
+<p>A group monitor allows a single test script's execution to update the state for
+multiple entities. For example, you may be able to scrape the state of multiple
+hosts from a single controller, or you may want to monitor the state of multiple
+ports on a single switch.</p>
 <pre><code class="language-yaml">group:
     # The ID pattern for this group. This ID must use interpolation from axis values to generate a set of
     # globally unique IDs. 
@@ -406,33 +454,143 @@ as a convenient way to test multiple monitors using shared scripts. For example,
 like so:</p>
 <pre><code class="language-bash">ssh $STYLUS_MONITOR_ID my-test-command
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><p>There's a few approaches you can take to monitoring. This is not a comprehensive list, but should support most devices you wish to monitor.</p>
-<ul>
-<li><a href="examples/overview.html#general-tips">General tips</a></li>
-<li><a href="examples/overview.html#htmlapi-scraping">HTML/API scraping</a> (via <a href="https://github.com/stedolan/jq">jq</a> and <a href="https://github.com/ericchiang/pup">pup</a>)</li>
-<li><a href="examples/overview.html#ping">Ping</a></li>
-<li><a href="examples/overview.html#ssh">SSH</a> (<a href="https://en.wikipedia.org/wiki/Secure_Shell">secure shell</a>)</li>
-<li><a href="examples/overview.html#snmp">SNMP</a> (<a href="https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol">simple network management protocol</a>)</li>
-</ul>
-<h1 id="general-tips"><a class="header" href="#general-tips">General tips</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="general-tips"><a class="header" href="#general-tips">General Tips</a></h1>
+<p>There are several approaches you can take to monitoring with Stylus. This section covers general best practices and tips for writing effective monitor scripts.</p>
 <h2 id="safe-scripting"><a class="header" href="#safe-scripting">Safe Scripting</a></h2>
-<p>Because monitor scripts may have a large number of moving parts, consider using <a href="https://sipb.mit.edu/doc/safe-shell/">safe shell scripting</a> techniques
-to ensure that any failure of any kind will return an error code.</p>
-<p>In addition <code>set -x</code> can be useful to print all commands that run as part of a monitor script. These are available in the logging endpoints and will
-show you the expansion of environment variables.</p>
+<p>Because monitor scripts may have a large number of moving parts, consider using <a href="https://sipb.mit.edu/doc/safe-shell/">safe shell scripting</a> techniques to ensure that any failure of any kind will return an error code.</p>
+<p>In addition <code>set -x</code> can be useful to print all commands that run as part of a monitor script. These are available in the logging endpoints and will show you the expansion of environment variables.</p>
 <pre><code class="language-bash">#!/bin/bash
 set -xeuf -o pipefail
 </code></pre>
-<h2 id="testing-your-configurations"><a class="header" href="#testing-your-configurations">Testing your configurations</a></h2>
-<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em> includes a <code>--test</code> command-line argument to allow you to develop
-your test script in a slightly more interactive manner. The output from <code>--test</code> will include the test script's stdout and stderr streams, plus the
-parsed monitor state as JSON, and the final rendered CSS.</p>
-<h1 id="htmlapi-scraping"><a class="header" href="#htmlapi-scraping">HTML/API scraping</a></h1>
-<p>Some devices can be tested using a simple cURL script:</p>
+<h2 id="testing-your-configurations-1"><a class="header" href="#testing-your-configurations-1">Testing Your Configurations</a></h2>
+<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em> includes a <code>--test</code> command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from <code>--test</code> will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ping-monitoring"><a class="header" href="#ping-monitoring">Ping Monitoring</a></h1>
+<p>The simplest monitor is a ping script. One ping is usually enough for most cases. You can pass a timeout to ping, but <em>Stylus</em> will automatically kill processes if they run too long.</p>
+<h2 id="basic-ping-script"><a class="header" href="#basic-ping-script">Basic Ping Script</a></h2>
+<pre><code class="language-bash">#!/bin/bash
+ping -c 1 ${STYLUS_MONITOR_ID}
+</code></pre>
+<h2 id="ping-with-custom-host"><a class="header" href="#ping-with-custom-host">Ping with Custom Host</a></h2>
+<pre><code class="language-bash">#!/bin/bash
+ping -c 1 8.8.8.8
+</code></pre>
+<h2 id="ping-with-timeout"><a class="header" href="#ping-with-timeout">Ping with Timeout</a></h2>
+<pre><code class="language-bash">#!/bin/bash
+ping -c 1 -W 5 ${STYLUS_MONITOR_ID}
+</code></pre>
+<h2 id="when-to-use-ping"><a class="header" href="#when-to-use-ping">When to Use Ping</a></h2>
+<p>Ping monitoring is ideal for:</p>
+<ul>
+<li>Basic connectivity testing</li>
+<li>Simple network reachability checks</li>
+<li>Quick health checks for network devices</li>
+<li>Testing internet connectivity</li>
+</ul>
+<p>For more complex monitoring scenarios, consider using <a href="examples/ping/../ssh/">SSH</a>, <a href="examples/ping/../snmp/">SNMP</a>, or <a href="examples/ping/../scraping/">HTML/API scraping</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ssh-monitoring"><a class="header" href="#ssh-monitoring">SSH Monitoring</a></h1>
+<p>SSH monitoring allows you to execute commands on remote systems and check their status. This is useful for monitoring servers, network devices, and other systems that support SSH access.</p>
+<h2 id="ssh-configuration"><a class="header" href="#ssh-configuration">SSH Configuration</a></h2>
+<p>To make your life easier, you can collect all of your SSH credentials in <a href="https://www.ssh.com/ssh/config/">a configuration file</a>. The examples in this section will assume you've got a central SSH configuration file.</p>
+<pre><code>host pi-*
+	User matt
+host tower
+	User root
+host unifi-*
+	User admin
+host *
+	IdentityFile /srv/ssh_id_rsa
+</code></pre>
+<h2 id="security-considerations"><a class="header" href="#security-considerations">Security Considerations</a></h2>
+<p>Depending on your security requirements, you may wish to loosen some of your SSH client's security check requirements. By disabling strict host key checking and host IP checking, your monitors will be more reliable but there will be <a href="https://security.stackexchange.com/questions/161520/what-is-the-actual-drawback-of-checkhostip-no">some tradeoffs</a>.</p>
+<pre><code class="language-bash">ssh &lt;...&gt; -oStrictHostKeyChecking=no -oCheckHostIP=no
+</code></pre>
+<h2 id="basic-ssh-check"><a class="header" href="#basic-ssh-check">Basic SSH Check</a></h2>
+<pre><code class="language-bash"># Assumes that `ssh_config` lives in the same folder as this script 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwd )"
+SSH_CONFIG=$DIR/ssh_config
+
+ssh_check () {
+    local host="$STYLUS_MONITOR_ID"
+    ssh -F $SSH_CONFIG $host -oStrictHostKeyChecking=no -oCheckHostIP=no "true"
+}
+
+ssh_check
+</code></pre>
+<h2 id="ssh--gather-basic-hardware-info"><a class="header" href="#ssh--gather-basic-hardware-info">SSH + Gather Basic Hardware Info</a></h2>
+<pre><code class="language-bash"># Assumes that `ssh_config` lives in the same folder as this script 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwd )"
+SSH_CONFIG=$DIR/ssh_config
+
+ssh_check () {
+    local host="$STYLUS_MONITOR_ID"
+    ssh -F $SSH_CONFIG $host -oStrictHostKeyChecking=no -oCheckHostIP=no \
+        "uname -a &amp;&amp; uptime &amp;&amp; cat /proc/cpuinfo | grep -i -E '(hardware|model|stepping|revision)' | sort | uniq"
+}
+
+ssh_check
+</code></pre>
+<h2 id="when-to-use-ssh"><a class="header" href="#when-to-use-ssh">When to Use SSH</a></h2>
+<p>SSH monitoring is ideal for:</p>
+<ul>
+<li>Server health checks</li>
+<li>Remote system monitoring</li>
+<li>Custom command execution</li>
+<li>Gathering system information</li>
+<li>Service status checks</li>
+</ul>
+<p>For simpler connectivity tests, consider <a href="examples/ssh/../ping/">ping monitoring</a>. For network devices, consider <a href="examples/ssh/../snmp/">SNMP monitoring</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="snmp-monitoring"><a class="header" href="#snmp-monitoring">SNMP Monitoring</a></h1>
+<p>SNMP (Simple Network Management Protocol) is a useful way to write more complex checks for network devices, but the output of the tools requires some massaging.</p>
+<h2 id="basic-snmp-check"><a class="header" href="#basic-snmp-check">Basic SNMP Check</a></h2>
+<pre><code class="language-bash">snmp_check () {
+    local host="$STYLUS_MONITOR_ID"
+    ARR=`snmpbulkwalk -OsQ -c public $host ifTable`
+    jq -n --arg inarr "${ARR}" '[$inarr | split("\n")
+        | .[]
+        | capture("(?&lt;key&gt;[^\\.]+)\\.(?&lt;idx&gt;\\d+)\\s+=\\s+(?&lt;value&gt;.*)")
+    ] | group_by(.idx) | .[] | from_entries'
+}
+
+# Some legacy devices only respond to SNMP v1
+snmp_v1_check () {
+    local host="$STYLUS_MONITOR_ID"
+    ARR=`snmpwalk -v1 -OsQ -c public $host ifTable`
+    jq -n --arg inarr "${ARR}" '[$inarr | split("\n")
+        | .[]
+        | capture("(?&lt;key&gt;[^\\.]+)\\.(?&lt;idx&gt;\\d+)\\s+=\\s+(?&lt;value&gt;.*)")
+    ] | group_by(.idx) | .[] | from_entries'
+}
+
+snmp_parse () {
+    cat - | jq -r '
+        # Only parse ethernet ports and omit anything that looks like a vlan port (ending with a .xxxx)
+        select(.ifType=="ethernetCsmacd" and (.ifDescr | test("\\.\\d+$") | not)) 
+        | "@@STYLUS@@ group.'$STYLUS_MONITOR_ID'-" 
+            + .ifIndex 
+            + ".status.status=" 
+            + (if .ifOperStatus == "up" then "\"green\"" else "\"blank\"" end)' 
+}
+
+# Map the SNMP JSON output to @@STYLUS@@ metadata updates
+snmp_check | snmp_parse
+</code></pre>
+<h2 id="when-to-use-snmp"><a class="header" href="#when-to-use-snmp">When to Use SNMP</a></h2>
+<p>SNMP monitoring is ideal for:</p>
+<ul>
+<li>Network device monitoring (switches, routers, etc.)</li>
+<li>Interface status monitoring</li>
+<li>Network performance metrics</li>
+<li>Device health checks</li>
+<li>Legacy network equipment</li>
+</ul>
+<p>For simpler connectivity tests, consider <a href="examples/snmp/../ping/">ping monitoring</a>. For server monitoring, consider <a href="examples/snmp/../ssh/">SSH monitoring</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="htmlapi-scraping"><a class="header" href="#htmlapi-scraping">HTML/API Scraping</a></h1>
+<p>Some devices can be tested using a simple cURL script, while others require more complex HTML parsing and API interaction.</p>
+<h2 id="simple-curl-check"><a class="header" href="#simple-curl-check">Simple cURL Check</a></h2>
 <pre><code class="language-bash">curl --silent --max-time 2 &lt;url&gt;
 </code></pre>
-<p>In other cases you may want to scrape HTML. The <code>pup</code> tool is included in the docker image to make this easier. You can use the <code>json{}</code> filter to pass
-a pre-processed HTML DOM tree to <code>jq</code> for further processing.</p>
+<h2 id="html-scraping-with-pup-and-jq"><a class="header" href="#html-scraping-with-pup-and-jq">HTML Scraping with pup and jq</a></h2>
+<p>In other cases you may want to scrape HTML. The <code>pup</code> tool is included in the docker image to make this easier. You can use the <code>json{}</code> filter to pass a pre-processed HTML DOM tree to <code>jq</code> for further processing.</p>
 <p>This example scrapes the power state from a Web Power Switch 7:</p>
 <pre><code class="language-bash">#!/bin/bash
 set -euf -o pipefail
@@ -453,87 +611,16 @@ done
 echo $HTML | \
     jq -r -e ". | to_entries | .[] | \"@@STYLUS@@ group.power-\" + (.key + 1 | tostring) + \".status.status=\" + if .value.state then \"\\\"green\\\"\" else \"\\\"blank\\\"\" end"
 </code></pre>
-<h1 id="ping"><a class="header" href="#ping">Ping</a></h1>
-<p>The simplest monitor is a ping script. One ping is usually enough for most cases. You can pass a timeout to ping, but <em>Stylus</em> will automatically kill
-processes if they run too long.</p>
-<pre><code class="language-bash">#!/bin/bash
-ping -c 1 ${STYLUS_MONITOR_ID}
-</code></pre>
-<h1 id="snmp"><a class="header" href="#snmp">SNMP</a></h1>
-<p>SNMP is a useful way to write more complex checks, but the output of the tools requires some massaging.</p>
-<pre><code class="language-bash">snmp_check () {
-    local host="$STYLUS_MONITOR_ID"
-    ARR=`snmpbulkwalk -OsQ -c public $host ifTable`
-    jq -n --arg inarr "${ARR}" '[$inarr | split("\n")
-        | .[]
-        | capture("(?&lt;key&gt;[^\\.]+)\\.(?&lt;idx&gt;\\d+)\\s+=\\s+(?&lt;value&gt;.*)")
-    ] | group_by(.idx) | .[] | from_entries'
-}
-
-# Some legacy devices only respond to SNMP v1
-snmp_v1_check () {
-    local host="$STYLUS_MONITOR_ID"
-    ARR=`snmpwalk -v1 -OsQ -c public $host ifTable`
-    jq -n --arg inarr "${ARR}" '[$inarr | split("\n")
-        | .[]
-        | capture("(?&lt;key&gt;[^\\.]+)\\.(?&lt;idx&gt;\\d+)\\s+=\\s+(?&lt;value&gt;.*)")
-    ] | group_by(.idx) | .[] | from_entries'
-}
-
-
-snmp_parse () {
-    cat - | jq -r '
-        # Only parse ethernet ports and omit anything that looks like a vlan port (ending with a .xxxx)
-        select(.ifType=="ethernetCsmacd" and (.ifDescr | test("\\.\\d+$") | not)) 
-        | "@@STYLUS@@ group.'$STYLUS_MONITOR_ID'-" 
-            + .ifIndex 
-            + ".status.status=" 
-            + (if .ifOperStatus == "up" then "\"green\"" else "\"blank\"" end)' 
-}
-
-# Map the SNMP JSON output to @@STYLUS@@ metadata updates
-snmp_check | snmp_parse
-</code></pre>
-<h1 id="ssh"><a class="header" href="#ssh">SSH</a></h1>
-<p>Depending on your security requirements, you may wish to loosen some of your SSH client's security check requirements. By disabling strict host key checking and host IP checking, your monitors will be more reliable but there will be <a href="https://security.stackexchange.com/questions/161520/what-is-the-actual-drawback-of-checkhostip-no">some tradeoffs</a>.</p>
-<pre><code class="language-bash">ssh &lt;...&gt; -oStrictHostKeyChecking=no -oCheckHostIP=no
-</code></pre>
-<h2 id="ssh-configuration"><a class="header" href="#ssh-configuration">SSH Configuration</a></h2>
-<p>To make your life easier, you can collect all of your SSH credentials in <a href="https://www.ssh.com/ssh/config/">a configuration file</a>. The examples in this section will assume you've got a central SSH configuration file.</p>
-<pre><code>host pi-*
-	User matt
-host tower
-	User root
-host unifi-*
-	User admin
-host *
-	IdentityFile /srv/ssh_id_rsa
-</code></pre>
-<h2 id="basic-ssh-check"><a class="header" href="#basic-ssh-check">Basic SSH check</a></h2>
-<pre><code class="language-bash"># Assumes that `ssh_config` lives in the same folder as this script 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwd )"
-SSH_CONFIG=$DIR/ssh_config
-
-ssh_check () {
-    local host="$STYLUS_MONITOR_ID"
-    ssh -F $SSH_CONFIG $host -oStrictHostKeyChecking=no -oCheckHostIP=no "true"
-}
-
-ssh_check
-</code></pre>
-<h2 id="ssh--gather-basic-hardware-info"><a class="header" href="#ssh--gather-basic-hardware-info">SSH + gather basic hardware info</a></h2>
-<pre><code class="language-bash"># Assumes that `ssh_config` lives in the same folder as this script 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwd )"
-SSH_CONFIG=$DIR/ssh_config
-
-ssh_check () {
-    local host="$STYLUS_MONITOR_ID"
-    ssh -F $SSH_CONFIG $host -oStrictHostKeyChecking=no -oCheckHostIP=no \
-        "uname -a &amp;&amp; uptime &amp;&amp; cat /proc/cpuinfo | grep -i -E '(hardware|model|stepping|revision)' | sort | uniq"
-}
-
-ssh_check
-</code></pre>
+<h2 id="when-to-use-scraping"><a class="header" href="#when-to-use-scraping">When to Use Scraping</a></h2>
+<p>HTML/API scraping is ideal for:</p>
+<ul>
+<li>Web-based device monitoring</li>
+<li>API endpoint health checks</li>
+<li>Web application monitoring</li>
+<li>Devices with web interfaces</li>
+<li>Custom dashboard monitoring</li>
+</ul>
+<p>For simpler connectivity tests, consider <a href="examples/scraping/../ping/">ping monitoring</a>. For server monitoring, consider <a href="examples/scraping/../ssh/">SSH monitoring</a>.</p>
 
                     </main>
 

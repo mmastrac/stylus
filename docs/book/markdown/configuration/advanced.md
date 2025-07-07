@@ -1,6 +1,9 @@
 ## Group Monitors
 
-A group monitor allows a single test script's execution to update the state for multiple hosts. 
+A group monitor allows a single test script's execution to update the state for
+multiple entities. For example, you may be able to scrape the state of multiple
+hosts from a single controller, or you may want to monitor the state of multiple
+ports on a single switch.
 
 ```yaml
 group:

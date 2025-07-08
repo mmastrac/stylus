@@ -1,0 +1,30 @@
+#!/usr/bin/env clitest --v0
+
+cd "..";
+
+$ stylus run
+%EXIT 2
+! error: the following required arguments were not provided:
+!   <FILE>
+! 
+! Usage: stylus run <FILE>
+! 
+! For more information, try '--help'.
+
+$ FORCE_CONTAINER_PATH=examples/isoflow/ stylus run --dry-run
+! [%{DATA} WARN  stylus::config] Passed configuration location "examples/isoflow/" was a directory -- inferring 'config.yaml' in that directory
+! Stylus %{DATA} is listening on 0.0.0.0:8000!
+! Dry run complete. Exiting.
+
+$ FORCE_CONTAINER_PATH=examples/isoflow/ FORCE_CONTAINER_PORT=8001 stylus run --dry-run
+! [%{DATA} WARN  stylus::config] Passed configuration location "examples/isoflow/" was a directory -- inferring 'config.yaml' in that directory
+! Stylus %{DATA} is listening on 0.0.0.0:8001!
+! Dry run complete. Exiting.
+
+$ FORCE_CONTAINER_PATH=examples/isoflow/ stylus run --dry-run something-else
+%EXIT 2
+! error: the argument '[FILE]' cannot be used with '[FORCE_CONTAINER_PATH]'
+! 
+! Usage: stylus run --dry-run <FILE>
+! 
+! For more information, try '--help'.

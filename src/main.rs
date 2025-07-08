@@ -41,7 +41,7 @@ async fn run() {
     env_logger::init_from_env(Env::new().filter_or("STYLUS_LOG", default));
 
     match parse_config_from_args().expect("Unable to parse configuration") {
-        OperationMode::Run(config) => crate::http::run(config).await,
+        OperationMode::Run(config, dry_run) => crate::http::run(config, dry_run).await,
         OperationMode::Dump(config) => {
             let monitors = parse_monitor_configs(&config.monitor.dir)
                 .expect("Unable to parse monitor configurations");

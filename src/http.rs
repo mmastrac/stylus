@@ -133,7 +133,7 @@ async fn handle_etag_cache(
     )))
 }
 
-pub async fn run(config: Config) {
+pub async fn run(config: Config, dry_run: bool) {
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
     let with_monitor = warp::any().map(move || monitor.clone());
 
@@ -212,6 +212,11 @@ pub async fn run(config: Config) {
 
     // We print one and only one message
     eprintln!("Stylus {} is listening on {}!", VERSION, addr);
+
+    if dry_run {
+        eprintln!("Dry run complete. Exiting.");
+        return;
+    }
 
     // Run with hyper instead of warp::serve
     _ = hyper::Server::bind(&addr).serve(make_service).await;

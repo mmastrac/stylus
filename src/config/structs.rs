@@ -6,7 +6,7 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
 pub enum OperationMode {
-    Run(Config),
+    Run(Config, bool),
     Dump(Config),
     Init(PathBuf),
     Test(Config, String),

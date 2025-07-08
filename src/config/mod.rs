@@ -6,7 +6,7 @@ use clap::Parser;
 use itertools::Itertools;
 use walkdir::WalkDir;
 
-use self::args::Args;
+use self::args::{Args, Commands};
 pub use self::structs::*;
 use crate::interpolate::*;
 
@@ -15,28 +15,33 @@ mod structs;
 
 pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
     let args = Args::parse();
-    let config_path = if let Some(path) = args.force_container_path {
-        path
-    } else {
-        args.config.unwrap()
-    };
-    let mut config = parse_config(&config_path)?;
-    if let Some(port) = args.force_container_port {
-        config.server.port = port
-    };
-    if let Some(addr) = args.force_container_listen_addr {
-        config.server.listen_addr = addr
-    }
-    debug!("{:?}", config);
 
-    if args.dump {
-        Ok(OperationMode::Dump(config))
-    } else if let Some(test) = args.test {
-        Ok(OperationMode::Test(config, test))
-    } else if let Some(init) = args.init {
-        Ok(OperationMode::Init(init))
-    } else {
-        Ok(OperationMode::Run(config))
+    match args.command {
+        Commands::Dump(dump_args) => {
+            let config = parse_config(&dump_args.config)?;
+            Ok(OperationMode::Dump(config))
+        }
+        Commands::Test(test_args) => {
+            let config = parse_config(&test_args.config)?;
+            Ok(OperationMode::Test(config, test_args.test_name))
+        }
+        Commands::Init(init_args) => Ok(OperationMode::Init(init_args.directory)),
+        Commands::Run(run_args) => {
+            let config_path = if let Some(path) = run_args.force_container_path {
+                path
+            } else {
+                run_args.config.unwrap()
+            };
+            let mut config = parse_config(&config_path)?;
+            if let Some(port) = run_args.force_container_port {
+                config.server.port = port
+            };
+            if let Some(addr) = run_args.force_container_listen_addr {
+                config.server.listen_addr = addr
+            }
+            debug!("{:?}", config);
+            Ok(OperationMode::Run(config, run_args.dry_run))
+        }
     }
 }
 

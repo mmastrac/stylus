@@ -5,7 +5,12 @@
 # Getting Started
 - [Overview](getting-started/overview.md)
 - [Running Stylus](getting-started/running.md)
-- [Creating Monitor Pages](getting-started/creating-monitors.md)
+    - [stylus init]()
+    - [stylus test]()
+    - [stylus run]()
+- [Creating a Stylus Project](getting-started/creating-project.md)
+- [Creating Monitors](getting-started/creating-monitors.md)
+- [Creating Monitor Pages](getting-started/creating-pages.md)
 
 # Configuration
 - [Server Configuration](configuration/server/README.md)
@@ -19,3 +24,6 @@
 - [SSH Monitoring](examples/ssh/README.md)
 - [SNMP Monitoring](examples/snmp/README.md)
 - [HTML/API Scraping](examples/scraping/README.md) 
+
+# Tutorials
+- [Creating SVG Diagrams](tutorials/svg-diagrams.md)

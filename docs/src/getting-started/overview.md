@@ -3,6 +3,8 @@ To begin, *Stylus* ships with a number of [examples](examples/general/README.md)
 Once you've got the example set up locally, we can walk though... 
 
 * [Running Stylus](running.md)
-* [Creating Monitor Pages](creating-monitors.md)
+* [Creating a Stylus Project](creating-project.md)
+* [Creating Monitors](creating-monitors.md)
+* [Creating Monitor Pages](creating-pages.md)
 * [Configuration](../configuration/server/README.md)
 * [Advanced Configuration](../configuration/advanced.md)

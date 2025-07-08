@@ -1,0 +1,64 @@
+#!/usr/bin/env clitest --v0
+
+using tempdir;
+
+$ stylus init new-project
+! Initializing directory: "new-project"...
+! Done!
+! 
+! Run `stylus "new-project"` to start the server
+
+$ stylus run new-project --dry-run
+! [%{DATA} WARN  stylus::config] Passed configuration location "new-project" was a directory -- inferring 'config.yaml' in that directory
+! Stylus %{DATA} is listening on 0.0.0.0:8000!
+! Dry run complete. Exiting.
+
+$ stylus test new-project/config.yaml --test-name monitor
+! Monitor Log
+! -----------
+! 
+! %{DATA} [exec  ] Starting
+! %{DATA} [stdout] Write your test script here
+! %{DATA} [exec  ] Termination: 0
+! 
+! State
+! -----
+! 
+! {
+!   "id": "monitor",
+!   "config": {
+!     "interval": "30s",
+!     "timeout": "10s",
+!     "command": "%{PATH}/new-project/monitor.d/monitor/test.sh"
+!   },
+!   "status": {
+!     "status": "green",
+!     "code": 0,
+!     "description": "Success",
+!     "css": {
+!       "metadata": {}
+!     },
+!     "metadata": {},
+!     "log": [
+!       "%{DATA} [exec  ] Starting",
+!       "%{DATA} [stdout] Write your test script here",
+!       "%{DATA} [exec  ] Termination: 0"
+!     ]
+!   },
+!   "children": {}
+! }
+! 
+! CSS
+! ---
+! 
+! /* monitor */
+! 
+! /* Default rules */
+! [data-monitor-id="monitor"] {
+!   --monitor-id: "monitor";
+!   --monitor-status: green;
+!   --monitor-code: 0;
+!   --monitor-description: "Success";
+! }
+!
+

@@ -68,7 +68,7 @@ async fn run() {
                     monitor_run(monitor, &mut |_, msg| {
                         state
                             .process_message(&monitor.id, msg, &config.css.metadata, &mut |m| {
-                                eprintln!("{}", m);
+                                println!("{}", m);
                             })
                             .expect("Failed to process message");
                         Ok(())

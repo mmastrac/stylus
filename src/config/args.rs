@@ -42,10 +42,11 @@ pub struct DumpArgs {
 #[derive(Debug, Parser)]
 pub struct TestArgs {
     /// The test to run
+    #[arg(short, long, required = true)]
     pub test_name: String,
 
     /// The configuration file
-    #[arg(name = "FILE")]
+    #[arg(name = "FILE", required = true)]
     pub config: PathBuf,
 }
 

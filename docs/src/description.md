@@ -16,10 +16,11 @@ The special endpoints available on the webserver are:
 
 The `style.css` endpoint may be linked by a HTML or SVG file served from the
 `static` directory that is configured. If desired, the HTML page can dynamically
-refresh the CSS periodically using Javascript. See the included example for a
-sample of how this might work.
+refresh the CSS periodically using Javascript. See the [included
+examples](https://github.com/mmastrac/stylus/blob/master/examples/simple_network/static/index.html)
+for how this might work.
 
 If you need more flexibility than CSS can provide, you can use the `status.json`
-endpoint to get the current status of the various services and dynamically
-update the HTML DOM, SVG images, a React.js application or something more
-complex.
+endpoint to get the current status of the various services, and dynamically
+update HTML, SVG images, or potentially even use React.js to update a more
+complex and interactive page in real-time.

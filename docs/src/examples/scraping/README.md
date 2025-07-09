@@ -1,4 +1,4 @@
-# HTML/API Scraping
+# Web/HTML/API Scraping
 
 Some devices can be tested using a simple cURL script, while others require more complex HTML parsing and API interaction.
 

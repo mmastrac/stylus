@@ -1,14 +1,14 @@
 # Summary
 
 - [Introduction](introduction.md)
-    - [Theory of operation](description.md)
 
 # Getting Started
 - [Overview](getting-started/overview.md)
+- [Theory of operation](description.md)
 - [Running Stylus](getting-started/running.md)
-    - [stylus init]()
-    - [stylus test]()
-    - [stylus run]()
+    - [stylus init](getting-started/stylus-init.md)
+    - [stylus test](getting-started/stylus-test.md)
+    - [stylus run](getting-started/stylus-run.md)
 - [Creating a Stylus Project](getting-started/creating-project.md)
 - [Creating Monitors](getting-started/creating-monitors.md)
 - [Creating Monitoring Pages](getting-started/creating-pages.md)

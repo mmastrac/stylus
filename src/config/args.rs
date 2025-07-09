@@ -54,6 +54,10 @@ pub struct TestArgs {
 pub struct InitArgs {
     /// The directory to initialize
     pub directory: PathBuf,
+
+    /// The path to the static files
+    #[arg(long, short)]
+    pub static_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]

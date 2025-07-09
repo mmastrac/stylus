@@ -109,7 +109,7 @@ async fn run() {
 
             panic!("Unable to locate monitor with id '{}'", id)
         }
-        OperationMode::Init(path) => {
+        OperationMode::Init(path, static_dir) => {
             println!("Initializing directory: {path:?}...");
             if !path.exists() {
                 std::fs::create_dir_all(&path)
@@ -118,19 +118,26 @@ async fn run() {
             let mut config = Config::default();
             config.version = 1;
             config.server.port = 8000;
+
+            if let Some(static_dir) = static_dir {
+                println!("Using static directory: {static_dir:?}");
+                config.server.static_path = Some(static_dir);
+            } else {
+                let static_path = path.join("static");
+                if !static_path.exists() {
+                    std::fs::create_dir_all(&static_path)
+                        .expect(&format!("Unable to create directory {static_path:?}"));
+                }
+                std::fs::write(static_path.join("README.md"), "Create your index.html here")
+                .expect("Unable to write README.md");
+            }
+
             std::fs::write(
                 path.join("config.yaml"),
                 serde_yaml::to_string(&config).expect("Unable to write configuration"),
             )
             .expect("Unable to write configuration");
 
-            let static_path = path.join("static");
-            if !static_path.exists() {
-                std::fs::create_dir_all(&static_path)
-                    .expect(&format!("Unable to create directory {static_path:?}"));
-            }
-            std::fs::write(static_path.join("README.md"), "Create your index.html here")
-                .expect("Unable to write README.md");
             let monitor_dir = path.join("monitor.d").join("monitor");
             if !monitor_dir.exists() {
                 std::fs::create_dir_all(&monitor_dir)

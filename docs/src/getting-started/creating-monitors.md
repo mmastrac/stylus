@@ -25,9 +25,9 @@ to the test script.
 
 The test script is a simple shell script that will be run by the monitor.
 
-To simplify development of monitors, **Stylus** provides a `stylus test` command
-that will run the test script and display the status of the monitor after it
-completes.
+Additionally to aid in the development of monitors, **Stylus** provides a
+`stylus test` command that will run the test script and display the status of
+the monitor after it completes.
 
 ```bash session
 $ stylus test ~/stylus/config.yaml --monitor monitor
@@ -76,6 +76,8 @@ CSS
   --monitor-description: "Success";
 }
 ```
+
+## Modifying the Monitor
 
 Let's say that we want to change the test script to check if the server can see
 the internet. We'll using `ping 8.8.8.8` as a proxy test for the internet

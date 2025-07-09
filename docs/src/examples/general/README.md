@@ -4,6 +4,19 @@ There are several approaches you can take to monitoring with Stylus. This
 section covers general best practices and tips for writing effective monitor
 scripts.
 
+## `STYLUS_MONITOR_ID`
+
+The `STYLUS_MONITOR_ID` environment variable is set by **Stylus** to the monitor's
+ID when running a monitor script. This allows you to write monitor scripts that
+can be re-used across multiple monitors.
+
+```bash
+#!/bin/sh
+set -xeuf -o pipefail
+# Check the health of a service running on the monitor
+curl --fail http://$STYLUS_MONITOR_ID:8080/health | jq --raw-output '.status'
+```
+
 ## Safe Scripting
 
 Because monitor scripts may have a large number of moving parts, consider using

@@ -29,9 +29,10 @@ stylus run ~/stylus
 ```
 
 If you open your web browser to `http://localhost:8000`, you should see a
-very basic default page with a green status:
+very basic default page with a green status. You'll also find a link to the
+status JSON and style CSS endpoints, as well as the per-monitor log output:
 
-<blockquote>
+<blockquote style="background-color: #f3faff !important;">
 <h1>Stylus</h1>
 <p>Updated at 2025-07-08T22:46:07.257Z</p>
 <table style="border: 1px solid #ccc; border-collapse: collapse;">

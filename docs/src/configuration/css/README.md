@@ -26,21 +26,17 @@ css:
   # Specify a number of rules - selector/declaration pairs. Each pair will generate a CSS block.
   rules:
     # Style the HTML/SVG with the appropriate status color
-    - selectors: "
+    - selectors: |
         #{{monitor.id}},
-        [data-monitor-id=\"{{monitor.id}}\"] > *
-      "
-      declarations: "
+        [data-monitor-id="{{monitor.id}}"] > *
+      declarations: |
         background-color: {{monitor.status.css.metadata.color}} !important;
         fill: {{monitor.status.css.metadata.color}} !important;
-      "
     # Add some text for the status/return value of the script
-    - selectors: "
+    - selectors: |
         #{{monitor.id}} td:nth-child(2)::after
-      "
-      declarations: "
-        content: \"status={{monitor.status.status}} retval={{monitor.status.code}}\"
-      "
+      declarations: |
+        content: "status={{monitor.status.status}} retval={{monitor.status.code}}"
 ```
 
 ## CSS Interpolation

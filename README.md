@@ -164,19 +164,19 @@ and is pretty much limited by how heavyweight your test scripts are.
 
 ### Included example
 
-![Screenshot](docs/screenshot-1.png)
+![Screenshot](docs/src/screenshots/screenshot-1.png)
 
 ### D3.js example
 
-![Screenshot](docs/screenshot-3.png)
+![Screenshot](docs/src/screenshots/screenshot-3.png)
 
 ### Isoflow example
 
-![Screenshot](docs/screenshot-4.png)
+![Screenshot](docs/src/screenshots/screenshot-4.png)
 
 ### A basic home network diagram
 
-![Screenshot](docs/screenshot-2.png)
+![Screenshot](docs/src/screenshots/screenshot-2.png)
 
 [diagrams.net]: https://app.diagrams.net/?splash=0&p=svgdata
 

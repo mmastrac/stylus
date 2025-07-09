@@ -1,6 +1,7 @@
 # Summary
 
-[Introduction](introduction.md)
+- [Introduction](introduction.md)
+    - [Theory of operation](description.md)
 
 # Getting Started
 - [Overview](getting-started/overview.md)

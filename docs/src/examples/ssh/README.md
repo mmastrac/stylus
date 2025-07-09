@@ -56,13 +56,6 @@ ssh_check () {
 ssh_check
 ```
 
-## When to Use SSH
-
-SSH monitoring is ideal for:
-- Server health checks
-- Remote system monitoring
-- Custom command execution
-- Gathering system information
-- Service status checks
+## Alternatives
 
 For simpler connectivity tests, consider [ping monitoring](../ping/). For network devices, consider [SNMP monitoring](../snmp/). 

@@ -11,7 +11,7 @@ ID when running a monitor script. This allows you to write monitor scripts that
 can be re-used across multiple monitors.
 
 ```bash
-#!/bin/sh
+#!/bin/bash
 set -xeuf -o pipefail
 # Check the health of a service running on the monitor
 curl --fail http://$STYLUS_MONITOR_ID:8080/health | jq --raw-output '.status'
@@ -32,10 +32,28 @@ the expansion of environment variables.
 set -xeuf -o pipefail
 ```
 
+## Script-relative Paths
+
+The `dirname` command can be used to get the directory of the script that is
+running. This can be useful to locate configuration files or other resources
+that are needed by the script, which allows you to run the script from any
+directory outside of **Stylus**.
+
+```bash
+#!/bin/bash
+set -xeuf -o pipefail
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+CONFIG_FILE=$DIR/config.yaml
+```
+
 ## Testing Your Configurations
 
-As monitor scripts using metadata can be somewhat tricky to get right, *Stylus*
-includes a `test` command-line argument to allow you to develop your test
-script in a slightly more interactive manner. The output from `test` will
-include the test script's stdout and stderr streams, plus the parsed monitor
-state as JSON, and the final rendered CSS.
+As monitor scripts using metadata can be somewhat tricky to get right,
+**Stylus** includes a [`test` command-line
+argument](../getting-started/stylus-test.md) to allow you to develop your test
+script in a slightly more interactive manner.
+
+The output from `stylus test` will include the test script's stdout and stderr
+streams, as well as the parsed monitor state as JSON, and the final rendered
+CSS.

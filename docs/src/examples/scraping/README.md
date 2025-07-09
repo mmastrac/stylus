@@ -35,13 +35,6 @@ echo $HTML | \
     jq -r -e ". | to_entries | .[] | \"@@STYLUS@@ group.power-\" + (.key + 1 | tostring) + \".status.status=\" + if .value.state then \"\\\"green\\\"\" else \"\\\"blank\\\"\" end"
 ```
 
-## When to Use Scraping
-
-HTML/API scraping is ideal for:
-- Web-based device monitoring
-- API endpoint health checks
-- Web application monitoring
-- Devices with web interfaces
-- Custom dashboard monitoring
+## Alternatives
 
 For simpler connectivity tests, consider [ping monitoring](../ping/). For server monitoring, consider [SSH monitoring](../ssh/). 

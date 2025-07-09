@@ -15,12 +15,12 @@
 
 # Configuration
 - [Server Configuration](configuration/server/README.md)
-- [CSS Configuration](configuration/css/README.md)
+    - [CSS Configuration](configuration/css/README.md)
 - [Monitor Configuration](configuration/monitor/README.md)
 - [Advanced Configuration](configuration/advanced.md)
-- [General Tips](configuration/general-tips.md)
 
-# Examples
+# Examples and Tips
+- [General Tips](configuration/general-tips.md)
 - [Example Scripts](examples/README.md)
     - [Ping Monitoring](examples/ping/README.md)
     - [SSH Monitoring](examples/ssh/README.md)

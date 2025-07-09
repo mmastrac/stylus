@@ -1,4 +1,4 @@
-There are a number of options for running **Stylus**.
+# Running Stylus
 
 You can run **Stylus** in several ways:
 
@@ -6,7 +6,6 @@ You can run **Stylus** in several ways:
 * [Using Static Binaries](#static-binaries) 
 * [Using Cargo](#cargo)
 * [Building from Source](#from-source)
-
 
 ### Docker
 

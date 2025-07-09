@@ -38,13 +38,6 @@ snmp_parse () {
 snmp_check | snmp_parse
 ```
 
-## When to Use SNMP
-
-SNMP monitoring is ideal for:
-- Network device monitoring (switches, routers, etc.)
-- Interface status monitoring
-- Network performance metrics
-- Device health checks
-- Legacy network equipment
+## Alternatives
 
 For simpler connectivity tests, consider [ping monitoring](../ping/). For server monitoring, consider [SSH monitoring](../ssh/). 

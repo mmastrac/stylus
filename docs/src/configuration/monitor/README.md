@@ -19,21 +19,34 @@ test:
   command: test.sh
 ```
 
+## Logging
+
+Output from the test's standard output and standard error streams are captured
+and available from the logging endpoint.
+
 ## Monitor States
 
-Output from the test's standard output and standard error streams are captured and available from the logging endpoint.
+The state of a monitor is determined by the return value of the test script.
 
-- **Blank**: A test that has not run or completed yet
-- **Yellow**: A test that has timed out
-- **Red**: Tests that fail by returning a value other than zero
-- **Green**: Tests that return zero (success)
+- Blank: A test that has not run or completed yet
+- Yellow: A test that has timed out
+- Red: Tests that fail by returning a value other than zero
+- Green: Tests that return zero (success)
 
-## Group Monitor
+## Group Monitors
 
 A group may be configured such that a single script may update states for multiple monitors. See [Advanced Configuration](../advanced.md) for examples of configuring such a group monitor.
 
+## Metadata
+
+Tests scripts may also set metadata associated with the run. More information on
+this is available in [Advanced Configuration](../advanced.md). 
+
 ## Testing Your Configurations
 
-As monitor scripts using metadata can be somewhat tricky to get right, **Stylus** includes a `--test` command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from `--test` will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.
-
-Tests scripts may also set metadata associated with the run. More information on this is available in [Advanced Configuration](../advanced.md). 
+As monitor scripts using metadata can be somewhat tricky to get right,
+**Stylus** includes a [`stylus test`
+command](../../getting-started/stylus-test.md) to allow you to develop your test
+script in a slightly more interactive manner. The output from `stylus test` will
+include the test script's stdout and stderr streams, plus the parsed monitor
+state as JSON, and the final rendered CSS.

@@ -4,12 +4,19 @@ See some example configurations and use cases for **Stylus**.
 
 ## Monitors
 
+Writing complex monitors can be challenging. Here are some examples of how to
+monitor various services and devices:
+
 - [ping](ping/): Basic connectivity monitoring using ping
 - [Web/HTML/API Scraping](scraping/): Monitoring web services and APIs
 - [SNMP](snmp/): Monitoring network devices with SNMP
 - [SSH](ssh/): Remote monitoring over SSH
 
 ## Projects
+
+The [github repository](https://github.com/mmastrac/stylus/tree/master/examples)
+contains a number of example projects that you can use as a starting point for
+your own configuration.
 
 - [Minimal](https://github.com/mmastrac/stylus/tree/master/examples/minimal): Basic configuration example
 - [Metadata](https://github.com/mmastrac/stylus/tree/master/examples/metadata): Adding custom metadata to monitors

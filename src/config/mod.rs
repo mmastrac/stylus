@@ -23,7 +23,7 @@ pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
         }
         Commands::Test(test_args) => {
             let config = parse_config(&test_args.config)?;
-            Ok(OperationMode::Test(config, test_args.test_name))
+            Ok(OperationMode::Test(config, test_args.monitor))
         }
         Commands::Init(init_args) => Ok(OperationMode::Init(init_args.directory)),
         Commands::Run(run_args) => {

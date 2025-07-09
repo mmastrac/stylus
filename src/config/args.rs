@@ -43,7 +43,7 @@ pub struct DumpArgs {
 pub struct TestArgs {
     /// The test to run
     #[arg(short, long, required = true)]
-    pub test_name: String,
+    pub monitor: String,
 
     /// The configuration file
     #[arg(name = "FILE", required = true)]

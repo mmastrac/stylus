@@ -17,7 +17,7 @@
 - [CSS Configuration](configuration/css/README.md)
 - [Monitor Configuration](configuration/monitor/README.md)
 - [Advanced Configuration](configuration/advanced.md)
-- [General Tips](examples/general/README.md)
+- [General Tips](configuration/general-tips.md)
 
 # Examples
 - [Example Scripts](examples/README.md)

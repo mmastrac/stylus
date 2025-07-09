@@ -10,4 +10,4 @@ current state.
 
 * [Getting Started](getting-started/overview.md)
 * [Configuration](configuration/server/README.md)
-* [Examples](examples/general/README.md)
+* [Examples](configuration/general-tips.md)

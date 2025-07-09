@@ -1,6 +1,6 @@
 # stylus init
 
-Initialize a new stylus directory with default configuration and monitor setup.
+Initialize a new **Stylus** project directory with default [configuration](../configuration/server/) and [monitor](../configuration/monitor/) setup.
 
 ## Usage
 
@@ -41,12 +41,5 @@ stylus init ~/my-stylus
 # Initialize with verbose output
 stylus init -v ~/my-stylus
 ```
-
-## What Gets Created
-
-- **config.yaml**: Default server configuration with port 8000
-- **monitor.d/monitor/config.yaml**: Default monitor with 30-second interval and 10-second timeout
-- **monitor.d/monitor/test.sh**: Executable test script with placeholder content
-- **static/**: Directory for your HTML/SVG files
 
 After initialization, you can start the server with `stylus run <DIRECTORY>`. 

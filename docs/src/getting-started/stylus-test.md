@@ -20,18 +20,7 @@ stylus test [OPTIONS] --monitor <MONITOR> <FILE>
 
 ## Description
 
-The `stylus test` command allows you to run a specific monitor test immediately and see its output without starting the full server. This is useful for:
-
-- Debugging monitor scripts
-- Testing monitor configurations
-- Verifying monitor behavior
-- Development and troubleshooting
-
-The command will:
-1. Run the specified monitor's test script
-2. Display the test output (stdout/stderr)
-3. Show the parsed monitor state as JSON
-4. Display the generated CSS for the monitor
+The `stylus test` command allows you to run a specific monitor test immediately and see its output without starting the full server.
 
 ## Example
 
@@ -50,13 +39,6 @@ stylus test --monitor web-server ~/my-stylus/
 
 The command outputs three sections:
 
-1. **Monitor Log**: Raw output from the test script execution
-2. **State**: JSON representation of the monitor's current state
-3. **CSS**: Generated CSS rules for the monitor
-
-## Use Cases
-
-- **Development**: Test monitor scripts during development
-- **Debugging**: Identify issues with monitor configurations
-- **Validation**: Verify monitor behavior before deployment
-- **Troubleshooting**: Isolate problems with specific monitors 
+1. _Monitor Log_: Raw output from the test script execution
+2. _State_: JSON representation of the monitor's current state
+3. _CSS_: Generated CSS rules for the monitor

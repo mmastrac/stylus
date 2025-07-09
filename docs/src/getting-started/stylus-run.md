@@ -51,12 +51,7 @@ If you specify a directory instead of a file, Stylus will look for `config.yaml`
 
 ## Dry Run Mode
 
-The `--dry-run` option allows you to test your configuration without actually starting the server. This is useful for:
-
-- Validating configuration syntax
-- Checking monitor configurations
-- Testing without affecting running services
-- CI/CD pipeline validation
+The `--dry-run` option allows you to test your configuration without actually starting the server. This is useful for validating configuration syntax locally or in a CI/CD pipeline.
 
 ## Server Endpoints
 

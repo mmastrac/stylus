@@ -1,13 +1,13 @@
 # Theory of operation
 
-**Stylus** acts as a webserver with special endpoints and a status monitoring
+**Stylus** acts as a webserver with special endpoints, and a status monitoring
 tool.
 
 The status monitoring portion is based around scripts, written in any shell
-scripting language you like. Each script is run on an interval, and if the
-script returns `0` that is considered "up" for a given service. If the service
-times out, or returns a non-zero error this is considered a soft ("yellow") or
-hard ("red") failure.
+scripting language you like. Each script is run regularly at an interval, and if
+the script returns `0` that is considered "up" for a given service. If the
+service times out, or returns a non-zero error this is considered a soft
+("yellow") or hard ("red") failure.
 
 The special endpoints available on the webserver are:
 

@@ -214,24 +214,273 @@ stylus ~/stylus/config.yaml
 <div style="break-before: page; page-break-before: always;"></div><h1 id="creating-a-stylus-project"><a class="header" href="#creating-a-stylus-project">Creating a Stylus Project</a></h1>
 <p>You can create a new stylus project by running the <code>stylus init</code> command. This
 will create a new directory with a default configuration and a <code>monitor.d</code>
-directory.</p>
-<pre><code class="language-bash">mkdir ~/stylus
-stylus init ~/stylus
+directory with a single monitor test.</p>
+<pre><code class="language-bash session">$ stylus init ~/stylus
+Initializing directory: "~/stylus"...
+Done!
+
+Run `stylus "~/stylus"` to start the server
+
+$ tree ~/stylus/
+  ├── config.yaml
+  ├── monitor.d
+  │   └── monitor
+  │       ├── config.yaml
+  │       └── test.sh
+  └── static
+      └── README.md
 </code></pre>
+<p>Once you've created the project, you can run the <code>stylus run</code> command to start
+the server.</p>
+<pre><code class="language-bash">stylus run ~/stylus
+</code></pre>
+<p>If you open your web browser to <code>http://localhost:8000</code>, you should see a
+very basic default page with a green status:</p>
+<blockquote>
+<h1 id="stylus"><a class="header" href="#stylus">Stylus</a></h1>
+<p>Updated at 2025-07-08T22:46:07.257Z</p>
+<table style="border: 1px solid #ccc; border-collapse: collapse;">
+    <tbody><tr>
+        <th>Monitor</th>
+        <th>Status</th>
+        <th>Exit</th>
+        <th>Log</th>
+    </tr>
+    <tr data-monitor-id="monitor" style="background-color: green;">
+        <td>monitor</td>
+        <td>green</td>
+        <td>Success (0)</td>
+        <td><a style="color: blue; text-decoration: underline;">Log</a></td>
+    </tr>
+</tbody></table>
+<ul>
+    <li><a style="color: blue; text-decoration: underline;">Status JSON</a></li>
+    <li><a style="color: blue; text-decoration: underline;">Style CSS</a></li>
+</ul>
+</blockquote>
+<p>By default, stylus will render a basic summary page for all of your monitors,
+which allows you to work on your monitors before you've created any pages.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="creating-monitors"><a class="header" href="#creating-monitors">Creating Monitors</a></h1>
+<p>A monitor is a script that is run periodically to check the status of a system.
+Monitors are defined in the <code>monitor.d</code> directory in a <strong>Stylus</strong> project.</p>
+<p>Monitors consist of a configuration file and a test script.</p>
+<p>Using the project we created in the previous section, let's take a look at the
+monitor that was created for us. The configuration from the initial project is:</p>
+<pre><code class="language-bash session">$ cat ~/stylus/monitor.d/monitor/config.yaml
+interval: 30s
+timeout: 10s
+command: test.sh
+
+$ cat ~/stylus/monitor.d/monitor/test.sh
+#!/bin/sh
+echo 'Write your test script here'
+</code></pre>
+<p>The <code>interval</code> and <code>timeout</code> fields are used to control how often the monitor
+is run and how long it is allowed to run for. The <code>command</code> field is the path
+to the test script.</p>
+<p>The test script is a simple shell script that will be run by the monitor.</p>
+<p>To simplify development of monitors, stylus provides a <code>stylus test</code> command
+that will run the test script and display the status of the monitor after it
+completes.</p>
+<pre><code class="language-bash session">$ stylus test ~/stylus/config.yaml --monitor monitor
+Monitor Log
+-----------
+
+&lt;timestamp&gt; [exec  ] Starting
+&lt;timestamp&gt; [stdout] Write your test script here
+&lt;timestamp&gt; [exec  ] Termination: 0
+
+State
+-----
+
+{
+  "id": "monitor",
+  "config": {
+    "interval": "30s",
+    "timeout": "10s",
+    "command": "test.sh"
+  },
+  "status": {
+    "status": "green",
+    "code": 0,
+    "description": "Success",
+    "css": {
+      "metadata": {}
+    },
+    "metadata": {},
+    "log": [
+      // ...
+    ]
+  },
+  "children": {}
+}
+
+CSS
+---
+
+/* monitor */
+
+/* Default rules */
+[data-monitor-id="monitor"] {
+  --monitor-id: "monitor";
+  --monitor-status: green;
+  --monitor-code: 0;
+  --monitor-description: "Success";
+}
+</code></pre>
+<p>Let's say that we want to change the test script to check if the server can see
+the internet. We'll using <code>ping 8.8.8.8</code> as a proxy test for the internet
+existing.</p>
+<p>Let's update <code>test.sh</code> to:</p>
+<pre><code class="language-bash">#!/bin/sh
+ping -c 1 8.8.8.8
+</code></pre>
+<p>Now let's run the test again:</p>
+<pre><code class="language-bash session">$ stylus test ~/stylus/config.yaml monitor
+Monitor Log
+-----------
+
+&lt;timestamp&gt; [exec  ] Starting
+&lt;timestamp&gt; [stdout] PING 8.8.8.8 (8.8.8.8): 56 data bytes
+&lt;timestamp&gt; [stdout] 64 bytes from 8.8.8.8: icmp_seq=0 ttl=111 time=20.496 ms
+&lt;timestamp&gt; [stdout] 
+&lt;timestamp&gt; [stdout] --- 8.8.8.8 ping statistics ---
+&lt;timestamp&gt; [stdout] 1 packets transmitted, 1 packets received, 0.0% packet loss
+&lt;timestamp&gt; [stdout] round-trip min/avg/max/stddev = 20.496/20.496/20.496/0.000 ms
+&lt;timestamp&gt; [exec  ] Termination: 0
+
+...
+</code></pre>
+<p>As expected, the monitor successfully pings the internet.</p>
+<h2 id="more-complex-monitors"><a class="header" href="#more-complex-monitors">More Complex Monitors</a></h2>
+<p>Monitors can be as simple or complex as you need them to be. For example, if
+you want to check the status of a service, you can use a monitor to check if
+the service is running.</p>
+<p>Note that in the below examples, we're using the <code>STYLUS_MONITOR_ID</code> environment
+variable to identify the monitor. This is a special variable that is set by
+<strong>Stylus</strong> to the monitor's ID.</p>
+<pre><code class="language-bash">#!/bin/sh
+set -xeuf -o pipefail
+# Check the health of a service running on the monitor
+curl --fail http://$STYLUS_MONITOR_ID:8080/health | jq --raw-output '.status'
+</code></pre>
+<p>You can use <a href="https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol">SNMP</a>
+to check the status of a network device.</p>
+<pre><code class="language-bash">#!/bin/sh
+set -xeuf -o pipefail
+# Print the SNMP OID for the system description
+snmpwalk -v 2c -c public $STYLUS_MONITOR_ID 1.3.6.1.2.1.1.1.0
+# Print the SNMP OID for the system uptime
+snmpwalk -v 2c -c public $STYLUS_MONITOR_ID 1.3.6.1.2.1.1.3.0
+</code></pre>
+<p>For more information on complex monitors, see the <a href="getting-started/../examples/">examples</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="creating-monitor-pages"><a class="header" href="#creating-monitor-pages">Creating Monitor Pages</a></h1>
 <p><strong>Stylus</strong> is designed to be flexible and gives you a lot (too much?) freedom in
 how you configure your display.</p>
+<h2 id="rendering-technologies"><a class="header" href="#rendering-technologies">Rendering Technologies</a></h2>
 <p><strong>Stylus</strong> works particularly well with
 <a href="https://en.wikipedia.org/wiki/Scalable_Vector_Graphics">SVG</a> diagrams, but can
 use any markup language that supports either CSS or dynamic updates via JSON
-data (eg: Angular, React, etc).</p>
+data (eg: <a href="https://angular.io/">Angular</a>, <a href="https://reactjs.org/">React</a>, etc).</p>
+<h3 id="html"><a class="header" href="#html">HTML</a></h3>
+<p>React is a popular library for building user interfaces. Using <code>/status.json</code>
+as the data source, you can create a simple page with the current state of the
+monitors.</p>
+<p>The <a href="https://isoflow.io">IsoFlow</a> component for React allows you to load a model
+and render it as an isometric diagram with a little bit of glue in <strong>Stylus</strong>:</p>
+<p><img src="getting-started/isoflow.png" alt="IsoFlow" /></p>
+<h3 id="svg"><a class="header" href="#svg">SVG</a></h3>
+<p>SVG is a flexible image format that conveniently supports CSS styling. See the
+<a href="getting-started/../tutorials/svg-diagrams.html">SVG tutorial</a> for more details on building a
+diagram using <a href="https://app.diagrams.net/">diagrams.net</a>.</p>
+<p><a href="https://d3js.org/">d3.js</a> is a popular library for creating interactive
+diagrams. See the <a href="https://github.com/mmastrac/stylus/tree/master/examples/d3"><code>d3.js</code> example in the
+repository</a> for an
+example of how to use it with <strong>Stylus</strong>.</p>
+<h2 id="hooks-and-endpoints"><a class="header" href="#hooks-and-endpoints">Hooks and Endpoints</a></h2>
 <p>There are number of provided hooks for updating status, and depending on which
 technology you'd like to use for your status page, you can choose which one
-makes sense:</p>
+makes sense.</p>
+<p>Monitors are independent of the the technology you use to render your page, so
+you can start with a very basic page and then add more complexity as you go.</p>
 <h2 id="css"><a class="header" href="#css">CSS</a></h2>
+<p>The simplest way to create a monitoring page is to use CSS to update the
+status of the page.</p>
+<p>The <code>/style.css</code> route serves live CSS with the current state of the monitors.</p>
+<p>For each monitor, <strong>Stylus</strong> will generate a CSS block with the current state of
+the monitor as CSS variables (including any metadata your script has generated):</p>
+<pre><code class="language-css">[data-monitor-id="web-server-1"] {
+  --monitor-id: "web-server-1";
+  --monitor-status: green;
+  --monitor-code: 0;
+  --monitor-description: "Success";
+  --monitor-metadata-rps: RPS: 702;
+}
+</code></pre>
+<p>These CSS variables can be used for basic styling of the page, but it is highly
+recommended to generate more complex CSS rules to style the page.</p>
+<p>In your project's <code>config.yaml</code> file, you can specify a number of rules to
+style the page. For each rules in this section, a CSS block will be generated
+for each monitor.</p>
+<p>For example, adding these rules:</p>
+<pre><code class="language-yaml">  # Specify a number of rules - selector/declaration pairs. Each pair will generate a CSS block.
+  rules:
+    # Style the HTML/SVG with the appropriate status color
+    - selectors: |
+        #{{monitor.id}},
+        [data-monitor-id="{{monitor.id}}"] &gt; *
+      declarations: |
+        background-color: {{monitor.status.css.metadata.color}} !important;
+        fill: {{monitor.status.css.metadata.color}} !important;
+</code></pre>
+<p>... will generate the following CSS block for each monitor:</p>
+<pre><code class="language-css">/* web-server-1 */
+
+/* Default rules */
+[data-monitor-id="web-server-1"] {
+  --monitor-id: "web-server-1";
+  --monitor-status: green;
+  --monitor-code: 0;
+  --monitor-description: "Success";
+  --monitor-metadata-rps: RPS: 702;
+}
+#web-server-1, [data-monitor-id="web-server-1"] {
+    background-color: #d0e6a5 !important;
+    fill: #d0e6a5 !important;
+}
+</code></pre>
+<p>See the <a href="getting-started/../configuration/css/">CSS Configuration</a> section for more details.</p>
 <h2 id="json"><a class="header" href="#json">JSON</a></h2>
-<h2 id="html"><a class="header" href="#html">HTML</a></h2>
+<p>The <code>/status.json</code> route serves the current state of the monitors as JSON.</p>
+<p>This can be used for dynamic rendering of the page, or for updating the page
+with a script.</p>
+<p>Each monitor's latest status is available in the JSON response, along with its
+log output, and any metadata generated by the monitor script.</p>
+<pre><code class="language-json">{
+    "id": "database",
+    "config": {
+        "interval": "5s",
+        "timeout": "15s",
+        "command": "..."
+    },
+    "status": {
+        "status": "green",
+        "code": 0,
+        "description": "Success",
+        "css": {
+            "metadata": {
+                "color": "#d0e6a5"
+            }
+        },
+        "metadata": {},
+        "log": [
+            "2025-07-08T23:51:05.732946+00:00 [exec  ] Starting",
+            "..."
+        ]
+    },
+    "children": {}
+}
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="server-configuration"><a class="header" href="#server-configuration">Server Configuration</a></h1>
 <p>The server configuration is stored in <code>config.yaml</code> in the root directory of the configuration. This controls the overall server behaviour (including listening ports) and points <em>Stylus</em> to the monitoring directory (<code>monitor.d</code> by default).</p>
 <pre><code class="language-yaml"># Stylus will fail to load any configuration without a version of 1 (for future extensibility)
@@ -385,7 +634,8 @@ css:
 <h2 id="testing-your-configurations"><a class="header" href="#testing-your-configurations">Testing Your Configurations</a></h2>
 <p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em> includes a <code>--test</code> command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from <code>--test</code> will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.</p>
 <p>Tests scripts may also set metadata associated with the run. More information on this is available in <a href="configuration/monitor/../advanced.html">Advanced Configuration</a>.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="group-monitors"><a class="header" href="#group-monitors">Group Monitors</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="advanced-configuration"><a class="header" href="#advanced-configuration">Advanced Configuration</a></h1>
+<h2 id="group-monitors"><a class="header" href="#group-monitors">Group Monitors</a></h2>
 <p>A group monitor allows a single test script's execution to update the state for
 multiple entities. For example, you may be able to scrape the state of multiple
 hosts from a single controller, or you may want to monitor the state of multiple
@@ -433,15 +683,27 @@ like so:</p>
 <pre><code class="language-bash">ssh $STYLUS_MONITOR_ID my-test-command
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="general-tips"><a class="header" href="#general-tips">General Tips</a></h1>
-<p>There are several approaches you can take to monitoring with Stylus. This section covers general best practices and tips for writing effective monitor scripts.</p>
+<p>There are several approaches you can take to monitoring with Stylus. This
+section covers general best practices and tips for writing effective monitor
+scripts.</p>
 <h2 id="safe-scripting"><a class="header" href="#safe-scripting">Safe Scripting</a></h2>
-<p>Because monitor scripts may have a large number of moving parts, consider using <a href="https://sipb.mit.edu/doc/safe-shell/">safe shell scripting</a> techniques to ensure that any failure of any kind will return an error code.</p>
-<p>In addition <code>set -x</code> can be useful to print all commands that run as part of a monitor script. These are available in the logging endpoints and will show you the expansion of environment variables.</p>
+<p>Because monitor scripts may have a large number of moving parts, consider using
+<a href="https://sipb.mit.edu/doc/safe-shell/">safe shell scripting</a> techniques to
+ensure that any failure of any kind will return an error code.</p>
+<p>In addition <code>set -x</code> can be useful to print all commands that run as part of a
+monitor script. These are available in the logging endpoints and will show you
+the expansion of environment variables.</p>
 <pre><code class="language-bash">#!/bin/bash
 set -xeuf -o pipefail
 </code></pre>
 <h2 id="testing-your-configurations-1"><a class="header" href="#testing-your-configurations-1">Testing Your Configurations</a></h2>
-<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em> includes a <code>--test</code> command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from <code>--test</code> will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.</p>
+<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em>
+includes a <code>test</code> command-line argument to allow you to develop your test
+script in a slightly more interactive manner. The output from <code>test</code> will
+include the test script's stdout and stderr streams, plus the parsed monitor
+state as JSON, and the final rendered CSS.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>See example configurations and use cases for Stylus.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ping-monitoring"><a class="header" href="#ping-monitoring">Ping Monitoring</a></h1>
 <p>The simplest monitor is a ping script. One ping is usually enough for most cases. You can pass a timeout to ping, but <em>Stylus</em> will automatically kill processes if they run too long.</p>
 <h2 id="basic-ping-script"><a class="header" href="#basic-ping-script">Basic Ping Script</a></h2>
@@ -599,12 +861,13 @@ echo $HTML | \
 <li>Custom dashboard monitoring</li>
 </ul>
 <p>For simpler connectivity tests, consider <a href="examples/scraping/../ping/">ping monitoring</a>. For server monitoring, consider <a href="examples/scraping/../ssh/">SSH monitoring</a>.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="svg"><a class="header" href="#svg">SVG</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="svg-1"><a class="header" href="#svg-1">SVG</a></h1>
 <p>Short story: Using a tool like <a href="https://app.diagrams.net/?splash=0&amp;p=svgdata">diagrams.net</a>, create an SVG diagram of your network. Attach an SVG DOM attribute to the elements you'd like to style with status changes. If you're using <a href="https://app.diagrams.net/?splash=0&amp;p=svgdata">diagrams.net</a>, this can be done using the <code>svgdata</code> plugin. Alternatively, you can use the automatic identifiers generated by your SVG editor as your monitoring identifiers.</p>
-<p>From the SVG you've generated, create CSS selectors and rules that will apply styles to the appropriate elements as
-statuses change. The SVG <code>fill</code> attribute is a good candidate to change, but ensure that you're using <code>!important</code> on
-all your rules to override the fill colors created by your SVG editor.</p>
-<h3 id="detailed-guide"><a class="header" href="#detailed-guide">Detailed guide</a></h3>
+<p>From the SVG you've generated, create CSS selectors and rules that will apply
+styles to the appropriate elements as statuses change. The SVG <code>fill</code> attribute
+is a good candidate to change, but ensure that you're using <code>!important</code> on all
+your rules to override the fill colors created by your SVG editor.</p>
+<h2 id="detailed-guide"><a class="header" href="#detailed-guide">Detailed guide</a></h2>
 <p>Enable one of the networking diagram sets on <a href="https://app.diagrams.net/?splash=0&amp;p=svgdata">diagrams.net</a> that matches the style of diagram you'd like to create.</p>
 <p><img src="https://raw.githubusercontent.com/mmastrac/stylus/master/docs/svg-demo/screen-1.png" alt="" /></p>
 <p>For each of the networking elements you've dropped on the canvas, click the "edit data" button to add metadata.</p>

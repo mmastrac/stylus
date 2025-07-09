@@ -167,15 +167,25 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="general-tips"><a class="header" href="#general-tips">General Tips</a></h1>
-<p>There are several approaches you can take to monitoring with Stylus. This section covers general best practices and tips for writing effective monitor scripts.</p>
+<p>There are several approaches you can take to monitoring with Stylus. This
+section covers general best practices and tips for writing effective monitor
+scripts.</p>
 <h2 id="safe-scripting"><a class="header" href="#safe-scripting">Safe Scripting</a></h2>
-<p>Because monitor scripts may have a large number of moving parts, consider using <a href="https://sipb.mit.edu/doc/safe-shell/">safe shell scripting</a> techniques to ensure that any failure of any kind will return an error code.</p>
-<p>In addition <code>set -x</code> can be useful to print all commands that run as part of a monitor script. These are available in the logging endpoints and will show you the expansion of environment variables.</p>
+<p>Because monitor scripts may have a large number of moving parts, consider using
+<a href="https://sipb.mit.edu/doc/safe-shell/">safe shell scripting</a> techniques to
+ensure that any failure of any kind will return an error code.</p>
+<p>In addition <code>set -x</code> can be useful to print all commands that run as part of a
+monitor script. These are available in the logging endpoints and will show you
+the expansion of environment variables.</p>
 <pre><code class="language-bash">#!/bin/bash
 set -xeuf -o pipefail
 </code></pre>
 <h2 id="testing-your-configurations"><a class="header" href="#testing-your-configurations">Testing Your Configurations</a></h2>
-<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em> includes a <code>--test</code> command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from <code>--test</code> will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.</p>
+<p>As monitor scripts using metadata can be somewhat tricky to get right, <em>Stylus</em>
+includes a <code>test</code> command-line argument to allow you to develop your test
+script in a slightly more interactive manner. The output from <code>test</code> will
+include the test script's stdout and stderr streams, plus the parsed monitor
+state as JSON, and the final rendered CSS.</p>
 
                     </main>
 
@@ -185,7 +195,7 @@ set -xeuf -o pipefail
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../../examples/ping/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../examples/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -199,7 +209,7 @@ set -xeuf -o pipefail
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../../examples/ping/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../examples/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Creating Monitor Pages - Stylus Documentation</title>
+        <title>Creating Monitoring Pages - Stylus Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -169,16 +169,110 @@
                         <h1 id="creating-monitor-pages"><a class="header" href="#creating-monitor-pages">Creating Monitor Pages</a></h1>
 <p><strong>Stylus</strong> is designed to be flexible and gives you a lot (too much?) freedom in
 how you configure your display.</p>
+<h2 id="rendering-technologies"><a class="header" href="#rendering-technologies">Rendering Technologies</a></h2>
 <p><strong>Stylus</strong> works particularly well with
 <a href="https://en.wikipedia.org/wiki/Scalable_Vector_Graphics">SVG</a> diagrams, but can
 use any markup language that supports either CSS or dynamic updates via JSON
-data (eg: Angular, React, etc).</p>
+data (eg: <a href="https://angular.io/">Angular</a>, <a href="https://reactjs.org/">React</a>, etc).</p>
+<h3 id="html"><a class="header" href="#html">HTML</a></h3>
+<p>React is a popular library for building user interfaces. Using <code>/status.json</code>
+as the data source, you can create a simple page with the current state of the
+monitors.</p>
+<p>The <a href="https://isoflow.io">IsoFlow</a> component for React allows you to load a model
+and render it as an isometric diagram with a little bit of glue in <strong>Stylus</strong>:</p>
+<p><img src="isoflow.png" alt="IsoFlow" /></p>
+<h3 id="svg"><a class="header" href="#svg">SVG</a></h3>
+<p>SVG is a flexible image format that conveniently supports CSS styling. See the
+<a href="../tutorials/svg-diagrams.html">SVG tutorial</a> for more details on building a
+diagram using <a href="https://app.diagrams.net/">diagrams.net</a>.</p>
+<p><a href="https://d3js.org/">d3.js</a> is a popular library for creating interactive
+diagrams. See the <a href="https://github.com/mmastrac/stylus/tree/master/examples/d3"><code>d3.js</code> example in the
+repository</a> for an
+example of how to use it with <strong>Stylus</strong>.</p>
+<h2 id="hooks-and-endpoints"><a class="header" href="#hooks-and-endpoints">Hooks and Endpoints</a></h2>
 <p>There are number of provided hooks for updating status, and depending on which
 technology you'd like to use for your status page, you can choose which one
-makes sense:</p>
+makes sense.</p>
+<p>Monitors are independent of the the technology you use to render your page, so
+you can start with a very basic page and then add more complexity as you go.</p>
 <h2 id="css"><a class="header" href="#css">CSS</a></h2>
+<p>The simplest way to create a monitoring page is to use CSS to update the
+status of the page.</p>
+<p>The <code>/style.css</code> route serves live CSS with the current state of the monitors.</p>
+<p>For each monitor, <strong>Stylus</strong> will generate a CSS block with the current state of
+the monitor as CSS variables (including any metadata your script has generated):</p>
+<pre><code class="language-css">[data-monitor-id="web-server-1"] {
+  --monitor-id: "web-server-1";
+  --monitor-status: green;
+  --monitor-code: 0;
+  --monitor-description: "Success";
+  --monitor-metadata-rps: RPS: 702;
+}
+</code></pre>
+<p>These CSS variables can be used for basic styling of the page, but it is highly
+recommended to generate more complex CSS rules to style the page.</p>
+<p>In your project's <code>config.yaml</code> file, you can specify a number of rules to
+style the page. For each rules in this section, a CSS block will be generated
+for each monitor.</p>
+<p>For example, adding these rules:</p>
+<pre><code class="language-yaml">  # Specify a number of rules - selector/declaration pairs. Each pair will generate a CSS block.
+  rules:
+    # Style the HTML/SVG with the appropriate status color
+    - selectors: |
+        #{{monitor.id}},
+        [data-monitor-id="{{monitor.id}}"] &gt; *
+      declarations: |
+        background-color: {{monitor.status.css.metadata.color}} !important;
+        fill: {{monitor.status.css.metadata.color}} !important;
+</code></pre>
+<p>... will generate the following CSS block for each monitor:</p>
+<pre><code class="language-css">/* web-server-1 */
+
+/* Default rules */
+[data-monitor-id="web-server-1"] {
+  --monitor-id: "web-server-1";
+  --monitor-status: green;
+  --monitor-code: 0;
+  --monitor-description: "Success";
+  --monitor-metadata-rps: RPS: 702;
+}
+#web-server-1, [data-monitor-id="web-server-1"] {
+    background-color: #d0e6a5 !important;
+    fill: #d0e6a5 !important;
+}
+</code></pre>
+<p>See the <a href="../configuration/css/">CSS Configuration</a> section for more details.</p>
 <h2 id="json"><a class="header" href="#json">JSON</a></h2>
-<h2 id="html"><a class="header" href="#html">HTML</a></h2>
+<p>The <code>/status.json</code> route serves the current state of the monitors as JSON.</p>
+<p>This can be used for dynamic rendering of the page, or for updating the page
+with a script.</p>
+<p>Each monitor's latest status is available in the JSON response, along with its
+log output, and any metadata generated by the monitor script.</p>
+<pre><code class="language-json">{
+    "id": "database",
+    "config": {
+        "interval": "5s",
+        "timeout": "15s",
+        "command": "..."
+    },
+    "status": {
+        "status": "green",
+        "code": 0,
+        "description": "Success",
+        "css": {
+            "metadata": {
+                "color": "#d0e6a5"
+            }
+        },
+        "metadata": {},
+        "log": [
+            "2025-07-08T23:51:05.732946+00:00 [exec  ] Starting",
+            "..."
+        ]
+    },
+    "children": {}
+}
+</code></pre>
 
                     </main>
 

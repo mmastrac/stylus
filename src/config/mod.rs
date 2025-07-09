@@ -28,6 +28,13 @@ pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
         Commands::Init(init_args) => Ok(OperationMode::Init(init_args.directory)),
         Commands::Run(run_args) => {
             let config_path = if let Some(path) = run_args.force_container_path {
+                if !path.exists() {
+                    eprintln!("Configuration file {} does not exist.", path.display());
+                    eprintln!(
+                        "Ensure that you have mounted the configuration folder into the container."
+                    );
+                    return Err("Configuration file does not exist. Unable to continue.".into());
+                }
                 path
             } else {
                 run_args.config.unwrap()

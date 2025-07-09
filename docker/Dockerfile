@@ -69,7 +69,7 @@ RUN set -eux; \
       > /usr/local/bin/stylus && chmod a+x /usr/local/bin/stylus
 
 ENV FORCE_CONTAINER_LISTEN_ADDR=0.0.0.0 FORCE_CONTAINER_PATH=/srv/config.yaml FORCE_CONTAINER_PORT=8000
-CMD []
+CMD [ "run" ]
 
 # Use tini for proper signal handling
 ENV TINI_VERBOSITY=0

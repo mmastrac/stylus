@@ -28,3 +28,10 @@ $ FORCE_CONTAINER_PATH=examples/isoflow/ stylus run --dry-run something-else
 ! Usage: stylus run --dry-run <FILE>
 ! 
 ! For more information, try '--help'.
+
+$ FORCE_CONTAINER_PATH=does-not-exist/ stylus run --dry-run
+! Configuration file does-not-exist/ does not exist.
+! Ensure that you have mounted the configuration folder into the container.
+! 
+! Fatal error parsing configuration:
+! Configuration file does not exist. Unable to continue.

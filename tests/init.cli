@@ -13,7 +13,7 @@ $ stylus run new-project --dry-run
 ! Stylus %{DATA} is listening on 0.0.0.0:8000!
 ! Dry run complete. Exiting.
 
-$ stylus test new-project/config.yaml --test-name monitor
+$ stylus test new-project/config.yaml --monitor monitor
 ! Monitor Log
 ! -----------
 ! 

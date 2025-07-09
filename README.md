@@ -6,7 +6,7 @@ your infrastructure, set up HTML/SVG with a diagram of your network, and stylus
 will generate you a dynamic stylesheet to give you a visual overview of the
 current state.
 
-![Screenshot](docs/screenshot-4.png)
+![Screenshot](docs/src/screenshots/screenshot-4.png)
 
 [diagrams.net]: https://app.diagrams.net/?splash=0&p=svgdata
 

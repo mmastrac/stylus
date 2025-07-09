@@ -113,31 +113,41 @@ As expected, the monitor successfully pings the internet.
 
 ## More Complex Monitors
 
-Monitors can be as simple or complex as you need them to be. For example, if
-you want to check the status of a service, you can use a monitor to check if
-the service is running.
+Monitors can be as simple or complex as you need them to be. 
 
-Note that in the below examples, we're using the `STYLUS_MONITOR_ID` environment
-variable to identify the monitor. This is a special variable that is set by
-**Stylus** to the monitor's ID.
+For example, you can use `curl` to request a JSON endpoint from a web service,
+and ensure that it returns a healthy response:
 
 ```bash
 #!/bin/sh
 set -xeuf -o pipefail
 # Check the health of a service running on the monitor
-curl --fail http://$STYLUS_MONITOR_ID:8080/health | jq --raw-output '.status'
+STATUS=$(curl --fail http://my-web-server:8080/health | jq --raw-output '.status')
+if [ "$STATUS" != "OK" ]; then
+  echo "Service unhealthy: $STATUS"
+  exit 1
+fi
 ```
 
-You can use [SNMP](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol)
-to check the status of a network device.
+If you want to monitor network devices, you can often use
+[SNMP](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol) to
+extract information from the device. SNMP allows you to query the device for
+information about its status using OIDs (Object Identifiers), which are roughly
+standardized across different devices.
+
+See the manual for your networking device for the appropriate OIDs to use, or
+reference one of the following resources: 
+
+ - <https://ldapwiki.com/wiki/Wiki.jsp?page=SNMP>
+ - <https://networklessons.com/cisco/ccie-routing-switching/introduction-to-snmp>
 
 ```bash
 #!/bin/sh
 set -xeuf -o pipefail
 # Print the SNMP OID for the system description
-snmpwalk -v 2c -c public $STYLUS_MONITOR_ID 1.3.6.1.2.1.1.1.0
+snmpwalk -v 2c -c public my-network-router 1.3.6.1.2.1.1.1.0
 # Print the SNMP OID for the system uptime
-snmpwalk -v 2c -c public $STYLUS_MONITOR_ID 1.3.6.1.2.1.1.3.0
+snmpwalk -v 2c -c public my-network-router 1.3.6.1.2.1.1.3.0
 ```
 
 For more information on complex monitors, see the [examples](../examples/).

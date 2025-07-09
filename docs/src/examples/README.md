@@ -4,8 +4,7 @@ See some example configurations and use cases for **Stylus**.
 
 ## Monitors
 
-Writing complex monitors can be challenging. Here are some examples of how to
-monitor various services and devices:
+Writing complex monitors can be challenging. Here are some examples of how to monitor various services and devices:
 
 - [ping](ping/): Basic connectivity monitoring using ping
 - [Web/HTML/API Scraping](scraping/): Monitoring web services and APIs

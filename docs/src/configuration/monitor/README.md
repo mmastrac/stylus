@@ -44,9 +44,4 @@ this is available in [Advanced Configuration](../advanced.md).
 
 ## Testing Your Configurations
 
-As monitor scripts using metadata can be somewhat tricky to get right,
-**Stylus** includes a [`stylus test`
-command](../../getting-started/stylus-test.md) to allow you to develop your test
-script in a slightly more interactive manner. The output from `stylus test` will
-include the test script's stdout and stderr streams, plus the parsed monitor
-state as JSON, and the final rendered CSS.
+Since monitor scripts with metadata can be tricky to get right, **Stylus** includes a [`stylus test` command](../../getting-started/stylus-test.md) that lets you develop your test script interactively. The output shows your script's stdout and stderr, plus the parsed monitor state as JSON, and the final rendered CSS.

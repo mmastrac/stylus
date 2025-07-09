@@ -17,8 +17,6 @@ stylus init [OPTIONS] <DIRECTORY>
 - `-v, --verbose...` - Pass multiple times to increase the level of verbosity (overwritten by STYLUS_LOG)
 - `-h, --help` - Print help
 
-## Description
-
 The `stylus init` command creates a new **Stylus** project directory with the following structure:
 
 ## What Gets Created

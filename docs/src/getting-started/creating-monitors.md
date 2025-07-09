@@ -26,9 +26,7 @@ to the test script.
 
 The test script is a simple shell script that will be run by the monitor.
 
-Additionally to aid in the development of monitors, **Stylus** provides a
-`stylus test` command that will run the test script and display the status of
-the monitor after it completes.
+To help you develop and debug monitors, **Stylus** provides a `stylus test` command that runs the test script and shows you exactly what happens.
 
 ```bash session
 $ stylus test --monitor monitor ~/stylus/config.yaml
@@ -114,7 +112,7 @@ As expected, the monitor successfully pings the internet.
 
 ## More Complex Monitors
 
-Monitors can be as simple or complex as you need them to be. 
+Monitors can be as simple or complex as you need them to be. Here are a few examples to get you started. 
 
 For example, you can use `curl` to request a JSON endpoint from a web service,
 and ensure that it returns a healthy response:

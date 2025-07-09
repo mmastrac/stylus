@@ -18,9 +18,7 @@ stylus test [OPTIONS] --monitor <MONITOR> <FILE>
 - `-v, --verbose...` - Pass multiple times to increase the level of verbosity (overwritten by STYLUS_LOG)
 - `-h, --help` - Print help
 
-## Description
-
-The `stylus test` command allows you to run a specific monitor test immediately and see its output without starting the full server.
+The `stylus test` command runs a specific monitor test immediately and shows you the output without starting the full server. This is perfect for debugging monitor scripts or checking if your configuration works.
 
 ## Example
 
@@ -35,13 +33,11 @@ stylus test -v --monitor web-server config.yaml
 stylus test --monitor web-server ~/my-stylus/
 ```
 
-## Output Format
+The command shows you three things:
 
-The command outputs three sections:
-
-1. _Monitor Log_: Raw output from the test script execution
-2. _State_: JSON representation of the monitor's current state
-3. _CSS_: Generated CSS rules for the monitor
+1. _Monitor Log_: What your script actually output
+2. _State_: How **Stylus** interpreted the results
+3. _CSS_: The CSS rules that would be generated
 
 ```bash session
 Monitor Log

@@ -1,8 +1,6 @@
 # Creating a **Stylus** Project
 
-You can create a new **Stylus** project by running the `stylus init` command. This
-will create a new directory with a default configuration and a `monitor.d`
-directory with a single monitor test.
+You can create a new **Stylus** project by running the `stylus init` command. This creates a new directory with a default configuration and a `monitor.d` directory with a single monitor test.
 
 ```bash session
 $ stylus init ~/stylus
@@ -21,8 +19,7 @@ $ tree ~/stylus/
       └── README.md
 ```
 
-Once you've created the project, you can run the `stylus run` command to start
-the server.
+Once you've created the project, you can start the server with the `stylus run` command.
 
 ```bash
 stylus run ~/stylus
@@ -55,6 +52,5 @@ status JSON and style CSS endpoints, as well as the per-monitor log output:
 </ul>
 </blockquote>
 
-By default, **Stylus** will render a basic summary page for all of your monitors,
-which allows you to work on your monitors before you've created any pages.
+By default, **Stylus** renders a basic summary page for all of your monitors. This lets you work on your monitors before creating any custom pages.
 

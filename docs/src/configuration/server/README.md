@@ -1,6 +1,6 @@
 # Server Configuration
 
-The server configuration is stored in `config.yaml` in the root directory of the configuration. This controls the overall server behaviour (including listening ports) and points **Stylus** to the monitoring directory (`monitor.d` by default).
+The server configuration is stored in `config.yaml` in the root directory of the configuration. This controls the overall server behaviour (including listening ports) and tells **Stylus** where to find your monitors (`monitor.d` by default).
 
 ```yaml
 # Stylus will fail to load any configuration without a version of 1 (for future extensibility)

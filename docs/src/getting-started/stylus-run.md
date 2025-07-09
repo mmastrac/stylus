@@ -18,16 +18,9 @@ stylus run [OPTIONS] [FILE]
 - `-v, --verbose...` - Pass multiple times to increase the level of verbosity (overwritten by STYLUS_LOG)
 - `-h, --help` - Print help
 
-## Description
-
 The `stylus run` command starts the **Stylus** server and begins monitoring your infrastructure. This is the main command you'll use to run **Stylus** in production.
 
-The command will:
-1. Load the configuration from the specified file or directory
-2. Parse all monitor configurations
-3. Start the HTTP server
-4. Begin running monitor tests according to their schedules
-5. Serve the status page and API endpoints
+The command loads your configuration, starts the HTTP server, and begins running your monitor tests on their schedules. It also serves your status page and provides API endpoints for the current monitor states.
 
 ## Examples
 
@@ -45,13 +38,11 @@ stylus run -v config.yaml
 stylus run --dry-run config.yaml
 ```
 
-## Configuration File
-
-If you specify a directory instead of a file, **Stylus** will look for `config.yaml` inside that directory. This is the most common usage pattern.
+If you specify a directory instead of a file, **Stylus** will look for `config.yaml` inside that directory. This is the most common way to run it.
 
 ## Dry Run Mode
 
-The `--dry-run` option allows you to test your configuration without actually starting the server. This is useful for validating configuration syntax locally or in a CI/CD pipeline.
+The `--dry-run` option tests your configuration without starting the server. This is useful for validating configuration syntax locally or in a CI/CD pipeline.
 
 ## Server Endpoints
 
@@ -64,4 +55,4 @@ Once running, the server provides several endpoints:
 
 ## Stopping the Server
 
-Use `Ctrl+C` to stop the server gracefully. **Stylus** will attempt to clean up any running monitor processes. 
+Use `Ctrl+C` to stop the server gracefully. **Stylus** will clean up any running monitor processes. 

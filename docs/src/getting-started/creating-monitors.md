@@ -10,9 +10,10 @@ monitor that was created for us. The configuration from the initial project is:
 
 ```bash session
 $ cat ~/stylus/monitor.d/monitor/config.yaml
-interval: 30s
-timeout: 10s
-command: test.sh
+test:
+  interval: 30s
+  timeout: 10s
+  command: test.sh
 
 $ cat ~/stylus/monitor.d/monitor/test.sh
 #!/bin/sh
@@ -30,7 +31,7 @@ Additionally to aid in the development of monitors, **Stylus** provides a
 the monitor after it completes.
 
 ```bash session
-$ stylus test ~/stylus/config.yaml --monitor monitor
+$ stylus test --monitor monitor ~/stylus/config.yaml
 Monitor Log
 -----------
 
@@ -93,7 +94,7 @@ ping -c 1 8.8.8.8
 Now let's run the test again:
 
 ```bash session
-$ stylus test ~/stylus/config.yaml monitor
+$ stylus test --monitor monitor ~/stylus/config.yaml
 Monitor Log
 -----------
 

@@ -8,7 +8,7 @@ version: 1
 
 # HTTP server configuration
 server:
-  # Listen port
+  # Listen port (default: 80, but init command uses 8000 for development)
   port: 8000
   # Static file directory
   static: static

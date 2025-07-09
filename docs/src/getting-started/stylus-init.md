@@ -21,15 +21,17 @@ stylus init [OPTIONS] <DIRECTORY>
 
 The `stylus init` command creates a new **Stylus** project directory with the following structure:
 
+## What Gets Created
+
 ```
 <DIRECTORY>/
 ├── config.yaml          # Main configuration file
 ├── monitor.d/           # Monitor directory
-│   └── monitor/         # Default monitor
-│       ├── config.yaml  # Monitor configuration
-│       └── test.sh      # Test script
+│   └── monitor/         # Default monitor with id "monitor"
+│       ├── config.yaml  # Monitor "monitor" configuration
+│       └── test.sh      # Test script for "monitor"
 └── static/              # Static files directory
-    └── README.md        # Placeholder for index.html
+    └── README.md        # Placeholder for static files
 ```
 
 ## Example
@@ -37,9 +39,6 @@ The `stylus init` command creates a new **Stylus** project directory with the fo
 ```bash
 # Initialize a new Stylus project in ~/my-stylus
 stylus init ~/my-stylus
-
-# Initialize with verbose output
-stylus init -v ~/my-stylus
 ```
 
 After initialization, you can start the server with `stylus run <DIRECTORY>`. 

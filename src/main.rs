@@ -20,7 +20,6 @@ extern crate derive_more;
 
 use crate::config::{
     parse_config_from_args, parse_monitor_configs, Config, MonitorDirConfig, OperationMode,
-    ServerConfig,
 };
 use crate::status::{MonitorState, Status};
 use crate::worker::monitor_run;
@@ -161,7 +160,7 @@ async fn run() {
             }
             println!("Done!");
             println!();
-            println!("Run `stylus {path:?}` to start the server");
+            println!("Run `stylus run {path:?}` to start the server");
         }
     }
 }

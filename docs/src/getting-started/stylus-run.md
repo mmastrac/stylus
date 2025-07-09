@@ -1,6 +1,6 @@
 # stylus run
 
-Run stylus (default command)
+Run **Stylus** (default command)
 
 ## Usage
 
@@ -20,7 +20,7 @@ stylus run [OPTIONS] [FILE]
 
 ## Description
 
-The `stylus run` command starts the Stylus server and begins monitoring your infrastructure. This is the main command you'll use to run Stylus in production.
+The `stylus run` command starts the **Stylus** server and begins monitoring your infrastructure. This is the main command you'll use to run **Stylus** in production.
 
 The command will:
 1. Load the configuration from the specified file or directory
@@ -47,7 +47,7 @@ stylus run --dry-run config.yaml
 
 ## Configuration File
 
-If you specify a directory instead of a file, Stylus will look for `config.yaml` inside that directory. This is the most common usage pattern.
+If you specify a directory instead of a file, **Stylus** will look for `config.yaml` inside that directory. This is the most common usage pattern.
 
 ## Dry Run Mode
 
@@ -64,4 +64,4 @@ Once running, the server provides several endpoints:
 
 ## Stopping the Server
 
-Use `Ctrl+C` to stop the server gracefully. Stylus will attempt to clean up any running monitor processes. 
+Use `Ctrl+C` to stop the server gracefully. **Stylus** will attempt to clean up any running monitor processes. 

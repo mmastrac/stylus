@@ -1,6 +1,6 @@
 # Monitor Configuration
 
-Monitor configurations define how Stylus tests your infrastructure components. Each monitor consists of a test script that runs on a schedule and reports the status back to Stylus.
+Monitor configurations define how **Stylus** tests your infrastructure components. Each monitor consists of a test script that runs on a schedule and reports the status back to **Stylus**.
 
 ## Standard Monitor
 
@@ -34,6 +34,6 @@ A group may be configured such that a single script may update states for multip
 
 ## Testing Your Configurations
 
-As monitor scripts using metadata can be somewhat tricky to get right, *Stylus* includes a `--test` command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from `--test` will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.
+As monitor scripts using metadata can be somewhat tricky to get right, **Stylus** includes a `--test` command-line argument to allow you to develop your test script in a slightly more interactive manner. The output from `--test` will include the test script's stdout and stderr streams, plus the parsed monitor state as JSON, and the final rendered CSS.
 
 Tests scripts may also set metadata associated with the run. More information on this is available in [Advanced Configuration](../advanced.md). 

@@ -19,7 +19,7 @@ stylus init [OPTIONS] <DIRECTORY>
 
 ## Description
 
-The `stylus init` command creates a new Stylus project directory with the following structure:
+The `stylus init` command creates a new **Stylus** project directory with the following structure:
 
 ```
 <DIRECTORY>/

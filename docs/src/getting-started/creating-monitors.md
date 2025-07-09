@@ -25,7 +25,7 @@ to the test script.
 
 The test script is a simple shell script that will be run by the monitor.
 
-To simplify development of monitors, stylus provides a `stylus test` command
+To simplify development of monitors, **Stylus** provides a `stylus test` command
 that will run the test script and display the status of the monitor after it
 completes.
 

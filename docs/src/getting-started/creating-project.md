@@ -1,6 +1,6 @@
-# Creating a Stylus Project
+# Creating a **Stylus** Project
 
-You can create a new stylus project by running the `stylus init` command. This
+You can create a new **Stylus** project by running the `stylus init` command. This
 will create a new directory with a default configuration and a `monitor.d`
 directory with a single monitor test.
 
@@ -55,6 +55,6 @@ status JSON and style CSS endpoints, as well as the per-monitor log output:
 </ul>
 </blockquote>
 
-By default, stylus will render a basic summary page for all of your monitors,
+By default, **Stylus** will render a basic summary page for all of your monitors,
 which allows you to work on your monitors before you've created any pages.
 

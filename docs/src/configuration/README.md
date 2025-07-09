@@ -1,3 +1,3 @@
 # Configuration
 
-Learn how to configure Stylus for your environment. 
+Learn how to configure **Stylus** for your environment. 

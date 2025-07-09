@@ -56,7 +56,7 @@ These may be referenced via standard interpolation, such as `{{monitor.status.me
 
 ## Environment variables
 
-*Stylus* invokes all test scripts with a special environment variable named `STYLUS_MONITOR_ID`. This may be used
+**Stylus** invokes all test scripts with a special environment variable named `STYLUS_MONITOR_ID`. This may be used
 as a convenient way to test multiple monitors using shared scripts. For example, a test script may be configured 
 like so:
 

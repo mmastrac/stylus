@@ -1,6 +1,6 @@
 # CSS Configuration
 
-The CSS configuration controls how Stylus generates dynamic stylesheets based on monitor status. This includes metadata for different states and CSS rules for styling your HTML/SVG elements.
+The CSS configuration controls how **Stylus** generates dynamic stylesheets based on monitor status. This includes metadata for different states and CSS rules for styling your HTML/SVG elements.
 
 ```yaml
 # config.yaml

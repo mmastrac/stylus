@@ -1,6 +1,6 @@
 # Ping Monitoring
 
-The simplest monitor is a ping script. One ping is usually enough for most cases. You can pass a timeout to ping, but *Stylus* will automatically kill processes if they run too long.
+The simplest monitor is a ping script. One ping is usually enough for most cases. You can pass a timeout to ping, but **Stylus** will automatically kill processes if they run too long.
 
 ## Basic Ping Script
 

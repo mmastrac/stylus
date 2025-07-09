@@ -22,14 +22,20 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MDBOOK_VERSION: 0.4.51
+      MDBOOK_LINKCHECK_VERSION: 0.7.7
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install mdBook from crates.io
+      - name: Install mdbook from crates.io
         uses: baptiste0928/cargo-install@v3
         with:
           crate: mdbook
           version: ${{ env.MDBOOK_VERSION }}
+      - name: Install mdbook-linkcheck from crates.io
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: mdbook-linkcheck
+          version: ${{ env.MDBOOK_LINKCHECK_VERSION }}
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5

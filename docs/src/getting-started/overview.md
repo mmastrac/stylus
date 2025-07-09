@@ -1,4 +1,4 @@
-To begin, *Stylus* ships with a number of [examples](examples/general/README.md) that can be found in the [source bundle](https://github.com/mmastrac/stylus/archive/master.zip). Copy the `simple_network` folder to a location of your choice. In this guide we will assume that it will appear in `~/stylus/`.
+To begin, *Stylus* ships with a number of [examples](../examples/general/) that can be found in the [source bundle](https://github.com/mmastrac/stylus/archive/master.zip). Copy the `simple_network` folder to a location of your choice. In this guide we will assume that it will appear in `~/stylus/`.
 
 Once you've got the example set up locally, we can walk though... 
 

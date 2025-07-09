@@ -6,4 +6,4 @@ title = "Stylus Documentation"
 
 [output.html]
 
-[output.markdown] 
+[output.linkcheck]

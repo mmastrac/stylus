@@ -152,6 +152,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d71b6127be86fdcfddb610f7182ac57211d4b18a3e9c82eb2d17662f2227ad6a"
 
 [[package]]
+name = "cargo-emit"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1582e1c9e755dd6ad6b224dcffb135d199399a4568d454bd89fe515ca8425695"
+
+[[package]]
 name = "cc"
 version = "1.2.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -505,6 +511,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
 
 [[package]]
+name = "glob"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8d1add55171497b4705a648c6b583acafb01d58050a51727785f0b2c8e0a2b2"
+
+[[package]]
 name = "h2"
 version = "0.3.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -798,6 +810,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "include_directory"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc51bf21d9c8c76d0d55b3926add7fde9b595719ee0d5710d46f8ee66131cca9"
+dependencies = [
+ "include_directory_macros",
+ "mime",
+]
+
+[[package]]
+name = "include_directory_macros"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35011b5de7391d94ea631aa584d09a88b2e877505a614e4952970214f2fd1b90"
+dependencies = [
+ "mime",
+ "new_mime_guess",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "indexmap"
 version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -969,6 +1003,16 @@ dependencies = [
  "mime",
  "spin",
  "version_check",
+]
+
+[[package]]
+name = "new_mime_guess"
+version = "4.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "02a2dfb3559d53e90b709376af1c379462f7fb3085a0177deb73e6ea0d99eff4"
+dependencies = [
+ "mime",
+ "unicase",
 ]
 
 [[package]]
@@ -1355,10 +1399,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_yaml"
-version = "0.9.34+deprecated"
+name = "serde_yaml_ng"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
+checksum = "7b4db627b98b36d4203a7b458cf3573730f2bb591b28871d916dfa9efabfd41f"
 dependencies = [
  "indexmap",
  "itoa",
@@ -1387,6 +1431,15 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
+]
+
+[[package]]
+name = "sheller"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a32f8460dd44e8f372abe7eaa40904b1bf9d3795db80a3edce8ce834bf6460ae"
+dependencies = [
+ "tracing",
 ]
 
 [[package]]
@@ -1446,18 +1499,30 @@ dependencies = [
  "handlebars",
  "humantime-serde",
  "hyper",
+ "include_directory",
  "itertools",
  "keepcalm",
  "log",
  "serde",
  "serde-aux",
+ "serde-value",
  "serde_json",
- "serde_yaml",
+ "serde_yaml_ng",
+ "stylus-ui",
  "subprocess",
  "tokio",
  "tower",
  "walkdir",
  "warp",
+]
+
+[[package]]
+name = "stylus-ui"
+version = "0.0.0"
+dependencies = [
+ "cargo-emit",
+ "glob",
+ "sheller",
 ]
 
 [[package]]
@@ -1637,7 +1702,19 @@ checksum = "784e0ac535deb450455cbfa28a6f0df145ea1bb7ae51b821cf5e7927fdcfbdd0"
 dependencies = [
  "log",
  "pin-project-lite",
+ "tracing-attributes",
  "tracing-core",
+]
+
+[[package]]
+name = "tracing-attributes"
+version = "0.1.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81383ab64e72a7a8b8e13130c49e3dab29def6d0c7d76a03087b3cf71c5c6903"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

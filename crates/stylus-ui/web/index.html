@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylus Web Interface</title>
+
+    <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        fetch('import_map.json').then(res => res.json()).then(json => {
+            const script = document.createElement('script');
+            script.type = 'importmap';
+            script.textContent = JSON.stringify(json);
+            document.getElementsByTagName('head')[0].insertBefore(script, null);
+
+            import('./babel-module-loader.js').then(module => {
+                module.importBabel('./src/app.tsx', { presets: [['react', { runtime: 'automatic' }], 'typescript'] });
+            });
+        }).catch(error => {
+            console.error('Failed to load application:', error);
+            document.getElementById('root').innerHTML = `
+                <div style="padding: 20px; color: red;">
+                    <h2>Failed to load application</h2>
+                    <p style="white-space: pre-wrap; font-family: monospace;">${error.message}</p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

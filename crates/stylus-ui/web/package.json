@@ -1,0 +1,8 @@
+{
+    "name": "stylus-ui",
+    "version": "1.0.0",
+    "dependencies": {
+        "@types/react": "19.0.0",
+        "@types/react-dom": "19.0.0"
+    }
+}

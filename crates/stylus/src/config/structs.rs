@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 pub enum OperationMode {
     Run(Config, bool),
     Dump(Config),
-    Init(PathBuf, Option<PathBuf>),
+    Init(PathBuf),
     Test(Config, String),
 }
 
@@ -39,6 +39,10 @@ pub struct Config {
     pub css: CssConfig,
     #[serde(default, skip_serializing_if = "default")]
     pub base_path: PathBuf,
+    #[serde(default, skip_serializing_if = "default")]
+    pub ui: Option<serde_value::Value>,
+    #[serde(default, skip_serializing_if = "default")]
+    pub config_d: HashMap<String, serde_value::Value>,
 }
 
 fn default<T: Default + PartialEq>(t: &T) -> bool {

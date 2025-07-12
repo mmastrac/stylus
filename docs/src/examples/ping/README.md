@@ -23,12 +23,6 @@ ping -c 1 8.8.8.8
 ping -c 1 -W 5 ${STYLUS_MONITOR_ID}
 ```
 
-## When to Use Ping
-
-Ping monitoring is ideal for:
-- Basic connectivity testing
-- Simple network reachability checks
-- Quick health checks for network devices
-- Testing internet connectivity
+## Alternatives
 
 For more complex monitoring scenarios, consider using [SSH](../ssh/), [SNMP](../snmp/), or [HTML/API scraping](../scraping/). 

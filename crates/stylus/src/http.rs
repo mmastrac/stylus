@@ -104,6 +104,15 @@ async fn handle_etag_cache(
     if_none_match: Option<String>,
 ) -> Result<Box<dyn warp::Reply>, Infallible> {
     let etag = generate_etag_from_file(&reply);
+    let extension = reply.path().extension().map(|s| s.to_string_lossy().to_string()).unwrap_or_default();
+    let mut reply = Box::new(reply) as Box<dyn Reply>;
+    if matches!(extension.as_str(), "js" | "jsx" | "ts" | "tsx") {
+        reply = Box::new(warp::reply::with_header(reply, "Content-Type", "text/javascript; charset=utf-8")) as Box<dyn Reply>;
+    } else if matches!(extension.as_str(), "css") {
+        reply = Box::new(warp::reply::with_header(reply, "Content-Type", "text/css; charset=utf-8")) as Box<dyn Reply>;
+    } else if matches!(extension.as_str(), "html" | "htm" | "xhtml") {
+        reply = Box::new(warp::reply::with_header(reply, "Content-Type", "text/html; charset=utf-8")) as Box<dyn Reply>;
+    }
     let cache_control = "no-cache, must-revalidate";
 
     // Check if client sent If-None-Match header
@@ -182,12 +191,29 @@ pub async fn run(config: Config, dry_run: bool) {
             .boxed()
     };
 
-    let default_index = path!()
-        .and(with_monitor.clone())
-        .and_then(default_index)
-        .map(|s| Box::new(warp::reply::html(s)) as Box<dyn Reply>);
+    #[cfg(not(feature = "builtin-ui"))]
+    let routes = {
+        let default_index = path!()
+            .and(with_monitor.clone())
+            .and_then(default_index)
+            .map(|s| Box::new(warp::reply::html(s)) as Box<dyn Reply>);
 
-    let routes = warp::get().and(style.or(status).or(log).or(static_files).or(default_index));
+            warp::get().and(style.or(status).or(log).or(static_files).or(default_index))
+    };
+
+    #[cfg(feature = "builtin-ui")]
+    let routes ={
+        let default_index = path!()
+            .map(|| warp::reply::with_header(warp::reply::html(stylus_ui::STYLUS_HTML), "Content-Type", "text/html; charset=utf-8"));
+
+        let default_js = path!("stylus.js")
+            .map(|| warp::reply::with_header(warp::reply::html(stylus_ui::STYLUS_JAVASCRIPT), "Content-Type", "text/javascript; charset=utf-8"));
+
+        let default_css = path!("stylus.css")
+            .map(|| warp::reply::with_header(warp::reply::html(stylus_ui::STYLUS_CSS), "Content-Type", "text/css; charset=utf-8"));
+
+            warp::get().and(style.or(status).or(log).or(static_files).or(default_index).or(default_js).or(default_css))
+    };
 
     // Convert warp routes to tower service
     let warp_service = warp::service(routes);

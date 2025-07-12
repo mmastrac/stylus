@@ -1,0 +1,11 @@
+#[cfg(use_files)]
+pub const STYLUS_JAVASCRIPT: &str = include_str!("compiled/stylus.js");
+#[cfg(use_files)]
+pub const STYLUS_CSS: &str = include_str!("compiled/stylus.css");
+
+#[cfg(not(use_files))]
+pub const STYLUS_JAVASCRIPT: &str = include_str!(concat!(env!("OUT_DIR"), "/stylus.js"));
+#[cfg(not(use_files))]
+pub const STYLUS_CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/stylus.css"));
+
+pub const STYLUS_HTML: &str = include_str!("../web/index-compiled.html");

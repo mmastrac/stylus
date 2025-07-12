@@ -27,7 +27,6 @@ pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
         }
         Commands::Init(init_args) => Ok(OperationMode::Init(
             init_args.directory,
-            init_args.static_path,
         )),
         Commands::Run(run_args) => {
             let config_path = if let Some(path) = run_args.force_container_path {
@@ -97,11 +96,29 @@ fn canonicalize(
 }
 
 pub fn parse_config_string(file: &Path, s: String) -> Result<Config, Box<dyn Error>> {
-    let mut config: Config = serde_yaml::from_str(&s)?;
+    let mut config: Config = serde_yaml_ng::from_str(&s)?;
     if Iterator::count(config.base_path.components()) == 0 {
         config.base_path = Path::parent(Path::new(&file))
             .ok_or("Failed to get base path")?
             .into();
+    }
+
+    let config_d = config.base_path.join("config.d");
+    if config_d.exists() {
+        for entry in std::fs::read_dir(config_d)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_file() && path.extension().unwrap_or_default() == "yaml" {
+                let name = path.file_stem().unwrap().to_string_lossy().to_string();
+                let value = serde_yaml_ng::from_str(&std::fs::read_to_string(&path)?)?;
+                config.config_d.insert(name, value);
+            }
+            if path.is_file() && path.extension().unwrap_or_default() == "json" {
+                let name = path.file_stem().unwrap().to_string_lossy().to_string();
+                let value = serde_json::from_str(&std::fs::read_to_string(&path)?)?;
+                config.config_d.insert(name, value);
+            }
+        }
     }
 
     for css in config.css.rules.iter_mut() {
@@ -194,7 +211,7 @@ pub fn parse_monitor_config_string(
     file: &Path,
     s: String,
 ) -> Result<MonitorDirConfig, Box<dyn Error>> {
-    let mut config: MonitorDirConfig = serde_yaml::from_str(&s)?;
+    let mut config: MonitorDirConfig = serde_yaml_ng::from_str(&s)?;
     if Iterator::count(config.base_path.components()) == 0 {
         config.base_path = Path::parent(file).ok_or("Failed to get base path")?.into();
     }

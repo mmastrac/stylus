@@ -6,6 +6,15 @@ server:
 monitor:
   dir: monitor.d
 
+ui:
+  title: "Infrastructure Monitoring"
+  description: "Real-time infrastructure status with interactive diagram"
+  visualizations:
+    - title: "Infrastructure Diagram"
+      description: "Interactive infrastructure overview with live status updates"
+      type: "isoflow"
+      config: "isoflow"
+
 css:
   # Use metadata to get prettier colors for the isoflow diagram
   metadata:
@@ -16,20 +25,9 @@ css:
     green:
       color: "#d0e6a5"
   rules:
-    # Style the HTML/SVG with the appropriate status color
+    # Style the isoflow diagram with the appropriate status color
     - selectors: |
-        #{{monitor.id}},
         [data-monitor-id="{{monitor.id}}"]
       declarations: |
         background-color: {{monitor.status.css.metadata.color}} !important;
         fill: {{monitor.status.css.metadata.color}} !important;
-    # Add some text for the status/return value of the script
-    - selectors: |
-        #{{monitor.id}} td:nth-child(2)::after
-      declarations: |
-        content: "status={{monitor.status.status}} retval={{monitor.status.code}}"
-    # Add the full description to the table
-    - selectors: |
-        #{{monitor.id}} td:nth-child(3)::after
-      declarations: |
-        content: "{{monitor.status.description}}"

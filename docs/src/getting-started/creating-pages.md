@@ -1,7 +1,8 @@
-# Creating Monitor Pages
+# Creating Custom Monitor Pages
 
-**Stylus** is designed to be flexible and gives you a lot (too much?) freedom in
-how you configure your display.
+**Stylus** ships with a built-in webapp that includes a number of visualizations,
+but you can also use it to serve any content you like, even fully replacing the
+built-in webapp.
 
 ## Rendering Technologies
 

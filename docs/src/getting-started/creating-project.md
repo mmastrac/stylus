@@ -10,13 +10,23 @@ Done!
 Run `stylus "~/stylus"` to start the server
 
 $ tree ~/stylus/
-  ├── config.yaml
-  ├── monitor.d
-  │   └── monitor
-  │       ├── config.yaml
-  │       └── test.sh
-  └── static
-      └── README.md
+├── README.md
+├── config.d
+│   └── isoflow.json
+├── config.yaml
+├── monitor.d
+│   ├── my-flaky-monitor
+│   │   ├── config.yaml
+│   │   └── test.sh
+│   ├── my-group-monitor
+│   │   ├── config.yaml
+│   │   └── test.sh
+│   └── my-monitor
+│       ├── config.yaml
+│       └── test.sh
+└── static
+    ├── README.md
+    └── iframe.html
 ```
 
 Once you've created the project, you can start the server with the `stylus run` command.
@@ -29,28 +39,14 @@ If you open your web browser to `http://localhost:8000`, you should see a
 very basic default page with a green status. You'll also find a link to the
 status JSON and style CSS endpoints, as well as the per-monitor log output:
 
-<blockquote style="background-color: #f3faff !important; color: black !important;">
-<h1 style="color: black !important;">Stylus</h1>
-<p>Updated at 2025-07-08T22:46:07.257Z</p>
-<table style="border: 1px solid #ccc; border-collapse: collapse;">
-    <tbody><tr>
-        <th>Monitor</th>
-        <th>Status</th>
-        <th>Exit</th>
-        <th>Log</th>
-    </tr>
-    <tr data-monitor-id="monitor" style="background-color: green;">
-        <td>monitor</td>
-        <td>green</td>
-        <td>Success (0)</td>
-        <td><a style="color: blue; text-decoration: underline;">Log</a></td>
-    </tr>
-</tbody></table>
-<ul>
-    <li><a style="color: blue; text-decoration: underline;">Status JSON</a></li>
-    <li><a style="color: blue; text-decoration: underline;">Style CSS</a></li>
-</ul>
-</blockquote>
+By default, **Stylus** renders a basic summary page for all of your monitors.
+This lets you work on your monitors before creating any custom pages. When you
+open the default project, you'll see three sections:
 
-By default, **Stylus** renders a basic summary page for all of your monitors. This lets you work on your monitors before creating any custom pages.
+1. A table visualization showing all the monitors
+2. An Isoflow visualization, updating the diagram when the status changes
+3. The monitor page listing the raw monitors, and their status, along with a
+   button to view the log output for each
 
+![Default page](../screenshots/init-1.png)
+![Default page](../screenshots/init-2.png)

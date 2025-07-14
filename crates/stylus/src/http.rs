@@ -49,6 +49,7 @@ async fn log_request(monitor: Arc<Monitor>, s: String) -> Result<String, Infalli
     Ok("Not found".to_owned())
 }
 
+#[cfg(not(feature = "builtin-ui"))]
 async fn default_index(monitor: Arc<Monitor>) -> Result<String, Infallible> {
     let mut handlebars = Handlebars::new();
     if let Err(e) = handlebars.register_template_string("t", include_str!("./index.html")) {

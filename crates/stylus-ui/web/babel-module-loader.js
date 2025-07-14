@@ -1,8 +1,6 @@
 // Turn a module into a tree of transpiled modules.
 export async function importBabel(entryPath, { presets = [] } = {}) {
-  if (!window.Babel) {
-    await import('https://unpkg.com/@babel/standalone/babel.min.js');
-  }
+  const Babel = await import('babel');
 
   // Normalize to ensure ./ prefix for relative paths
   function normalizePath(base, relative) {

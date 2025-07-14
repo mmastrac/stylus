@@ -112,7 +112,10 @@ async fn handle_etag_cache(
         reply = Box::new(warp::reply::with_header(reply, "Content-Type", "text/css; charset=utf-8")) as Box<dyn Reply>;
     } else if matches!(extension.as_str(), "html" | "htm" | "xhtml") {
         reply = Box::new(warp::reply::with_header(reply, "Content-Type", "text/html; charset=utf-8")) as Box<dyn Reply>;
+    } else if matches!(extension.as_str(), "json") {
+        reply = Box::new(warp::reply::with_header(reply, "Content-Type", "application/json; charset=utf-8")) as Box<dyn Reply>;
     }
+
     let cache_control = "no-cache, must-revalidate";
 
     // Check if client sent If-None-Match header

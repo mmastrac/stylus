@@ -15,6 +15,17 @@ export interface CSSConfig {
   rules: any[];
 }
 
+export interface StackRow {
+  id: string;
+  size: string;
+  layout: string;
+}
+
+export interface Stack {
+  title: string;
+  rows: StackRow[];
+}
+
 export interface Visualization {
   title: string;
   description: string;
@@ -22,6 +33,8 @@ export interface Visualization {
   url?: string;
   config?: string;
   inject?: boolean;
+  stacks?: Stack[];
+  size?: 'small' | 'large';
 }
 
 export interface UIConfig {
@@ -63,7 +76,12 @@ export interface Monitor {
   id: string;
   config: MonitorConfigItem;
   status: MonitorStatus;
-  children: Record<string, any>;
+  children: Record<string, MonitorChildStatus>;
+}
+
+export interface MonitorChildStatus {
+  axes: Record<string, any>;
+  status: MonitorStatus;
 }
 
 export interface StatusData {

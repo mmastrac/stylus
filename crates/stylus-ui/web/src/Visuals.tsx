@@ -186,6 +186,136 @@ function IframeVisualization({ url, inject, statusData }: IframeVisualizationPro
     );
 }
 
+// Stack Visualization Component
+interface StackRow {
+    id: string;
+    size: string;
+    layout: string;
+}
+
+interface Stack {
+    title: string;
+    rows: StackRow[];
+}
+
+interface StackVisualizationProps {
+    stacks?: Stack[];
+    statusData: StatusData | null;
+    size?: 'small' | 'large';
+}
+
+function StackVisualization({ stacks, statusData, size }: StackVisualizationProps) {
+    if (!stacks || !statusData) {
+        return (
+            <div className={`visualization-stack ${size ? `stack-${size}` : ''}`}>
+                <div className="stack-placeholder">No stack data available</div>
+            </div>
+        );
+    }
+
+    const parseLayout = (layout: string) => {
+        // Parse layout like "1x5x2 1x1x2" into multiple group definitions
+        const groupDefs = layout.split(' ').map(groupLayout => {
+            const parts = groupLayout.split('x').map(Number);
+            if (parts.length === 3) {
+                return { groups: parts[0], columns: parts[1], rows: parts[2] };
+            }
+            return { groups: 1, columns: 1, rows: 1 };
+        });
+        return groupDefs;
+    };
+
+    const getChildStatus = (monitorId: string) => {
+        const monitor = statusData.monitors.find(m => m.id === monitorId);
+        if (!monitor?.children) return [];
+        
+        return Object.entries(monitor.children)
+            .map(([id, child]) => ({ id, child }))
+            .sort((a, b) => {
+                const aIndex = a.child.axes.index;
+                const bIndex = b.child.axes.index;
+                if (aIndex !== undefined && bIndex !== undefined) {
+                    return aIndex - bIndex;
+                }
+                return a.id.localeCompare(b.id);
+            });
+    };
+
+    const renderStackGroups = (children: Array<{id: string, child: any}>, layoutDefs: Array<{groups: number, columns: number, rows: number}>) => {
+        let childIndex = 0;
+        
+        return layoutDefs.map((layoutDef, layoutIndex) => {
+            const groups = [];
+            
+            for (let groupIndex = 0; groupIndex < layoutDef.groups; groupIndex++) {
+                const groupChildren = [];
+                
+                for (let row = 0; row < layoutDef.rows; row++) {
+                    for (let col = 0; col < layoutDef.columns; col++) {
+                        const child = children[childIndex];
+                        childIndex++;
+                        
+                        if (child) {
+                            groupChildren.push(
+                                <StatusIndicator 
+                                    key={`${row}-${col}`}
+                                    status={child.child.status.status} 
+                                    className="stack-status-indicator"
+                                    title={child.id}
+                                />
+                            );
+                        } else {
+                            groupChildren.push(
+                                <div key={`${row}-${col}`} className="stack-cell-empty" title={`Empty slot ${childIndex}`} />
+                            );
+                        }
+                    }
+                }
+                
+                groups.push(
+                    <div key={groupIndex} className="stack-group" style={{
+                        display: 'grid',
+                        gridTemplateColumns: `repeat(${layoutDef.columns}, var(--grid-size, 8px))`,
+                        gridTemplateRows: `repeat(${layoutDef.rows}, var(--grid-size, 8px))`,
+                        gap: 'var(--grid-gap, 1px)'
+                    }}>
+                        {groupChildren}
+                    </div>
+                );
+            }
+            
+            return groups;
+        });
+    };
+
+    return (
+        <div className={`visualization-stack ${size ? `stack-${size}` : ''}`}>
+            <div className="stack-columns">
+                {stacks.map((stack, stackIndex) => (
+                    <div key={stackIndex} className="stack-column">
+                        <h4 className="stack-title">{stack.title}</h4>
+                        {stack.rows.map((row, rowIndex) => {
+                            const children = getChildStatus(row.id);
+                            const layoutDefs = parseLayout(row.layout);
+                            
+                            return (
+                                <div key={rowIndex} className="stack-row">
+                                    <div className="stack-row-header">
+                                        <span className="stack-row-id">{row.id}</span>
+                                    </div>
+                                    <div className="stack-groups">
+                                        {renderStackGroups(children, layoutDefs)}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 // Base Visualization Card Component
 interface VisualizationCardProps {
     visualization: Visualization;
@@ -325,6 +455,8 @@ function VisualizationCard({ visualization, statusData, onShowLog, isFullscreen 
                 );
             case 'svg':
                 return <SVGVisualization url={visualization.url} statusData={statusData} />;
+            case 'stack':
+                return <StackVisualization stacks={visualization.stacks} statusData={statusData} size={visualization.size} />;
             default:
                 return (
                     <>
@@ -344,6 +476,7 @@ function VisualizationCard({ visualization, statusData, onShowLog, isFullscreen 
         switch (visualization.type) {
             case 'table':
             case 'svg':
+            case 'stack':
                 return 'sized';
             case 'iframe':
             case 'isoflow':
@@ -357,7 +490,7 @@ function VisualizationCard({ visualization, statusData, onShowLog, isFullscreen 
         <div className={`visualization-card ${getVisualizationClass()}`}>
             <div className="visualization-card-content">
                 {!isFullscreen && <h3>{visualization.title}</h3>}
-                <p>{visualization.description}</p>
+                {!isFullscreen && <p>{visualization.description}</p>}
                 {getVisualizationContent()}
             </div>
             {!isFullscreen && onFullscreen && (

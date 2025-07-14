@@ -40,6 +40,27 @@ The table visualization displays monitor status in a structured table format wit
   type: "table"
 ```
 
+### Stack Visualization
+
+The stack visualization displays monitor status like a rack of servers.
+
+**Configuration:**
+
+```yaml
+- title: "Rack Status"
+  description: "Rack of servers with status indicators"
+  type: "stack"
+  stacks:
+    - title: "Rack 1"
+      rows:
+        - id: "group"
+          size: "small"
+          layout: 1x5x2 1x1x2
+```
+
+The `size` parameter controls the size of the status indicators, and the `layout`
+parameter controls the layout of the status indicators.
+
 ### SVG Visualization
 
 The SVG visualization loads an SVG file and applies dynamic styling based on
@@ -103,11 +124,14 @@ information when available.
 
 ## Fullscreen Mode
 
-All visualizations support fullscreen mode for detailed viewing. Click the fullscreen button (⛶) in the top-right corner of any visualization card.
+All visualizations support fullscreen mode for detailed viewing. Click the
+fullscreen button (`⛶`) in the top-right corner of any visualization card.
 
 ## Examples
 
 ### Simple Status Dashboard
+
+A table and SVG diagram.
 
 ```yaml
 ui:
@@ -121,7 +145,7 @@ ui:
       url: "/network.svg"
 ```
 
-### Complex Infrastructure Monitoring
+A table, iframe, and Isoflow diagram.
 
 ```yaml
 ui:
@@ -144,21 +168,9 @@ ui:
 
 ### Custom Visualization Development
 
-For complex visualizations, you can create custom HTML/JavaScript applications and embed them using the iframe visualization type. This allows for:
+For complex visualizations, you can create custom HTML/JavaScript applications
+and embed them using the `iframe` visualization type. This allows for complex
+interactive dashboards, real-time data visualization, and integration with
+external monitoring systems.
 
-- Complex interactive dashboards
-- Real-time data visualization
-- Custom chart libraries (D3.js, Chart.js, etc.)
-- Integration with external monitoring systems
-
-### Dynamic Content Updates
-
-All visualizations automatically update when status data changes. The system handles:
-
-- CSS cache busting for fresh styles
-- SVG content updates
-- Iframe style re-injection
-- Table data refresh
-
-This ensures your visualizations always reflect the current state of your monitored services.
-
+See the [Custom Monitor Pages](creating-pages.md) section for more details.

@@ -28,10 +28,11 @@ export function findVisualizationById(visualizations: any[], urlId: string): any
 interface StatusIndicatorProps {
     status: Status;
     className?: string;
+    title?: string;
 }
 
-export function StatusIndicator({ status, className = "" }: StatusIndicatorProps): JSX.Element {
+export function StatusIndicator({ status, className = "", title = "" }: StatusIndicatorProps): JSX.Element {
     return (
-        <span className={`status-indicator ${getStatusClass(status)} ${className}`}></span>
+        <span className={`status-indicator ${getStatusClass(status)} ${className}`} title={title}></span>
     );
 } 

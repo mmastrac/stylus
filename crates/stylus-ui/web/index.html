@@ -10,23 +10,26 @@
 <body>
     <div id="root"></div>
     <script>
-        fetch('import_map.json').then(res => res.json()).then(json => {
+        async function loadRoot() {
+            const res = await fetch('import_map.json');
+            const json = await res.json();
             const script = document.createElement('script');
             script.type = 'importmap';
             script.textContent = JSON.stringify(json);
             document.getElementsByTagName('head')[0].insertBefore(script, null);
 
-            import('./babel-module-loader.js').then(module => {
-                module.importBabel('./src/app.tsx', { presets: [['react', { runtime: 'automatic' }], 'typescript'] });
-            });
-        }).catch(error => {
+            const module = await import('./babel-module-loader.js');
+            await module.importBabel('./src/app.tsx', { presets: [['react', { runtime: 'automatic' }], 'typescript'] });
+        }
+
+        loadRoot().catch(error => {
             console.error('Failed to load application:', error);
             document.getElementById('root').innerHTML = `
                 <div style="padding: 20px; color: red;">
                     <h2>Failed to load application</h2>
                     <p style="white-space: pre-wrap; font-family: monospace;">${error.message}</p>
                 </div>
-            `;
+            `;  
         });
     </script>
 </body>

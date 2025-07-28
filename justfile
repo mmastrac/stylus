@@ -30,7 +30,9 @@ ts-check:
     cd crates/stylus-ui/web && npx tsc --noEmit
 
 bundle:
-    cd crates/stylus-ui/web \
-      && cp src/style.css ../src/compiled/stylus.css \
-      && deno bundle --minify --platform browser \
-        --output ../src/compiled/stylus.js --sourcemap=external src/app.tsx
+    cd crates/stylus-ui/ \
+      && cp web/src/style.css src/compiled/stylus.css \
+      && deno bundle --config web/deno.json --minify --platform browser \
+        --output src/compiled/stylus.js --sourcemap=external web/src/app.tsx \
+      && gzip -9 --force src/compiled/stylus.js.map
+

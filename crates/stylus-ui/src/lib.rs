@@ -8,7 +8,8 @@ pub const STYLUS_CSS: &str = include_str!("compiled/stylus.css");
 #[cfg(not(use_files))]
 pub const STYLUS_JAVASCRIPT: &str = include_str!(concat!(env!("OUT_DIR"), "/stylus.js"));
 #[cfg(not(use_files))]
-pub const STYLUS_JAVASCRIPT_MAP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/stylus.js.map.gz"));
+pub const STYLUS_JAVASCRIPT_MAP: &[u8] =
+    include_bytes!(concat!(env!("OUT_DIR"), "/stylus.js.map.gz"));
 #[cfg(not(use_files))]
 pub const STYLUS_CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/stylus.css"));
 

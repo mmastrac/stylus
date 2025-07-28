@@ -219,23 +219,18 @@ fn handle_static_content_with_etag(
             .into_response();
     }
 
-    let res = (StatusCode::OK,
-    [
-        ("Content-Type", content_type),
-        ("Cache-Control", cache_control),
-        ("ETag", etag.as_str()),
-    ],
-    content);
+    let res = (
+        StatusCode::OK,
+        [
+            ("Content-Type", content_type),
+            ("Cache-Control", cache_control),
+            ("ETag", etag.as_str()),
+        ],
+        content,
+    );
 
     if let Some(sourcemap) = sourcemap {
-        return (
-            res.0,
-            res.1,
-            [
-                ("SourceMap", sourcemap)
-            ],
-            res.2,
-        ).into_response();
+        return (res.0, res.1, [("SourceMap", sourcemap)], res.2).into_response();
     }
 
     return res.into_response();
@@ -291,8 +286,13 @@ async fn index_handler(headers: HeaderMap, State(state): State<AppState>) -> imp
 
     #[cfg(feature = "builtin-ui")]
     {
-        return handle_static_content_with_etag(headers, "text/html; charset=utf-8", None, &stylus_ui::STYLUS_HTML)
-            .into_response();
+        return handle_static_content_with_etag(
+            headers,
+            "text/html; charset=utf-8",
+            None,
+            &stylus_ui::STYLUS_HTML,
+        )
+        .into_response();
     }
 
     #[allow(unreachable_code)]
@@ -340,17 +340,20 @@ pub async fn run(config: Config, dry_run: bool) {
                     )
                 }),
             )
-            .route("/stylus.js.map", get(|| async {
-                (
-                    StatusCode::OK,
-                    [
-                        ("Content-Type", "application/json"),
-                        ("Cache-Control", "no-cache"),
-                        ("Content-Encoding", "gzip"),
-                    ],
-                    stylus_ui::STYLUS_JAVASCRIPT_MAP,
-                )
-            }));
+            .route(
+                "/stylus.js.map",
+                get(|| async {
+                    (
+                        StatusCode::OK,
+                        [
+                            ("Content-Type", "application/json"),
+                            ("Cache-Control", "no-cache"),
+                            ("Content-Encoding", "gzip"),
+                        ],
+                        stylus_ui::STYLUS_JAVASCRIPT_MAP,
+                    )
+                }),
+            );
     }
 
     // Add static files route if configured

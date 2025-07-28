@@ -1,8 +1,8 @@
 #![warn(clippy::all)]
-use std::path::PathBuf;
-use std::time::Duration;
+use std::path::Path;
 
 use env_logger::Env;
+use include_directory::{include_directory, Dir};
 use keepcalm::SharedMut;
 
 mod config;
@@ -18,9 +18,7 @@ extern crate log;
 #[macro_use]
 extern crate derive_more;
 
-use crate::config::{
-    parse_config_from_args, parse_monitor_configs, Config, MonitorDirConfig, OperationMode,
-};
+use crate::config::{parse_config_from_args, parse_monitor_configs, OperationMode};
 use crate::status::{MonitorState, Status};
 use crate::worker::monitor_run;
 
@@ -115,52 +113,39 @@ async fn run() {
                 std::fs::create_dir_all(&path)
                     .expect(&format!("Unable to create directory {path:?}"));
             }
-            let mut config = Config::default();
-            config.version = 1;
-            config.server.port = 8000;
-            std::fs::write(
-                path.join("config.yaml"),
-                serde_yaml::to_string(&config).expect("Unable to write configuration"),
-            )
-            .expect("Unable to write configuration");
+            write_template(&path);
 
-            let static_path = path.join("static");
-            if !static_path.exists() {
-                std::fs::create_dir_all(&static_path)
-                    .expect(&format!("Unable to create directory {static_path:?}"));
-            }
-            std::fs::write(static_path.join("README.md"), "Create your index.html here")
-                .expect("Unable to write README.md");
-            let monitor_dir = path.join("monitor.d").join("monitor");
-            if !monitor_dir.exists() {
-                std::fs::create_dir_all(&monitor_dir)
-                    .expect(&format!("Unable to create directory {monitor_dir:?}"));
-            }
-            let mut monitor_config = MonitorDirConfig::default();
-            monitor_config.root.test_mut().command = PathBuf::from("test.sh");
-            monitor_config.root.test_mut().interval = Duration::from_secs(30);
-            monitor_config.root.test_mut().timeout = Duration::from_secs(10);
-            std::fs::write(
-                monitor_dir.join("config.yaml"),
-                serde_yaml::to_string(&monitor_config).expect("Unable to write configuration"),
-            )
-            .expect("Unable to write configuration");
-            std::fs::write(
-                monitor_dir.join("test.sh"),
-                "#!/bin/sh\necho 'Write your test script here'",
-            )
-            .expect("Unable to write test.sh");
-            if cfg!(unix) {
-                use std::os::unix::fs::PermissionsExt;
-                std::fs::set_permissions(
-                    monitor_dir.join("test.sh"),
-                    std::fs::Permissions::from_mode(0o755),
-                )
-                .expect("Unable to set permissions on test.sh");
-            }
             println!("Done!");
             println!();
             println!("Run `stylus run {path:?}` to start the server");
+        }
+    }
+}
+
+fn write_template(path: &Path) {
+    static TEMPLATE: Dir = include_directory!("$CARGO_MANIFEST_DIR/src/template");
+    write_template_recursive(path, &TEMPLATE);
+}
+
+fn write_template_recursive(root_path: &Path, dir: &Dir) {
+    let dir_path = root_path.join(dir.path());
+    std::fs::create_dir_all(&dir_path).expect(&format!("Unable to create directory {dir_path:?}"));
+
+    for dir in dir.dirs() {
+        write_template_recursive(root_path, &dir);
+    }
+
+    for file in dir.files() {
+        let file_path = root_path.join(file.path());
+        std::fs::write(&file_path, file.contents())
+            .expect(&format!("Unable to write file {file:?}"));
+
+        if file.mimetype() == "application/x-shellscript" {
+            if cfg!(unix) {
+                use std::os::unix::fs::PermissionsExt;
+                std::fs::set_permissions(file_path, std::fs::Permissions::from_mode(0o755))
+                    .expect("Unable to set permissions on test.sh");
+            }
         }
     }
 }

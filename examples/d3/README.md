@@ -30,23 +30,6 @@ dynamically updates colors based on monitor status:
       "
 ```
 
-## Customization
-
-### Adding New Components
-
-1. Add a new monitor directory in `monitor.d/`
-2. Create `config.yaml` and `test.sh` files
-3. Add the component to the `components` array in `index.html`
-4. Add any connections to the `connections` array
-
-### Modifying the Diagram
-
-The diagram is defined in the JavaScript section of `index.html`. You can:
-- Change component positions by modifying `x` and `y` coordinates
-- Add new component types by extending the drawing logic
-- Modify colors and styling in the CSS section
-- Add animations or interactions using D3.js
-
 ## Files Structure
 
 ```

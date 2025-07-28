@@ -1,0 +1,4 @@
+src/compiled/
+web/node_modules/.bin
+web/node_modules/.deno
+

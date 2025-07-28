@@ -6,6 +6,14 @@ server:
 monitor:
   dir: monitor.d
 
+ui:
+  visualizations:
+    - title: "Metadata Status Table"
+      description: "A table showing monitor status with custom metadata"
+      type: "iframe"
+      url: "/metadata.html"
+      inject: true
+
 css:
   # Use metadata to get prettier colors - note that we can add arbitrary string keys and values here
   metadata:

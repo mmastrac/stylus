@@ -6,14 +6,14 @@ $ stylus init new-project
 ! Initializing directory: "new-project"...
 ! Done!
 ! 
-! Run `stylus "new-project"` to start the server
+! Run `stylus run "new-project"` to start the server
 
 $ stylus run new-project --dry-run
 ! [%{DATA} WARN  stylus::config] Passed configuration location "new-project" was a directory -- inferring 'config.yaml' in that directory
 ! Stylus %{DATA} is listening on 0.0.0.0:8000!
 ! Dry run complete. Exiting.
 
-$ stylus test new-project/config.yaml --monitor monitor
+$ stylus test new-project/config.yaml --monitor my-monitor
 ! Monitor Log
 ! -----------
 ! 
@@ -25,11 +25,11 @@ $ stylus test new-project/config.yaml --monitor monitor
 ! -----
 ! 
 ! {
-!   "id": "monitor",
+!   "id": "my-monitor",
 !   "config": {
 !     "interval": "30s",
 !     "timeout": "10s",
-!     "command": "%{PATH}/new-project/monitor.d/monitor/test.sh"
+!     "command": "%{PATH}"
 !   },
 !   "status": {
 !     "status": "green",
@@ -51,11 +51,11 @@ $ stylus test new-project/config.yaml --monitor monitor
 ! CSS
 ! ---
 ! 
-! /* monitor */
+! /* my-monitor */
 ! 
 ! /* Default rules */
-! [data-monitor-id="monitor"] {
-!   --monitor-id: "monitor";
+! [data-monitor-id="my-monitor"] {
+!   --monitor-id: "my-monitor";
 !   --monitor-status: green;
 !   --monitor-code: 0;
 !   --monitor-description: "Success";

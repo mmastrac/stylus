@@ -1,51 +1,25 @@
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8" />
         <title>Status page</title>
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet"> 
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> 
         <style>
             body {
-                font-family: 'Open Sans', sans-serif;
+                font-family: 'Roboto', sans-serif;
+                font-size: 12px;
             }
             table, table td, table th {
                 border: 1px solid black;
                 border-collapse: collapse;
             }
             td, th {
-                padding: 0.2em;
+                padding: 0.2em 1em;
             }
         </style>
         <link id="status" rel="stylesheet" href="data:;" />
-        <script>
-            function reloadCss() {
-                var old = document.getElementById('status');
-                var css = document.createElement('link');
-                css.rel = "stylesheet";
-                css.href = "/style.css?t=" + new Date().valueOf();
-                css.onload = function() {
-                    old.remove();
-                    css.id = "status";
-                    setTimeout(function() {
-                        reloadCss();
-                    }, 1000);
-                }
-                css.onerror = function() {
-                    css.remove();
-                    setTimeout(function() {
-                        reloadCss();
-                    }, 1000);
-                }
-                old.insertAdjacentElement("afterend", css);
-            }
-
-            reloadCss();
-        </script>
     </head>
     <body>
-        <h1>Providing Metadata</h1>
-
-        <h2>Status Table</h2>
-
         <table>
             <tr>
                 <th>Name</th>

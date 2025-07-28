@@ -26,7 +26,18 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - uses: actions-rs/cargo@v1
+      - name: Install just
+        uses: baptiste0928/cargo-install@v3
         with:
-          command: test
-
+          crate: just
+      - name: Install clitest
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: clitest
+      - name: Install deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: "2.4.1"
+      - name: Test
+        run: |
+          just test

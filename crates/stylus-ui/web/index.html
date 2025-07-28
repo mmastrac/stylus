@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylus Web Interface</title>
+
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🖋️</text></svg>">
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        async function loadRoot() {
+            const res = await fetch('import_map.json');
+            const json = await res.json();
+            const script = document.createElement('script');
+            script.type = 'importmap';
+            script.textContent = JSON.stringify(json);
+            document.getElementsByTagName('head')[0].insertBefore(script, null);
+
+            const module = await import('./babel-module-loader.js');
+            await module.importBabel('./src/app.tsx', { presets: [['react', { runtime: 'automatic' }], 'typescript'] });
+        }
+
+        loadRoot().catch(error => {
+            console.error('Failed to load application:', error);
+            document.getElementById('root').innerHTML = `
+                <div style="padding: 20px; color: red;">
+                    <h2>Failed to load application</h2>
+                    <p style="white-space: pre-wrap; font-family: monospace;">${error.message}</p>
+                </div>
+            `;  
+        });
+    </script>
+</body>
+</html>

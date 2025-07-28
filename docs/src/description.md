@@ -1,13 +1,27 @@
-# Theory of operation
+# What is Stylus?
 
-**Stylus** acts as a webserver with special endpoints, and a status monitoring
-tool.
+**Stylus** is (1) a service/network monitoring application, and (2) a webserver
+with special endpoints.
+
+## Web Application
+
+Included in the **Stylus** package is a built-in webapp that includes a number
+of visualizations, but you can also use it to serve any content you like, even
+fully replacing the built-in webapp.
+
+The webapp includes an `iframe` visualization that can be used to display any
+URL you like, and if you're serving a local HTML page, can even inject CSS into it
+for dynamic updates without scripting.
+
+## Status Monitoring
 
 The status monitoring portion is based around scripts, written in any shell
 scripting language you like. Each script is run regularly at an interval, and if
 the script returns `0` that is considered "up" for a given service. If the
 service times out, or returns a non-zero error this is considered a soft
 ("yellow") or hard ("red") failure.
+
+## Web Server
 
 The special endpoints available on the webserver are:
 
@@ -17,7 +31,7 @@ The special endpoints available on the webserver are:
 The `style.css` endpoint may be linked by a HTML or SVG file served from the
 `static` directory that is configured. If desired, the HTML page can dynamically
 refresh the CSS periodically using Javascript. See the [included
-examples](https://github.com/mmastrac/stylus/blob/master/examples/simple_network/static/index.html)
+examples](https://github.com/mmastrac/stylus/blob/master/examples/)
 for how this might work.
 
 If you need more flexibility than CSS can provide, you can use the `status.json`

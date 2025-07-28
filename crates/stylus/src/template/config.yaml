@@ -1,0 +1,26 @@
+version: 1
+server:
+  port: 8000
+  listen_addr: 0.0.0.0
+
+ui:
+  title: Stylus Monitor
+  description: Real-time monitoring of your services
+  visualizations:
+    - title: Monitor List
+      description: List of all monitors in table view
+      type: table
+    - title: Diagram
+      description: Isoflow diagram of the monitors. Edit with https://stan-smith.github.io/FossFLOW/
+      type: isoflow
+      config: isoflow # Load the config named isoflow.yaml from config.d
+    - title: Embedded Webpage
+      description: Embed any webpage in the dashboard
+      type: iframe
+      url: iframe.html # Loaded from the server's static/ directory
+
+monitor:
+  dir: monitor.d
+css:
+  metadata: {}
+  rules: []

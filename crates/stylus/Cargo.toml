@@ -1,0 +1,40 @@
+[package]
+name = "stylus"
+description = "Stylus (style + status) is a lightweight status page for home infrastructure."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[features]
+default = ["builtin-ui"]
+builtin-ui = ["dep:stylus-ui"]
+
+[dependencies]
+stylus-ui = { path = "../stylus-ui", features = ["from-source-auto"], optional = true }
+
+tokio = { version = "1.46", features = ["macros", "rt-multi-thread"] }
+axum = "0.7"
+hyper = { version = "1.0", features = ["full"] }
+hyper-util = { version = "0.1", features = ["server"] }
+tower = { version = "0.5", features = ["util", "make"] }
+tower-http = { version = "0.5", features = ["fs", "trace"] }
+derive_more = { version = "2", features = ["full"] }
+serde = { version = "1", features = ["derive", "rc"] }
+serde_yaml_ng = "0.10"
+serde_json = { version = "1", features = ["raw_value"] }
+serde-value = "0.7"
+serde-aux = "4"
+humantime-serde = "1.1.1"
+walkdir = "2.3.2"
+handlebars = "6.3"
+subprocess = "0.2.8"
+log = "0.4.17"
+env_logger = "0.11"
+itertools = "0.14"
+clap = { version = "4.5", features = ["derive", "env"] }
+keepcalm = { version = "0.4.1", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+include_directory = "0.1"

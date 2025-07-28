@@ -6,6 +6,29 @@ server:
 monitor:
   dir: monitor.d
 
+ui:
+  title: "Group Monitor Test"
+  description: "Testing group monitors with port status visualization"
+  visualizations:
+    - title: "Port view"
+      description: "Visual grid showing port status with real-time updates"
+      type: "stack"
+      stacks:
+        - title: "Rack 1"
+          rows:
+            - id: "group"
+              size: "small"
+              layout: 3x4x2
+            - id: "group-2"
+              size: "small"
+              layout: 1x5x2 1x2x1
+
+    - title: "Port Status Grid"
+      description: "Visual grid showing port status with real-time updates"
+      type: "iframe"
+      url: "/ports.html"
+      inject: true
+
 css:
   # Use metadata to get prettier colors - note that we can add arbitrary string keys and values here
   metadata:
@@ -16,17 +39,13 @@ css:
     green:
       color: "#d0e6a5"
   rules:
-    # Style the HTML/SVG with the appropriate status color
-    - selectors: "
+    # Style the HTML with the appropriate status color
+    - selectors: |
         #{{monitor.id}},
-        [data-monitor-id=\"{{monitor.id}}\"] > *
-      "
-      declarations: "
+        [data-monitor-id="{{monitor.id}}"] > *
+      declarations: |
         background-color: {{monitor.status.css.metadata.color}} !important;
-      "
-    - selectors: "
+    - selectors: |
         #{{monitor.id}}::after
-      "
-      declarations: "
-        content: \"status={{monitor.status.status}} retval={{monitor.status.code}}\"
-      "
+      declarations: |
+        content: "status={{monitor.status.status}} retval={{monitor.status.code}}"

@@ -1,0 +1,26 @@
+[package]
+name = "stylus-ui"
+description = "Stylus (style + status) is a lightweight status page for home infrastructure."
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[features]
+default = ["from-source-auto"]
+
+# Automatically detect if we need to build from source
+from-source-auto = []
+from-source-always = []
+
+[dependencies]
+
+[build-dependencies]
+sheller = "0.5.4"
+glob = "0.3.1"
+cargo-emit = "0.2.1"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(use_files)'] }

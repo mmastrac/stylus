@@ -1,0 +1,53 @@
+{
+  "version": "5",
+  "specifiers": {
+    "npm:@types/react-dom@19.0.0": "19.0.0",
+    "npm:@types/react@19.0.0": "19.0.0"
+  },
+  "npm": {
+    "@types/react-dom@19.0.0": {
+      "integrity": "sha512-1KfiQKsH1o00p9m5ag12axHQSb3FOU9H20UTrujVSkNhuCrRHiQWFqgEnTNK5ZNfnzZv8UWrnXVqCmCF9fgY3w==",
+      "dependencies": [
+        "@types/react"
+      ]
+    },
+    "@types/react@19.0.0": {
+      "integrity": "sha512-MY3oPudxvMYyesqs/kW1Bh8y9VqSmf+tzqw3ae8a9DZW68pUe3zAdHeI1jc6iAysuRdACnVknHP8AhwD4/dxtg==",
+      "dependencies": [
+        "csstype"
+      ]
+    },
+    "csstype@3.1.3": {
+      "integrity": "sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw=="
+    }
+  },
+  "redirects": {
+    "https://esm.sh/react-dom@19/client?dev&external=react": "https://esm.sh/react-dom@19.1.0/client?dev&external=react",
+    "https://esm.sh/react-dom@19?dev&external=react": "https://esm.sh/react-dom@19.1.0?dev&external=react",
+    "https://esm.sh/react@19/jsx-runtime?dev": "https://esm.sh/react@19.1.0/jsx-runtime?dev",
+    "https://esm.sh/react@19?dev": "https://esm.sh/react@19.1.0?dev",
+    "https://esm.sh/scheduler@^0.26.0?target=denonext&dev": "https://esm.sh/scheduler@0.26.0?dev&target=denonext"
+  },
+  "remote": {
+    "https://esm.sh/react-dom@19.1.0/X-ZXJlYWN0/denonext/client.development.mjs": "3eedb1d72e5d8ab73f5507fef9fe5a6b8f046238914a3932563e865cbcfa4b49",
+    "https://esm.sh/react-dom@19.1.0/X-ZXJlYWN0/denonext/react-dom.development.mjs": "e6612c9f7b24abe44372957d96e3bb9ccd82049edffca216f43d2304cf7464dc",
+    "https://esm.sh/react-dom@19.1.0/client?dev&external=react": "11fe1d42dd8bb3301ef651d323ddbbd044406ec8891fe6cb5098707f272554af",
+    "https://esm.sh/react-dom@19.1.0?dev&external=react": "915bb262bcae649b835461e63ff77de21cd77344d4ee338523461a8c01b938a9",
+    "https://esm.sh/react@19.1.0/denonext/jsx-runtime.development.mjs": "353967629afcaf1cb60443fdd3ef57055fbb3ca0b559e5d89da9b41603619053",
+    "https://esm.sh/react@19.1.0/denonext/react.development.mjs": "263363089b8469b05ce340682f9b67a8037d0f134913eec85be8dc070807b917",
+    "https://esm.sh/react@19.1.0/jsx-runtime?dev": "bd3f8f1c7bee7c88ea3b604d47e343c142406d5abb10e892d4b8ee0ed32f801c",
+    "https://esm.sh/react@19.1.0?dev": "ac1322aec122bcd49ba3dd1597af6be47134d7a5bb541e61fdf2ed746e75da68",
+    "https://esm.sh/scheduler@0.26.0/denonext/scheduler.development.mjs": "95aae612f4d1b5879f5fd20b42769eff8a4fbbcc92b0b8aacd5179ca760061a5",
+    "https://esm.sh/scheduler@0.26.0?dev&target=denonext": "53c2099f311b0f626ccf64b613c057d605e2b701d45cdcfd2670816d555b2b0d",
+    "https://esm.sh/x-isoflow-react-19@1.1.1-patch-6/X-ZXJlYWN0LHJlYWN0LWRvbQ/denonext/x-isoflow-react-19.mjs": "0942c64965fb3d524cf9247c58aa9cc9acd518bb18d065b6ef54bf70fc692bdb",
+    "https://esm.sh/x-isoflow-react-19@1.1.1-patch-6?external=react,react-dom": "c12a2f4bf850a940e1c76ac0595dfa0f101b335d8ca89fabcd706121b42e44f0"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@types/react-dom@19.0.0",
+        "npm:@types/react@19.0.0"
+      ]
+    }
+  }
+}

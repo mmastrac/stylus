@@ -1,18 +1,19 @@
+extern crate cargo_emit;
 extern crate glob;
 extern crate sheller;
-extern crate cargo_emit;
 
-use std::path::Path;
 use cargo_emit::{rerun_if_changed, rustc_cfg, warning};
+use std::path::Path;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let compiled_script = root.join("compiled/stylus.js");
     let compiled_css = root.join("compiled/stylus.css");
-    
+
     let files_exist = compiled_script.exists() && compiled_css.exists();
 
-    if cfg!(feature = "from-source-always") || (cfg!(feature = "from-source-auto") && !files_exist) {
+    if cfg!(feature = "from-source-always") || (cfg!(feature = "from-source-auto") && !files_exist)
+    {
         use glob::glob;
         use sheller::try_run;
 
@@ -29,8 +30,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let out_dir = std::env::var_os("OUT_DIR").unwrap().into_string().unwrap();
 
         try_run!("deno install --config web/deno.json")?;
-        try_run!(r#"deno bundle --config web/deno.json --minify --platform browser \
-            --output {out_dir}/stylus.js --sourcemap=external web/src/app.tsx"#)?;
+        try_run!(
+            r#"deno bundle --config web/deno.json --minify --platform browser \
+            --output {out_dir}/stylus.js --sourcemap=external web/src/app.tsx"#
+        )?;
         std::fs::copy("web/src/style.css", format!("{out_dir}/stylus.css"))?;
     } else {
         rerun_if_changed!("src/compiled/stylus.js");

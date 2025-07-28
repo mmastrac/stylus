@@ -16,9 +16,11 @@ builtin-ui = ["dep:stylus-ui"]
 stylus-ui = { path = "../stylus-ui", features = ["from-source-auto"], optional = true }
 
 tokio = { version = "1.46", features = ["macros", "rt-multi-thread"] }
-warp = "0.3"
-hyper = { version = "0.14", features = ["full"] }
+axum = "0.7"
+hyper = { version = "1.0", features = ["full"] }
+hyper-util = { version = "0.1", features = ["server"] }
 tower = { version = "0.5", features = ["util", "make"] }
+tower-http = { version = "0.5", features = ["fs", "trace"] }
 derive_more = { version = "2", features = ["full"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_yaml_ng = "0.10"

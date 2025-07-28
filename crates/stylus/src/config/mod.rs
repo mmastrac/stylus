@@ -25,9 +25,7 @@ pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
             let config = parse_config(&test_args.config)?;
             Ok(OperationMode::Test(config, test_args.monitor))
         }
-        Commands::Init(init_args) => Ok(OperationMode::Init(
-            init_args.directory,
-        )),
+        Commands::Init(init_args) => Ok(OperationMode::Init(init_args.directory)),
         Commands::Run(run_args) => {
             let config_path = if let Some(path) = run_args.force_container_path {
                 if !path.exists() {

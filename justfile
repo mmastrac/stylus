@@ -31,6 +31,7 @@ ts-check:
 
 bundle:
     cd crates/stylus-ui/ \
+      && mkdir -p src/compiled \
       && cp web/src/style.css src/compiled/stylus.css \
       && deno bundle --config web/deno.json --minify --platform browser \
         --output src/compiled/stylus.js --sourcemap=external web/src/app.tsx \
@@ -38,6 +39,7 @@ bundle:
 
 release-tag:
     #!/usr/bin/env bash
+    set -euf -o pipefail
     VERSION="v$(cargo metadata --format-version=1 | jq -r '.packages[] | select(.name == "stylus") | .version')"
     echo "Creating tag $VERSION..."
     git tag "$VERSION"

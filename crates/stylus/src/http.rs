@@ -196,6 +196,7 @@ fn etag_matches(headers: &HeaderMap, etag: &str) -> bool {
 fn handle_static_content_with_etag(
     headers: HeaderMap,
     content_type: &'static str,
+    sourcemap: Option<&'static str>,
     content: &'static str,
 ) -> impl IntoResponse {
     let cache_control = if cfg!(debug_assertions) {
@@ -218,16 +219,26 @@ fn handle_static_content_with_etag(
             .into_response();
     }
 
-    (
-        StatusCode::OK,
-        [
-            ("Content-Type", content_type),
-            ("Cache-Control", cache_control),
-            ("ETag", etag.as_str()),
-        ],
-        content,
-    )
-        .into_response()
+    let res = (StatusCode::OK,
+    [
+        ("Content-Type", content_type),
+        ("Cache-Control", cache_control),
+        ("ETag", etag.as_str()),
+    ],
+    content);
+
+    if let Some(sourcemap) = sourcemap {
+        return (
+            res.0,
+            res.1,
+            [
+                ("SourceMap", sourcemap)
+            ],
+            res.2,
+        ).into_response();
+    }
+
+    return res.into_response();
 }
 
 /// Custom static file handler with ETag support
@@ -278,7 +289,18 @@ async fn index_handler(headers: HeaderMap, State(state): State<AppState>) -> imp
         return default_index(state).await.into_response();
     }
 
-    handle_static_content_with_etag(headers, "text/html; charset=utf-8", &stylus_ui::STYLUS_HTML)
+    #[cfg(feature = "builtin-ui")]
+    {
+        return handle_static_content_with_etag(headers, "text/html; charset=utf-8", None, &stylus_ui::STYLUS_HTML)
+            .into_response();
+    }
+
+    #[allow(unreachable_code)]
+    (
+        StatusCode::NOT_FOUND,
+        [("Content-Type", "text/plain")],
+        "File not found".to_string(),
+    )
         .into_response()
 }
 
@@ -302,6 +324,7 @@ pub async fn run(config: Config, dry_run: bool) {
                     handle_static_content_with_etag(
                         headers,
                         "text/javascript; charset=utf-8",
+                        Some("/stylus.js.map"),
                         &stylus_ui::STYLUS_JAVASCRIPT,
                     )
                 }),
@@ -312,10 +335,22 @@ pub async fn run(config: Config, dry_run: bool) {
                     handle_static_content_with_etag(
                         headers,
                         "text/css; charset=utf-8",
+                        None,
                         &stylus_ui::STYLUS_CSS,
                     )
                 }),
-            );
+            )
+            .route("/stylus.js.map", get(|| async {
+                (
+                    StatusCode::OK,
+                    [
+                        ("Content-Type", "application/json"),
+                        ("Cache-Control", "no-cache"),
+                        ("Content-Encoding", "gzip"),
+                    ],
+                    stylus_ui::STYLUS_JAVASCRIPT_MAP,
+                )
+            }));
     }
 
     // Add static files route if configured

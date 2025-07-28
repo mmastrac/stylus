@@ -34,6 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             r#"deno bundle --config web/deno.json --minify --platform browser \
             --output {out_dir}/stylus.js --sourcemap=external web/src/app.tsx"#
         )?;
+        try_run!("gzip -9 {out_dir}/stylus.js.map")?;
         std::fs::copy("web/src/style.css", format!("{out_dir}/stylus.css"))?;
     } else {
         rerun_if_changed!("src/compiled/stylus.js");

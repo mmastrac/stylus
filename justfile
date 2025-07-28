@@ -22,5 +22,7 @@ ts-check:
     cd crates/stylus-ui/web && npx tsc --noEmit
 
 bundle:
-    cd crates/stylus-ui/web && mkdir -p build \
-      && deno bundle --minify --platform browser --output build/app.js --sourcemap=external src/app.tsx
+    cd crates/stylus-ui/web \
+      && cp src/style.css ../src/compiled/stylus.css \
+      && deno bundle --minify --platform browser \
+        --output ../src/compiled/stylus.js --sourcemap=external src/app.tsx

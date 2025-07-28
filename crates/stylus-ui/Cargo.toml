@@ -2,6 +2,11 @@
 name = "stylus-ui"
 description = "Stylus (style + status) is a lightweight status page for home infrastructure."
 edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
 
 [features]
 default = ["from-source-auto"]

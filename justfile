@@ -36,3 +36,9 @@ bundle:
         --output src/compiled/stylus.js --sourcemap=external web/src/app.tsx \
       && gzip -9 --force src/compiled/stylus.js.map
 
+release-tag:
+    #!/usr/bin/env bash
+    VERSION="v$(cargo metadata --format-version=1 | jq -r '.packages[] | select(.name == "stylus") | .version')"
+    echo "Creating tag $VERSION..."
+    git tag "$VERSION"
+    echo "Tag created. Push with: git push origin $VERSION"

@@ -1,7 +1,10 @@
 # https://just.systems
 
-default:
-    echo 'Hello, world!'
+clitest: build-debug
+    PATH=`pwd`/target/debug:$PATH clitest --quiet tests/*
+
+build-debug:
+    cargo build --bin stylus
 
 dev:
     #!/usr/bin/env bash

@@ -13,6 +13,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Install just
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: just
+      - name: Install deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: "2.4.1"
+      - name: Bundle UI source
+        run: just bundle
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
           cargo install cross

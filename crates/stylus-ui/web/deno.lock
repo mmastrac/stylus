@@ -22,11 +22,6 @@
     }
   },
   "redirects": {
-    "https://esm.sh/@types/react-dom@~19.1.6/X-ZXJlYWN0/client.d.ts": "https://esm.sh/@types/react-dom@19.1.6/X-ZXJlYWN0/client.d.ts",
-    "https://esm.sh/@types/react-dom@~19.1.6/X-ZXJlYWN0/index.d.ts": "https://esm.sh/@types/react-dom@19.1.6/X-ZXJlYWN0/index.d.ts",
-    "https://esm.sh/@types/react@~19.1.0/index.d.ts": "https://esm.sh/@types/react@19.1.8/index.d.ts",
-    "https://esm.sh/@types/react@~19.1.2/jsx-runtime.d.ts": "https://esm.sh/@types/react@19.1.8/jsx-runtime.d.ts",
-    "https://esm.sh/@types/scheduler@~0.26.0/index.d.ts": "https://esm.sh/@types/scheduler@0.26.0/index.d.ts",
     "https://esm.sh/react-dom@19/client?dev&external=react": "https://esm.sh/react-dom@19.1.0/client?dev&external=react",
     "https://esm.sh/react-dom@19?dev&external=react": "https://esm.sh/react-dom@19.1.0?dev&external=react",
     "https://esm.sh/react@19/jsx-runtime?dev": "https://esm.sh/react@19.1.0/jsx-runtime?dev",
@@ -34,8 +29,6 @@
     "https://esm.sh/scheduler@^0.26.0?target=denonext&dev": "https://esm.sh/scheduler@0.26.0?dev&target=denonext"
   },
   "remote": {
-    "https://esm.sh/@babel/standalone/babel.min.js": "fbd9c1ba3dfde665bd7198adabccd36938a886d975461e502145922571283437",
-    "https://esm.sh/@babel/standalone@7.28.1/es2022/babel.min.mjs": "512c7b555b9bd0ac778d97c11ce9e186c7467d935f6d7d90deca8eb6525754ec",
     "https://esm.sh/react-dom@19.1.0/X-ZXJlYWN0/denonext/client.development.mjs": "3eedb1d72e5d8ab73f5507fef9fe5a6b8f046238914a3932563e865cbcfa4b49",
     "https://esm.sh/react-dom@19.1.0/X-ZXJlYWN0/denonext/react-dom.development.mjs": "e6612c9f7b24abe44372957d96e3bb9ccd82049edffca216f43d2304cf7464dc",
     "https://esm.sh/react-dom@19.1.0/client?dev&external=react": "11fe1d42dd8bb3301ef651d323ddbbd044406ec8891fe6cb5098707f272554af",

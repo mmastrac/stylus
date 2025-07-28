@@ -1,6 +1,6 @@
 {
     "imports": {
-        "babel": "https://esm.sh/@babel/standalone/babel.min.js",
+        "babel": "https://esm.sh/@babel/standalone@@7.28.2/babel.min.js",
         "react": "https://esm.sh/react@19?dev",
         "react-dom": "https://esm.sh/react-dom@19?dev&external=react",
         "react-dom/client": "https://esm.sh/react-dom@19/client?dev&external=react",

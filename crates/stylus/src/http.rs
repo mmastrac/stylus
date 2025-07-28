@@ -7,7 +7,7 @@ use std::sync::Arc;
 use axum::{
     extract::{Path, State},
     http::{HeaderMap, HeaderValue, StatusCode},
-    response::{IntoResponse, Json, Response},
+    response::{IntoResponse, Json},
     routing::get,
     Router,
 };
@@ -56,8 +56,7 @@ async fn log_request(
     )
 }
 
-#[cfg(not(feature = "builtin-ui"))]
-async fn default_index(State(state): State<AppState>) -> impl IntoResponse {
+async fn default_index(state: AppState) -> impl IntoResponse {
     use crate::status::MonitorState;
     use handlebars::Handlebars;
     use keepcalm::SharedMut;
@@ -99,15 +98,7 @@ async fn default_index(State(state): State<AppState>) -> impl IntoResponse {
 /// Generate an ETag from file content hash
 fn generate_etag_from_path(path: &std::path::Path) -> String {
     if let Ok(content) = std::fs::read_to_string(path) {
-        let mut hasher = DefaultHasher::new();
-        content.hash(&mut hasher);
-        let hash1 = hasher.finish();
-        // Stretch the hash by using the file size. This isn't
-        // cryptographic by any means.
-        content.len().hash(&mut hasher);
-        content.hash(&mut hasher);
-        let hash2 = hasher.finish();
-        format!("\"{:x}{:x}\"", hash1, hash2)
+        generate_etag_from_string(&content)
     } else {
         let mut hasher = DefaultHasher::new();
         if let Ok(metadata) = std::fs::metadata(path) {
@@ -120,6 +111,17 @@ fn generate_etag_from_path(path: &std::path::Path) -> String {
         path.hash(&mut hasher);
         format!("\"W/{:x}\"", hasher.finish())
     }
+}
+
+/// Generate an ETag from string content
+fn generate_etag_from_string(content: &str) -> String {
+    let mut hasher = DefaultHasher::new();
+    content.hash(&mut hasher);
+    let hash1 = hasher.finish();
+    content.len().hash(&mut hasher);
+    content.hash(&mut hasher);
+    let hash2 = hasher.finish();
+    format!("\"{:x}{:x}\"", hash1, hash2)
 }
 
 /// Handle ETag cache validation for static files
@@ -139,54 +141,93 @@ async fn handle_static_file_with_etag(headers: HeaderMap, file_path: PathBuf) ->
         _ => "application/octet-stream",
     };
 
-    let cache_control = "no-cache, must-revalidate";
+    let cache_control = if cfg!(debug_assertions) {
+        "no-cache"
+    } else {
+        // Allow caching for 10 seconds, and stale for 60 seconds
+        "max-age=10, stale-while-revalidate=60"
+    };
 
     // Check if client sent If-None-Match header
-    if let Some(client_etag) = headers.get("if-none-match") {
-        if let Ok(client_etag_str) = client_etag.to_str() {
-            // Remove quotes if present for comparison
-            let client_etag = client_etag_str.trim_matches('"');
-            let server_etag = etag.trim_matches('"');
-
-            if client_etag == server_etag {
-                // ETags match, return 304 Not Modified
-                let mut response = Response::new(axum::body::Body::empty());
-                *response.status_mut() = StatusCode::NOT_MODIFIED;
-                response
-                    .headers_mut()
-                    .insert("ETag", HeaderValue::from_str(&etag).unwrap());
-                response
-                    .headers_mut()
-                    .insert("Cache-Control", HeaderValue::from_static(cache_control));
-                return response;
-            }
-        }
+    if etag_matches(&headers, &etag) {
+        return (
+            StatusCode::NOT_MODIFIED,
+            [
+                ("ETag", HeaderValue::from_str(&etag).unwrap()),
+                ("Cache-Control", HeaderValue::from_static(cache_control)),
+            ],
+            "",
+        )
+            .into_response();
     }
 
     // Read file content
     match std::fs::read(&file_path) {
-        Ok(content) => {
-            let mut response = Response::new(axum::body::Body::from(content));
-            response
-                .headers_mut()
-                .insert("Content-Type", HeaderValue::from_static(content_type));
-            response
-                .headers_mut()
-                .insert("Cache-Control", HeaderValue::from_static(cache_control));
-            response
-                .headers_mut()
-                .insert("ETag", HeaderValue::from_str(&etag).unwrap());
-            response
-        }
-        Err(_) => {
-            let mut response = Response::new(axum::body::Body::from("File not found"));
-            *response.status_mut() = StatusCode::NOT_FOUND;
-            response
-                .headers_mut()
-                .insert("Content-Type", HeaderValue::from_static("text/plain"));
-            response
+        Ok(content) => (
+            StatusCode::OK,
+            [
+                ("Content-Type", HeaderValue::from_static(content_type)),
+                ("Cache-Control", HeaderValue::from_static(cache_control)),
+                ("ETag", HeaderValue::from_str(&etag).unwrap()),
+            ],
+            content,
+        )
+            .into_response(),
+        Err(_) => (
+            StatusCode::NOT_FOUND,
+            [("Content-Type", HeaderValue::from_static("text/plain"))],
+            "File not found",
+        )
+            .into_response(),
+    }
+}
+
+fn etag_matches(headers: &HeaderMap, etag: &str) -> bool {
+    if let Some(client_etag) = headers.get("if-none-match") {
+        if let Ok(client_etag_str) = client_etag.to_str() {
+            let client_etag = client_etag_str.trim_matches('"');
+            let server_etag = etag.trim_matches('"');
+            return client_etag == server_etag;
         }
     }
+    false
+}
+
+fn handle_static_content_with_etag(
+    headers: HeaderMap,
+    content_type: &'static str,
+    content: &'static str,
+) -> impl IntoResponse {
+    let cache_control = if cfg!(debug_assertions) {
+        "no-cache"
+    } else {
+        // Allow caching for 10 seconds, and stale for 60 seconds
+        "max-age=10, stale-while-revalidate=60"
+    };
+
+    let etag = generate_etag_from_string(content);
+    if etag_matches(&headers, &etag) {
+        return (
+            StatusCode::NOT_MODIFIED,
+            [
+                ("ETag", HeaderValue::from_str(&etag).unwrap()),
+                ("Cache-Control", HeaderValue::from_static(cache_control)),
+            ],
+            "",
+        )
+            .into_response();
+    }
+
+    (
+        StatusCode::OK,
+        [
+            ("Content-Type", content_type),
+            ("Cache-Control", cache_control),
+            ("ETag", etag.as_str()),
+        ],
+        content,
+    )
+        .into_response()
 }
 
 /// Custom static file handler with ETag support
@@ -215,24 +256,6 @@ async fn static_files_handler(
         }
     }
 
-    if file.is_empty() {
-        #[cfg(not(feature = "builtin-ui"))]
-        {
-            return index_handler(state.monitor.config.clone())
-                .await
-                .into_response();
-        }
-        #[cfg(feature = "builtin-ui")]
-        {
-            return (
-                StatusCode::OK,
-                [("Content-Type", "text/html; charset=utf-8")],
-                stylus_ui::STYLUS_HTML,
-            )
-                .into_response();
-        }
-    }
-
     (
         StatusCode::NOT_FOUND,
         [("Content-Type", "text/plain")],
@@ -241,20 +264,21 @@ async fn static_files_handler(
         .into_response()
 }
 
-async fn index_handler(config: Config) -> impl IntoResponse {
-    if let Some(static_path) = &config.server.static_path {
+async fn index_handler(headers: HeaderMap, State(state): State<AppState>) -> impl IntoResponse {
+    if let Some(static_path) = &state.monitor.config.server.static_path {
         let full_path = static_path.join("index.html");
         if full_path.exists() {
-            return handle_static_file_with_etag(HeaderMap::new(), full_path)
+            return handle_static_file_with_etag(headers, full_path)
                 .await
                 .into_response();
         }
     }
-    (
-        StatusCode::OK,
-        [("Content-Type", "text/html; charset=utf-8")],
-        stylus_ui::STYLUS_HTML,
-    )
+
+    if cfg!(not(feature = "builtin-ui")) {
+        return default_index(state).await.into_response();
+    }
+
+    handle_static_content_with_etag(headers, "text/html; charset=utf-8", &stylus_ui::STYLUS_HTML)
         .into_response()
 }
 
@@ -266,35 +290,29 @@ pub async fn run(config: Config, dry_run: bool) {
     let mut app = Router::new()
         .route("/style.css", get(css_request))
         .route("/status.json", get(status_request))
-        .route("/log/:monitor_id", get(log_request));
-
-    #[cfg(not(feature = "builtin-ui"))]
-    {
-        app = app.route("/", get(default_index));
-    }
+        .route("/log/:monitor_id", get(log_request))
+        .route("/", get(index_handler));
 
     #[cfg(feature = "builtin-ui")]
     {
-        let config = config.clone();
         app = app
-            .route("/", get(move || index_handler(config.clone())))
             .route(
                 "/stylus.js",
-                get(|| async {
-                    (
-                        StatusCode::OK,
-                        [("Content-Type", "text/javascript; charset=utf-8")],
-                        stylus_ui::STYLUS_JAVASCRIPT,
+                get(|headers: HeaderMap| async {
+                    handle_static_content_with_etag(
+                        headers,
+                        "text/javascript; charset=utf-8",
+                        &stylus_ui::STYLUS_JAVASCRIPT,
                     )
                 }),
             )
             .route(
                 "/stylus.css",
-                get(|| async {
-                    (
-                        StatusCode::OK,
-                        [("Content-Type", "text/css; charset=utf-8")],
-                        stylus_ui::STYLUS_CSS,
+                get(|headers: HeaderMap| async {
+                    handle_static_content_with_etag(
+                        headers,
+                        "text/css; charset=utf-8",
+                        &stylus_ui::STYLUS_CSS,
                     )
                 }),
             );

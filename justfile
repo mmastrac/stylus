@@ -1,7 +1,12 @@
 # https://just.systems
 
-clitest: build-debug
+test-cli: build-debug
     PATH=`pwd`/target/debug:$PATH clitest --quiet tests/*
+
+test-rust:
+    cargo test
+
+test: test-cli test-rust
 
 build-debug:
     cargo build --bin stylus

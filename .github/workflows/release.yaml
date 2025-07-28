@@ -17,6 +17,10 @@ jobs:
         uses: baptiste0928/cargo-install@v3
         with:
           crate: just
+      - name: Install cross
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cross
       - name: Install deno
         uses: denoland/setup-deno@v1
         with:
@@ -25,7 +29,6 @@ jobs:
         run: just bundle
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-          cargo install cross
           cross build --release --target arm-unknown-linux-musleabi
           cross build --release --target arm-unknown-linux-musleabihf
           cross build --release --target aarch64-unknown-linux-musl

@@ -7,8 +7,8 @@ use std::path::Path;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let compiled_script = root.join("compiled/stylus.js");
-    let compiled_css = root.join("compiled/stylus.css");
+    let compiled_script = root.join("src/compiled/stylus.js");
+    let compiled_css = root.join("src/compiled/stylus.css");
 
     let files_exist = compiled_script.exists() && compiled_css.exists();
 

@@ -20,7 +20,7 @@ axum = "0.7"
 hyper = { version = "1.0", features = ["full"] }
 hyper-util = { version = "0.1", features = ["server"] }
 tower = { version = "0.5", features = ["util", "make"] }
-tower-http = { version = "0.5", features = ["fs", "trace"] }
+tower-http = { version = "0.6", features = ["fs", "trace"] }
 derive_more = { version = "2", features = ["full"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_yaml_ng = "0.10"

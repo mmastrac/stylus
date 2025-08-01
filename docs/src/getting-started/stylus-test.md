@@ -10,7 +10,7 @@ stylus test [OPTIONS] --monitor <MONITOR> <FILE>
 
 ## Arguments
 
-- `<FILE>` - The configuration file
+- `<DIRECTORY>` - The configuration directory
 
 ## Options
 
@@ -23,14 +23,11 @@ The `stylus test` command runs a specific monitor test immediately and shows you
 ## Example
 
 ```bash
-# Test a monitor named "web-server" using config.yaml
-stylus test --monitor web-server config.yaml
+# Test a monitor named "web-server"
+stylus test --monitor web-server ~/my-stylus/
 
 # Test with verbose output
-stylus test -v --monitor web-server config.yaml
-
-# Test using a directory (will look for config.yaml inside)
-stylus test --monitor web-server ~/my-stylus/
+stylus test -v --monitor web-server ~/my-stylus/
 ```
 
 The command shows you three things:

@@ -32,10 +32,10 @@ stylus run config.yaml
 stylus run ~/my-stylus/
 
 # Run with verbose output
-stylus run -v config.yaml
+stylus run -v ~/my-stylus/
 
 # Dry run - test configuration without starting server
-stylus run --dry-run config.yaml
+stylus run --dry-run ~/my-stylus/
 ```
 
 If you specify a directory instead of a file, **Stylus** will look for `config.yaml` inside that directory. This is the most common way to run it.

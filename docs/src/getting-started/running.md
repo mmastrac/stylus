@@ -23,6 +23,7 @@ your configuration.
 ```bash
 # Assume that this is running against the stylus example, this will map the example directory into
 # the container's /srv folder. The container will automatically load config.yaml from this folder!
+docker run --name stylus -p 8000:8000 -v ~/stylus/:/srv mmastrac/stylus:latest init
 docker run --name stylus -p 8000:8000 -v ~/stylus/:/srv mmastrac/stylus:latest
 ```
 
@@ -33,7 +34,8 @@ pre-built binary releases at <https://github.com/mmastrac/stylus/releases>.
 
 ```bash
 # This will run against the example in ~/stylus/
-stylus_<arch> ~/stylus/config.yaml
+stylus_<arch> init ~/stylus/
+stylus_<arch> run ~/stylus/
 ```
 
 ### Cargo
@@ -43,7 +45,8 @@ install` the `stylus` package.
 
 ```bash
 cargo install stylus
-stylus ~/stylus/config.yaml
+stylus init ~/stylus/
+stylus run ~/stylus/
 ```
 
 ### From Source
@@ -51,5 +54,6 @@ stylus ~/stylus/config.yaml
 If you have the source downloaded, you can run `stylus` directly from that source directory.
 
 ```bash
-cargo run -- ~/stylus/config.yaml
+cargo run -- init ~/stylus/
+cargo run -- run ~/stylus/
 ```

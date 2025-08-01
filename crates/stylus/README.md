@@ -14,8 +14,8 @@ common platforms.
 
 ```bash
 mkdir ~/stylus
-docker run --name stylus -p 8000:8000 -v ~/stylus/:/srv mmastrac/stylus:latest init
-docker run --name stylus -p 8000:8000 -v ~/stylus/:/srv mmastrac/stylus:latest
+docker run --rm --name stylus -p 8000:8000 -v ~/stylus/:/srv mmastrac/stylus:latest init
+docker run --rm --name stylus -p 8000:8000 -v ~/stylus/:/srv mmastrac/stylus:latest
 ```
 
 You can also run **Stylus** without Docker by installing the `stylus` binary

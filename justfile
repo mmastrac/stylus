@@ -1,7 +1,7 @@
 # https://just.systems
 
 test-cli: build-debug
-    PATH=`pwd`/target/debug:$PATH clitest --quiet tests/*
+    PATH=`pwd`/target/debug:$PATH clitest tests/*
 
 test-rust:
     cargo test
@@ -44,3 +44,13 @@ release-tag:
     echo "Creating tag $VERSION..."
     git tag "$VERSION"
     echo "Tag created. Push with: git push origin $VERSION"
+
+publish: bundle
+    cargo publish -p stylus-ui --allow-dirty
+    cargo publish -p stylus
+
+publish-docker:
+    #!/usr/bin/env bash
+    set -euf -o pipefail
+    VERSION="v$(cargo metadata --format-version=1 | jq -r '.packages[] | select(.name == "stylus") | .version')"
+    docker/build.sh "$VERSION"

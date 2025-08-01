@@ -25,9 +25,6 @@ The command loads your configuration, starts the HTTP server, and begins running
 ## Examples
 
 ```bash
-# Run with a specific config file
-stylus run config.yaml
-
 # Run using a directory (will look for config.yaml inside)
 stylus run ~/my-stylus/
 

@@ -322,7 +322,8 @@ mod test {
 
     #[test]
     fn deserialize_config_test() -> Result<(), Box<dyn Error>> {
-        let config = parse_config(Path::new("src/testcases/v1.yaml"))?;
+        let input = std::fs::read_to_string("src/testcases/v1.yaml")?;
+        let config = parse_config_string(Path::new("src/testcases/v1.yaml"), input)?;
         assert_eq!(config.base_path, Path::new("src/testcases").canonicalize()?);
         Ok(())
     }

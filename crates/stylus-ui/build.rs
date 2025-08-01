@@ -10,10 +10,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let compiled_script = root.join("src/compiled/stylus.js");
     let compiled_css = root.join("src/compiled/stylus.css");
 
+    let features = std::env::var("CARGO_CFG_FEATURE").unwrap_or_default();
+    let from_source_always = features.contains("from-source-always");
+    let from_source_auto = features.contains("from-source-auto");
+
     let files_exist = compiled_script.exists() && compiled_css.exists();
 
-    if cfg!(feature = "from-source-always") || (cfg!(feature = "from-source-auto") && !files_exist)
-    {
+    if from_source_always || (from_source_auto && !files_exist) {
         use glob::glob;
         use sheller::try_run;
 

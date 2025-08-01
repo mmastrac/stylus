@@ -13,7 +13,7 @@ default = ["builtin-ui"]
 builtin-ui = ["dep:stylus-ui"]
 
 [dependencies]
-stylus-ui = { path = "../stylus-ui", features = ["from-source-auto"], optional = true }
+stylus-ui = { workspace = true, features = ["from-source-auto"], optional = true }
 
 tokio = { version = "1.46", features = ["macros", "rt-multi-thread"] }
 axum = "0.7"

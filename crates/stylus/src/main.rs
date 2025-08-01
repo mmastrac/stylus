@@ -107,7 +107,7 @@ async fn run() {
 
             panic!("Unable to locate monitor with id '{}'", id)
         }
-        OperationMode::Init(path) => {
+        OperationMode::Init(path, docker) => {
             println!("Initializing directory: {path:?}...");
             if !path.exists() {
                 std::fs::create_dir_all(&path)
@@ -117,7 +117,11 @@ async fn run() {
 
             println!("Done!");
             println!();
-            println!("Run `stylus run {path:?}` to start the server");
+            if docker {
+                println!("Re-run the container with no arguments to start the server");
+            } else {
+                println!("Run `stylus run {path:?}` to start the server");
+            }
         }
     }
 }

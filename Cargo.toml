@@ -7,7 +7,7 @@ members = [
 default-members = ["crates/stylus"]
 
 [workspace.package]
-version = "0.13.0"
+version = "0.14.0"
 authors = ["Matt Mastracci <matthew@mastracci.com>"]
 edition = "2021"
 license = "MIT"
@@ -15,4 +15,4 @@ repository = "https://github.com/mmastrac/stylus"
 readme = "README.md"
 
 [workspace.dependencies]
-stylus-ui = { path = "crates/stylus-ui", version = "=0.13.0" }
+stylus-ui = { path = "crates/stylus-ui", version = "=0.14.0" }

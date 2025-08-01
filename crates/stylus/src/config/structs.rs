@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 pub enum OperationMode {
     Run(Config, bool),
     Dump(Config),
-    Init(PathBuf),
+    Init(PathBuf, bool),
     Test(Config, String),
 }
 

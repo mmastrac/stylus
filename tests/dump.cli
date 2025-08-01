@@ -1,0 +1,27 @@
+#!/usr/bin/env clitest --v0
+
+using tempdir;
+
+$ stylus init .
+! Initializing directory: "."...
+! Done!
+! 
+! Run `stylus run "."` to start the server
+
+$ stylus dump .
+! {
+!   "config": {
+!     "version": 1,
+!     "server": {
+!       "port": 8000,
+!       "listen_addr": "0.0.0.0",
+*
+
+$ FORCE_CONTAINER_PATH=`pwd` stylus dump
+! {
+!   "config": {
+!     "version": 1,
+!     "server": {
+!       "port": 8000,
+!       "listen_addr": "0.0.0.0",
+*

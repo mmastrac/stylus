@@ -18,26 +18,65 @@ pub fn parse_config_from_args() -> Result<OperationMode, Box<dyn Error>> {
 
     match args.command {
         Commands::Dump(dump_args) => {
-            let config = parse_config(&dump_args.config)?;
+            let path = if let Some(path) = dump_args.directory {
+                path
+            } else {
+                dump_args
+                    .force_container_path
+                    .expect("No forced container path specified")
+            };
+
+            let config = parse_config(&path)?;
             Ok(OperationMode::Dump(config))
         }
         Commands::Test(test_args) => {
-            let config = parse_config(&test_args.config)?;
+            let path = if let Some(path) = test_args.directory {
+                path
+            } else {
+                test_args
+                    .force_container_path
+                    .expect("No forced container path specified")
+            };
+            let config = parse_config(&path)?;
             Ok(OperationMode::Test(config, test_args.monitor))
         }
-        Commands::Init(init_args) => Ok(OperationMode::Init(init_args.directory)),
+        Commands::Init(init_args) => {
+            let docker = init_args.directory.is_none();
+            let mut path = if let Some(path) = init_args.directory {
+                path
+            } else {
+                init_args
+                    .force_container_path
+                    .expect("No forced container path specified")
+            };
+            let extension = path
+                .extension()
+                .map(|e| e.to_string_lossy().to_string())
+                .unwrap_or_default();
+            match extension.as_str() {
+                "yml" | "yaml" => {
+                    warn!("Passed configuration location {:?} has a yaml file extension -- inferring directory as parent", path);
+                    path = path.parent().expect("No parent directory").into();
+                }
+                _ => {}
+            }
+            Ok(OperationMode::Init(path, docker))
+        }
         Commands::Run(run_args) => {
-            let config_path = if let Some(path) = run_args.force_container_path {
+            let config_path = if let Some(path) = run_args.config {
+                path
+            } else {
+                let path = run_args
+                    .force_container_path
+                    .expect("No forced container path specified");
                 if !path.exists() {
                     eprintln!("Configuration file {} does not exist.", path.display());
                     eprintln!(
-                        "Ensure that you have mounted the configuration folder into the container."
+                        "Ensure that you have mounted the configuration folder into the container and have run `init` in the configuration path."
                     );
                     return Err("Configuration file does not exist. Unable to continue.".into());
                 }
                 path
-            } else {
-                run_args.config.unwrap()
             };
             let mut config = parse_config(&config_path)?;
             if let Some(port) = run_args.force_container_port {
@@ -56,9 +95,20 @@ pub fn parse_config(file: &Path) -> Result<Config, Box<dyn Error>> {
     let curr = std::env::current_dir()?;
     let mut path = Path::new(&file).into();
     canonicalize("configuration", Some(&curr), &mut path)?;
-    if path.is_dir() {
-        warn!("Passed configuration location {:?} was a directory -- inferring 'config.yaml' in that directory", file);
-        path = path.join("config.yaml");
+    if path.is_file() {
+        if path.file_name().unwrap_or_default() == "config.yaml" {
+            warn!(
+                "Passed configuration location {:?} was a file -- inferring directory from parent",
+                file
+            );
+            path = path.parent().expect("No parent directory").into();
+        } else {
+            return Err(format!("Either the stylus directory or its config.yaml must be passed as an argument: (got {:?})", file).into());
+        }
+    }
+    let path = path.join("config.yaml");
+    if !path.exists() {
+        return Err(format!("Configuration file {} does not exist.", path.display()).into());
     }
     let s = std::fs::read_to_string(&path)?;
     parse_config_string(&path, s)

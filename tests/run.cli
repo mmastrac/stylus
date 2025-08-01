@@ -5,33 +5,36 @@ cd "..";
 $ stylus run
 %EXIT 2
 ! error: the following required arguments were not provided:
-!   <FILE>
+!   <DIRECTORY>
 ! 
-! Usage: stylus run <FILE>
+! Usage: stylus run <DIRECTORY>
 ! 
 ! For more information, try '--help'.
 
+$ stylus run --dry-run examples/isoflow/
+! Stylus %{DATA} is listening on 0.0.0.0:8000!
+! Dry run complete. Exiting.
+
+$ stylus run --dry-run examples/isoflow/config.yaml
+! [%{DATA} WARN  stylus::config] Passed configuration location "examples/isoflow/config.yaml" was a file -- inferring directory from parent
+! Stylus %{DATA} is listening on 0.0.0.0:8000!
+! Dry run complete. Exiting.
+
+$ FORCE_CONTAINER_PATH=/tmp/ignored stylus run --dry-run examples/isoflow/
+! Stylus %{DATA} is listening on 0.0.0.0:8000!
+! Dry run complete. Exiting.
+
 $ FORCE_CONTAINER_PATH=examples/isoflow/ stylus run --dry-run
-! [%{DATA} WARN  stylus::config] Passed configuration location "examples/isoflow/" was a directory -- inferring 'config.yaml' in that directory
 ! Stylus %{DATA} is listening on 0.0.0.0:8000!
 ! Dry run complete. Exiting.
 
 $ FORCE_CONTAINER_PATH=examples/isoflow/ FORCE_CONTAINER_PORT=8001 stylus run --dry-run
-! [%{DATA} WARN  stylus::config] Passed configuration location "examples/isoflow/" was a directory -- inferring 'config.yaml' in that directory
 ! Stylus %{DATA} is listening on 0.0.0.0:8001!
 ! Dry run complete. Exiting.
 
-$ FORCE_CONTAINER_PATH=examples/isoflow/ stylus run --dry-run something-else
-%EXIT 2
-! error: the argument '[FILE]' cannot be used with '[FORCE_CONTAINER_PATH]'
-! 
-! Usage: stylus run --dry-run <FILE>
-! 
-! For more information, try '--help'.
-
 $ FORCE_CONTAINER_PATH=does-not-exist/ stylus run --dry-run
 ! Configuration file does-not-exist/ does not exist.
-! Ensure that you have mounted the configuration folder into the container.
+! Ensure that you have mounted the configuration folder into the container and have run `init` in the configuration path.
 ! 
 ! Fatal error parsing configuration:
 ! Configuration file does not exist. Unable to continue.

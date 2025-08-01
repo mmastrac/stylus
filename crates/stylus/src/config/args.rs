@@ -34,9 +34,13 @@ pub enum Commands {
 
 #[derive(Debug, Parser)]
 pub struct DumpArgs {
-    /// The configuration file
-    #[arg(name = "FILE")]
-    pub config: PathBuf,
+    /// The stylus directory containing the configuration file
+    #[arg(name = "DIRECTORY", required_unless_present_any = ["force_container_path"])]
+    pub directory: Option<PathBuf>,
+
+    /// Advanced: if running a container, allows the container to override any path specified on the command line
+    #[arg(env = "FORCE_CONTAINER_PATH", hide = true)]
+    pub force_container_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]
@@ -45,15 +49,24 @@ pub struct TestArgs {
     #[arg(short, long, required = true)]
     pub monitor: String,
 
-    /// The configuration file
-    #[arg(name = "FILE", required = true)]
-    pub config: PathBuf,
+    /// The stylus directory containing the configuration file
+    #[arg(name = "DIRECTORY", required_unless_present_any = ["force_container_path"])]
+    pub directory: Option<PathBuf>,
+
+    /// Advanced: if running a container, allows the container to override any path specified on the command line
+    #[arg(env = "FORCE_CONTAINER_PATH", hide = true)]
+    pub force_container_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]
 pub struct InitArgs {
-    /// The directory to initialize
-    pub directory: PathBuf,
+    /// The directory to initialize (eg: `/srv/stylus`)
+    #[arg(name = "DIRECTORY", required_unless_present_any = ["force_container_path"])]
+    pub directory: Option<PathBuf>,
+
+    /// Advanced: if running a container, allows the container to override any path specified on the command line
+    #[arg(env = "FORCE_CONTAINER_PATH", hide = true)]
+    pub force_container_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Parser)]
@@ -62,8 +75,8 @@ pub struct RunArgs {
     // /// Daemonize stylus and detact from the tty
     // #[arg(long, short)]
     // pub daemonize: bool,
-    /// The configuration file (or directory)
-    #[arg(name = "FILE", group = "path", required_unless_present_any = ["force_container_path"])]
+    /// The stylus directory containing the configuration file
+    #[arg(name = "DIRECTORY", required_unless_present_any = ["force_container_path"])]
     pub config: Option<PathBuf>,
 
     /// Dry run the configuration (everything except running the server)
@@ -79,6 +92,6 @@ pub struct RunArgs {
     pub force_container_listen_addr: Option<String>,
 
     /// Advanced: if running a container, allows the container to override any path specified on the command line
-    #[arg(env = "FORCE_CONTAINER_PATH", group = "path", hide = true)]
+    #[arg(env = "FORCE_CONTAINER_PATH", hide = true)]
     pub force_container_path: Option<PathBuf>,
 }

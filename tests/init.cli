@@ -9,11 +9,11 @@ $ stylus init new-project
 ! Run `stylus run "new-project"` to start the server
 
 $ stylus run new-project --dry-run
-! [%{DATA} WARN  stylus::config] Passed configuration location "new-project" was a directory -- inferring 'config.yaml' in that directory
 ! Stylus %{DATA} is listening on 0.0.0.0:8000!
 ! Dry run complete. Exiting.
 
 $ stylus test new-project/config.yaml --monitor my-monitor
+! [%{DATA} WARN  stylus::config] Passed configuration location "new-project/config.yaml" was a file -- inferring directory from parent
 ! Monitor Log
 ! -----------
 ! 
@@ -62,3 +62,17 @@ $ stylus test new-project/config.yaml --monitor my-monitor
 ! }
 !
 
+$ rm -rf new-project
+
+$ stylus init new-project/config.yaml
+! [%{DATA} WARN  stylus::config] Passed configuration location "new-project/config.yaml" has a yaml file extension -- inferring directory as parent
+! Initializing directory: "new-project"...
+! Done!
+! 
+! Run `stylus run "new-project"` to start the server
+
+$ find new-project
+! new-project
+! new-project/monitor.d
+# etc
+*

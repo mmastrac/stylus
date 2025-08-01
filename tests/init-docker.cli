@@ -1,0 +1,15 @@
+#!/usr/bin/env clitest --v0
+
+using tempdir;
+
+$ FORCE_CONTAINER_PATH=`pwd` FORCE_CONTAINER_PORT=8000 stylus init
+! Initializing directory: "%{PATH}"...
+! Done!
+! 
+! Re-run the container with no arguments to start the server
+
+$ FORCE_CONTAINER_PATH=/tmp/ignored FORCE_CONTAINER_PORT=8000 stylus init .
+! Initializing directory: "."...
+! Done!
+! 
+! Run `stylus run "."` to start the server

@@ -44,23 +44,13 @@ server:
 monitor:
   dir: monitor.d/
 
-css:
-  # Arbitrary metadata can be associated with the four states
-  metadata:
-    blank:
-      color: "white"
-    red:
-      color: "#fa897b"
-    yellow:
-      color: "#ffdd94"
-    green:
-      color: "#d0e6a5"
-  rules:
-    # Multiple CSS rules with handlebars replacements are supported
-    - selectors: "#{{monitor.id}}"
-      declarations: "
-        background-color: {{monitor.status.css.metadata.color}} !important;
-      "
+ui:
+  title: Stylus Monitor
+  description: Real-time monitoring of your services
+  visualizations:
+    - title: Monitor List
+      description: List of all monitors in table view
+      type: table
 ```
 
 The monitors are configured by creating a subdirectory in the monitor directory

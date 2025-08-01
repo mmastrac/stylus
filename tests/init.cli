@@ -71,8 +71,9 @@ $ stylus init new-project/config.yaml
 ! 
 ! Run `stylus run "new-project"` to start the server
 
+# etc
 $ find new-project
 ! new-project
+*
 ! new-project/monitor.d
-# etc
 *

@@ -38,3 +38,4 @@ clap = { version = "4.5", features = ["derive", "env"] }
 keepcalm = { version = "0.4.1", features = ["serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 include_directory = "0.1"
+peg = "0.8"

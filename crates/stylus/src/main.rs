@@ -7,9 +7,11 @@ use keepcalm::SharedMut;
 
 mod config;
 mod css;
+mod expressions;
 mod http;
 mod interpolate;
 mod monitor;
+mod monitors;
 mod status;
 mod worker;
 
@@ -70,8 +72,7 @@ async fn run() {
                     println!("Monitor Log");
                     println!("-----------");
                     println!();
-
-                    monitor_run(monitor, &mut |_, msg| {
+                    monitor_run(&monitor, &mut |_, msg| {
                         state
                             .process_message(&monitor.id, msg, &config.css.metadata, &mut |m| {
                                 println!("{}", m);

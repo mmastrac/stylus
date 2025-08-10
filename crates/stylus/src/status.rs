@@ -36,7 +36,7 @@ pub struct MonitorState {
     pub children: BTreeMap<String, MonitorChildStatus>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct MonitorChildStatus {
     pub axes: BTreeMap<String, MonitorDirAxisValue>,
 
@@ -124,6 +124,7 @@ impl MonitorState {
                     LogStream::StdOut => "stdout",
                     LogStream::StdErr => "stderr",
                 };
+
                 // TODO: Long lines without \n at the end should have some sort of other delimiter inserted
                 self.process_log_message(stream, m.trim_end(), direct_logger);
             }

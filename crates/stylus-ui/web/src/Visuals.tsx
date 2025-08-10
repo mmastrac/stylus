@@ -220,6 +220,12 @@ function StackVisualization({ stacks, statusData, size }: StackVisualizationProp
             if (parts.length === 3) {
                 return { groups: parts[0], columns: parts[1], rows: parts[2] };
             }
+            if (parts.length === 2) {
+                return { groups: 1, columns: parts[0], rows: parts[1] };
+            }
+            if (parts.length === 1) {
+                return { groups: 1, columns: parts[0], rows: 1 };
+            }
             return { groups: 1, columns: 1, rows: 1 };
         });
         return groupDefs;
@@ -256,17 +262,26 @@ function StackVisualization({ stacks, statusData, size }: StackVisualizationProp
                         childIndex++;
                         
                         if (child) {
+                            let title = `${child.id}`;
+                            for (const [key, value] of Object.entries(child.child.status.metadata)) {
+                                title += `\n${key}: ${value}`;
+                            }
                             groupChildren.push(
                                 <StatusIndicator 
                                     key={`${row}-${col}`}
                                     status={child.child.status.status} 
                                     className="stack-status-indicator"
-                                    title={child.id}
+                                    title={title}
                                 />
                             );
                         } else {
                             groupChildren.push(
-                                <div key={`${row}-${col}`} className="stack-cell-empty" title={`Empty slot ${childIndex}`} />
+                                <StatusIndicator 
+                                    key={`${row}-${col}`}
+                                    status="blank"
+                                    className="stack-status-indicator"
+                                    title={`No child found for port index ${childIndex}`}
+                                />
                             );
                         }
                     }

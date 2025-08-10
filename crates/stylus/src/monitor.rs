@@ -21,6 +21,20 @@ pub struct Monitor {
     monitors: Vec<MonitorThread>,
 }
 
+pub trait MonitorMessageProcessor: Send + Sync + std::fmt::Debug + 'static {
+    /// Process a message from a monitor thread, potentially generating internal
+    /// messages from it.
+    fn new(&self) -> Box<dyn MonitorMessageProcessorInstance>;
+}
+
+pub trait MonitorMessageProcessorInstance: Send + Sync + std::fmt::Debug + 'static {
+    /// Process a message from a monitor thread, potentially generating internal
+    /// messages from it.
+    fn process_message(&self, input: &str) -> Vec<String>;
+
+    fn finalize(&self) -> Vec<String>;
+}
+
 impl MonitorThread {
     /// Create a new monitor thread and release it
     fn create(
@@ -38,7 +52,7 @@ impl MonitorThread {
         let drop_detect = SharedMut::new(());
         let mut drop_detect_clone = Some(drop_detect.clone());
         let _thread = thread::spawn(move || {
-            monitor_thread(monitor, move |id, m| {
+            monitor_thread(&monitor, move |id, m| {
                 drop_detect_clone = if let Some(drop_detect) = drop_detect_clone.take() {
                     drop_detect.try_unwrap().err()
                 } else {

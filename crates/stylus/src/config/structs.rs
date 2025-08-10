@@ -5,6 +5,9 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
+use crate::monitor::MonitorMessageProcessor;
+use crate::monitors::snmp::SnmpNetworkMonitorConfig;
+
 pub enum OperationMode {
     Run(Config, bool),
     Dump(Config),
@@ -150,6 +153,7 @@ impl Default for MonitorDirConfig {
 pub enum MonitorDirRootConfig {
     Test(MonitorDirTestConfig),
     Group(MonitorDirGroupConfig),
+    Snmp(SnmpNetworkMonitorConfig),
 }
 
 impl MonitorDirRootConfig {
@@ -158,6 +162,9 @@ impl MonitorDirRootConfig {
         match self {
             MonitorDirRootConfig::Test(ref test) => test,
             MonitorDirRootConfig::Group(ref group) => &group.test,
+            MonitorDirRootConfig::Snmp(ref snmp) => {
+                snmp.test.as_ref().expect("test_mut was not called")
+            }
         }
     }
 
@@ -166,6 +173,12 @@ impl MonitorDirRootConfig {
         match self {
             MonitorDirRootConfig::Test(ref mut test) => test,
             MonitorDirRootConfig::Group(ref mut group) => &mut group.test,
+            MonitorDirRootConfig::Snmp(ref mut snmp) => {
+                if snmp.test.is_none() {
+                    snmp.test = Some(snmp.test());
+                }
+                snmp.test.as_mut().unwrap()
+            }
         }
     }
 }
@@ -212,4 +225,6 @@ pub struct MonitorDirTestConfig {
     pub command: PathBuf,
     #[serde(skip)]
     pub args: Vec<String>,
+    #[serde(skip)]
+    pub processor: Option<Arc<dyn MonitorMessageProcessor>>,
 }

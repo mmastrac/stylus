@@ -55,8 +55,18 @@ pub fn interpolate_modify<'a>(
         Some("group") => {
             let part = path.next().ok_or("Missing group child")?;
             status = &mut children
-                .get_mut(part)
-                .ok_or(format!("Could not find child '{}'", part))?
+                .entry(part.to_owned())
+                .or_insert_with(|| {
+                    let mut status = MonitorChildStatus::default();
+                    if let Some((_, index)) = part.rsplit_once('-') {
+                        if let Ok(index) = index.parse::<i64>() {
+                            status
+                                .axes
+                                .insert("index".to_owned(), MonitorDirAxisValue::Number(index));
+                        }
+                    }
+                    status
+                })
                 .status;
             if path.next() != Some("status") {
                 return Err(format!("Invalid path: {}", raw_path).into());

@@ -1,0 +1,19 @@
+snmp:
+  id: router-{{ index }}
+  interval: 60s
+  timeout: 30s
+  exclude: |
+    ifType != 'ethernetCsmacd'
+  # Dream Machine Pro SE names normal ports as eth<n> and
+  # the SFP/2.5G ports with branding
+  include: |
+    (startswith(ifDescr, 'eth') and not contains(ifDescr, '.'))
+      or contains(ifDescr, "10G Ethernet Adapter")
+      or contains(ifDescr, "2.5GbE Controller")
+  # SNMP doesn't work properly on the UDM Pro SE, so try to detect if the port is up
+  # via ifInOctets and ifOutOctets
+  green: |
+    ifOperStatus == "up" and ifAdminStatus == "up" and ifOutOctets > 0 and ifInOctets > 0
+  target:
+    host: 192.168.1.1
+    community: public

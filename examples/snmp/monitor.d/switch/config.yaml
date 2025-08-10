@@ -1,0 +1,11 @@
+snmp:
+  id: router-{{ index }}
+  interval: 60s
+  timeout: 30s
+  exclude: |
+    ifType != 'ethernetCsmacd'
+  red: |
+    ifOperStatus == "up" and ifSpeed < 1000000000
+  target:
+    host: 192.168.1.254
+    community: public

@@ -9,6 +9,7 @@ use subprocess::{Exec, ExitStatus, Popen, Redirection};
 
 use self::linebuf::LineBuf;
 use crate::config::*;
+use crate::monitor::MonitorMessageProcessorInstance;
 
 mod linebuf;
 
@@ -31,7 +32,7 @@ pub enum WorkerMessage {
 }
 
 pub fn monitor_thread<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
-    monitor: MonitorDirConfig,
+    monitor: &MonitorDirConfig,
     mut sender: T,
 ) {
     loop {
@@ -60,6 +61,9 @@ pub fn monitor_run<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
     monitor: &MonitorDirConfig,
     sender: &mut T,
 ) -> (Duration, Result<(), Box<dyn Error>>) {
+    let processor = monitor.root.test().processor.as_ref().map(|p| p.new());
+    let processor = processor.as_deref();
+
     let args = monitor
         .root
         .test()
@@ -78,6 +82,7 @@ pub fn monitor_run<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error>>>(
             args,
             test.timeout,
             sender,
+            processor,
         ),
     )
 }
@@ -153,18 +158,29 @@ fn process_log_message<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
     stream: LogStream,
     s: String,
     sender: &mut T,
+    processor: Option<&dyn MonitorMessageProcessorInstance>,
 ) {
     const META_PREFIX: &str = "@@STYLUS@@";
 
+    let mut processed = vec![];
     let msg = if s.starts_with(META_PREFIX) {
         let s = s.split_at(META_PREFIX.len()).1;
         WorkerMessage::Metadata(s.trim().to_owned())
     } else {
+        if let Some(processor) = processor {
+            processed = processor.process_message(&s);
+        }
         WorkerMessage::LogMessage(stream, s)
     };
 
     if sender(id, msg).is_err() {
         failed.store(true, Ordering::SeqCst)
+    }
+
+    for msg in processed {
+        if sender(id, WorkerMessage::Metadata(msg)).is_err() {
+            failed.store(true, Ordering::SeqCst);
+        }
     }
 }
 
@@ -175,6 +191,7 @@ fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
     args: Option<&[impl AsRef<OsStr> + std::fmt::Debug]>,
     timeout: Duration,
     sender: &mut T,
+    processor: Option<&dyn MonitorMessageProcessorInstance>,
 ) -> Result<(), Box<dyn Error>> {
     // This will fail if we're supposed to shut down
     sender(id, WorkerMessage::Starting)?;
@@ -194,7 +211,7 @@ fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
 
     let failed = AtomicBool::new(false);
     let mut f = |stream, s| {
-        process_log_message(id, &failed, stream, s, sender);
+        process_log_message(id, &failed, stream, s, sender, processor);
     };
     let mut stdout = LineBuf::new(80);
     let mut stderr = LineBuf::new(80);
@@ -233,6 +250,12 @@ fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
 
     stdout.close(&mut |s| f(LogStream::StdOut, s));
     stderr.close(&mut |s| f(LogStream::StdErr, s));
+
+    if let Some(processor) = processor {
+        for msg in processor.finalize() {
+            sender(id, WorkerMessage::Metadata(msg))?;
+        }
+    }
 
     debug!("[{}] Finished read, waiting for status...", id);
 
@@ -299,6 +322,7 @@ mod tests {
                 tx.send(m)?;
                 Ok(())
             },
+            None,
         )
         .expect("Failed to monitor");
         drop(tx);

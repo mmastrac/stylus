@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.15.0] - 2025-08-10
 
 ### Added
 - **SNMP Monitor**: New built-in SNMP monitor that automates network device monitoring
@@ -75,23 +75,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Better Docker support and error handling
-
----
-
-## Migration Notes
-
-### From v0.12.x to v0.13.0
-- **Breaking Change**: The UI system has been completely rewritten
-- HTML-based customizations may need to be updated for the new React-based system
-- New configuration options available for enhanced visualizations
-- Improved monitor grouping and display capabilities
-
-### From v0.13.x to v0.14.0
-- No breaking changes
-- Improved path handling for better cross-platform support
-- Enhanced documentation and examples
-
-### From v0.14.x to Unreleased
-- **New Feature**: SNMP monitor support for network device monitoring
-- Enhanced expression system for complex monitoring logic
-- Improved documentation for advanced use cases

@@ -16,7 +16,7 @@ builtin-ui = ["dep:stylus-ui"]
 stylus-ui = { workspace = true, features = ["from-source-auto"], optional = true }
 
 tokio = { version = "1.46", features = ["macros", "rt-multi-thread"] }
-axum = "0.7"
+axum = "0.8"
 hyper = { version = "1.0", features = ["full"] }
 hyper-util = { version = "0.1", features = ["server"] }
 tower = { version = "0.5", features = ["util", "make"] }

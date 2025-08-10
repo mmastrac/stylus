@@ -94,6 +94,25 @@ set -xeuf -o pipefail
 curl --retry 2 --max-time 5 --connect-timeout 5 http://192.168.1.1:9000
 ```
 
+### SNMP
+
+**Stylus** has a built-in SNMP monitor that can be used to monitor network
+devices. 
+
+```yaml
+snmp:
+  id: router-{{ index }}
+  interval: 60s
+  timeout: 30s
+  exclude: |
+    ifType != 'ethernetCsmacd'
+  red: |
+    ifOperStatus == "up" and ifSpeed < 1000000000
+  target:
+    host: 192.168.1.254
+    community: public
+```
+
 ### Advanced techniques
 
 Tools such as `jq`, `sed`, or `awk` can be used for more advanced tests (ie:

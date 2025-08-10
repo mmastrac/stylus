@@ -87,14 +87,21 @@ impl Value {
         Value::Int(self.as_int() * other.as_int())
     }
 
-    fn div(self, other: Value) -> Value {
-        Value::Int(self.as_int() / other.as_int())
+    fn div(self, other: Value) -> Result {
+        if other.as_int() == 0 {
+            Err(Error("division by zero".to_string()))
+        } else {
+            Ok(Value::Int(self.as_int() / other.as_int()))
+        }
     }
 
-    fn pow_val(self, other: Value) -> Value {
+    fn pow_val(self, other: Value) -> Result {
         let a = self.as_int();
         let b = other.as_int();
-        Value::Int(a.pow(b as u32))
+        Ok(Value::Int(
+            a.checked_pow(b.try_into().map_err(|_| Error("overflow".to_string()))?)
+                .ok_or(Error("overflow".to_string()))?,
+        ))
     }
 
     fn negate(self) -> Value {
@@ -158,9 +165,9 @@ peg::parser!( pub grammar expression() for str {
               ws() "-" ws() v:@ { Ok(v?.negate()) }
         --
         x:(@) ws() "*" ws() y:@ { Ok(x?.mul(y?)) }
-        x:(@) ws() "/" ws() y:@ { Ok(x?.div(y?)) }
+        x:(@) ws() "/" ws() y:@ { x?.div(y?) }
         --
-        x:@   ws() "^" ws() y:(@) { Ok(x?.pow_val(y?)) }
+        x:@   ws() "^" ws() y:(@) { x?.pow_val(y?) }
         --
         ws() "str" ws() "(" ws() v:expr(ctx) ws() ")" { Ok(Value::Str(v?.as_str())) }
         ws() "int" ws() "(" ws() v:expr(ctx) ws() ")" { Ok(Value::Int(v?.as_int())) }

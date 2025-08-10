@@ -84,10 +84,8 @@ impl SnmpNetworkMonitorConfig {
         // Auth (v1/v2c vs v3)
         match self.target.version {
             1 | 2 => {
-                if let Some(ref community) = self.target.community {
-                    parts.push("-c".into());
-                    parts.push(community.clone());
-                }
+                parts.push("-c".into());
+                parts.push(self.target.community.clone());
             }
             3 => {
                 if let Some(ref username) = self.target.username {
@@ -171,7 +169,8 @@ pub struct SnmpNetworkMonitorSnmpConfig {
     pub port: Option<u16>,
     #[serde(default = "default_version")]
     pub version: u8,
-    pub community: Option<String>,
+    #[serde(default = "default_community")]
+    pub community: String,
     pub username: Option<String>,
     pub auth_protocol: Option<String>,
     pub auth_password: Option<String>,
@@ -179,6 +178,10 @@ pub struct SnmpNetworkMonitorSnmpConfig {
     pub privacy_password: Option<String>,
     #[serde(default = "default_bulk")]
     pub bulk: bool,
+}
+
+fn default_community() -> String {
+    "public".to_string()
 }
 
 fn default_version() -> u8 {

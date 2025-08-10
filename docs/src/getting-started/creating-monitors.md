@@ -128,11 +128,11 @@ if [ "$STATUS" != "OK" ]; then
 fi
 ```
 
-If you want to monitor network devices, you can often use
-[SNMP](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol) to
-extract information from the device. SNMP allows you to query the device for
-information about its status using OIDs (Object Identifiers), which are roughly
-standardized across different devices.
+If you want to monitor network devices, you can often use the [SNMP](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol) protocol.
+
+**Stylus** has a [built-in SNMP monitor](../configuration/monitor/snmp.md) that
+can be used to monitor network devices, but in some cases you may want to write
+a custom script to monitor SNMP devices for more complex checks.
 
 See the manual for your networking device for the appropriate OIDs to use, or
 reference one of the following resources: 

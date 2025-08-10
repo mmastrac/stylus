@@ -2,22 +2,13 @@
 
 Monitor configurations define how **Stylus** tests your infrastructure components. Each monitor consists of a test script that runs on a schedule and reports the status back to **Stylus**.
 
-## Standard Monitor
+## Monitor Types
 
-A standard monitor consists of a single test for a single host.
+Stylus supports several types of monitors:
 
-```yaml
-test:
-  # (optional) The internal ID to use for this test. If omitted, the ID is inferred from the monitor directory's name.
-  id: foo
-  # How often the test is run. The interval restarts from the last success or failure of the test.
-  interval: 60s
-  # How long the script will be given to run before it is killed.
-  timeout: 30s
-  # The test command to run, relative to the monitor directory. The PATH is not used and the file must be
-  # directly executable.
-  command: test.sh
-```
+- **[Standard Monitor](standard.md)** - Single test for a single host
+- **[Group Monitor](group.md)** - Single script that updates multiple monitors
+- **[SNMP Monitor](snmp.md)** - Network device monitoring via SNMP
 
 ## Logging
 
@@ -32,10 +23,6 @@ The state of a monitor is determined by the return value of the test script.
 - Yellow: A test that has timed out
 - Red: Tests that fail by returning a value other than zero
 - Green: Tests that return zero (success)
-
-## Group Monitors
-
-A group may be configured such that a single script may update states for multiple monitors. See [Advanced Configuration](../advanced.md) for examples of configuring such a group monitor.
 
 ## Metadata
 

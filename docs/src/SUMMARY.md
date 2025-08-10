@@ -18,6 +18,9 @@
 - [Server Configuration](configuration/server/README.md)
     - [CSS Configuration](configuration/css/README.md)
 - [Monitor Configuration](configuration/monitor/README.md)
+    - [Standard Monitor](configuration/monitor/standard.md)
+    - [Group Monitor](configuration/monitor/group.md)
+    - [SNMP Monitor](configuration/monitor/snmp.md)
 - [Advanced Configuration](configuration/advanced.md)
 
 # Examples and Tips

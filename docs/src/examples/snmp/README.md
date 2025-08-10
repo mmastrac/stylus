@@ -1,6 +1,11 @@
 # SNMP Monitoring
 
-SNMP (Simple Network Management Protocol) is a useful way to write more complex checks for network devices, but the output of the tools requires some massaging.
+Stylus has a [built-in SNMP monitor](../../configuration/monitor/snmp.md) that
+can be used to monitor network devices, but in some cases you may want to write
+a custom script to monitor SNMP devices for more complex checks.
+
+SNMP (Simple Network Management Protocol) is a useful way to write more complex
+checks for network devices, but the output of the tools requires some massaging.
 
 ## Basic SNMP Check
 

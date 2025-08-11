@@ -1,13 +1,14 @@
 import { useEffect, useRef } from "react";
-import { StatusData } from "../types";
+import { VisualizationState } from "./VisualizationState.tsx";
 
 // SVG Visualization Component
 interface SVGVisualizationProps {
+    state: VisualizationState;
     url?: string;
-    statusData: StatusData | null;
 }
 
-export function SVGVisualization({ url, statusData }: SVGVisualizationProps) {
+export function SVGVisualization({ state, url }: SVGVisualizationProps) {
+    const { statusData } = state;
     const containerRef = useRef<HTMLDivElement>(null);
     const shadowRootRef = useRef<ShadowRoot | null>(null);
     const styleRef = useRef<HTMLStyleElement | null>(null);

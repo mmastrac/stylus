@@ -26,6 +26,16 @@ export interface Stack {
   rows: StackRow[];
 }
 
+export interface RowColumn {
+  type: string;
+  width: number;
+  url?: string;
+  config?: string;
+  inject?: boolean;
+  stacks?: Stack[];
+  size?: 'small' | 'large';
+}
+
 export interface Visualization {
   title: string;
   description: string;
@@ -35,6 +45,7 @@ export interface Visualization {
   inject?: boolean;
   stacks?: Stack[];
   size?: 'small' | 'large';
+  columns?: RowColumn[];
 }
 
 export interface UIConfig {

@@ -1,12 +1,12 @@
-import { StatusData } from "../types";
 import { StatusIndicator } from "../utils.tsx";
+import { VisualizationState } from "./VisualizationState.tsx";
 
 interface TableVisualizationProps {
-    statusData: StatusData | null;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    state: VisualizationState;
 }
 
-export function TableVisualization({ statusData, onShowLog }: TableVisualizationProps) {
+export function TableVisualization({ state }: TableVisualizationProps) {
+    const { statusData, onShowLog } = state;
     const hasStatusData = statusData !== null;
     const monitorCount = statusData?.monitors?.length || 0;
     

@@ -19,6 +19,7 @@ dev:
     rm -rf "$BUILD_DIR"
     if [ -n "$CONFIG_DIR" ]; then
         cp -R "$CONFIG_DIR" "$BUILD_DIR"
+        mkdir -p "$BUILD_DIR/static" || true
     else
         cargo run --bin stylus --no-default-features -- init "$BUILD_DIR"
     fi

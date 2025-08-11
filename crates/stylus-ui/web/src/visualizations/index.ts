@@ -1,5 +1,5 @@
-export { StackVisualization } from './StackVisualization';
-export { IframeVisualization } from './IframeVisualization';
-export { SVGVisualization } from './SVGVisualization';
-export { IsoflowVisualization } from './IsoflowVisualization';
-export { TableVisualization } from './TableVisualization';
+export { StackVisualization } from './StackVisualization.tsx';
+export { IframeVisualization } from './IframeVisualization.tsx';
+export { SVGVisualization } from './SVGVisualization.tsx';
+export { IsoflowVisualization } from './IsoflowVisualization.tsx';
+export { TableVisualization } from './TableVisualization.tsx';

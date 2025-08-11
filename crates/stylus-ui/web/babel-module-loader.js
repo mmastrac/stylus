@@ -50,58 +50,118 @@ export async function importBabel(entryPath, { presets = [] } = {}) {
         ImportDeclaration(path) {
           const source = path.node.source.value;
           if (!isRelativeImport(source)) return;
-        
+  
           const newCall = t.awaitExpression(
             t.callExpression(t.identifier('__importBabelInternal'), [
               t.stringLiteral(source),
               t.stringLiteral(parentUrl),
             ])
           );
-        
+  
           const specifiers = path.node.specifiers;
           if (specifiers.length === 0) {
             path.replaceWith(t.expressionStatement(newCall));
             return;
           }
-        
+  
           const bindings = [];
-        
           for (const spec of specifiers) {
             if (t.isImportDefaultSpecifier(spec)) {
               bindings.push(t.objectProperty(t.identifier('default'), spec.local));
             } else if (t.isImportSpecifier(spec)) {
-              bindings.push(t.objectProperty(
-                spec.imported,
-                spec.local,
-                false,
-                spec.imported.name === spec.local.name
-              ));
+              bindings.push(
+                t.objectProperty(
+                  spec.imported,
+                  spec.local,
+                  false,
+                  spec.imported.name === spec.local.name
+                )
+              );
             } else if (t.isImportNamespaceSpecifier(spec)) {
-              path.replaceWith(t.variableDeclaration('const', [
-                t.variableDeclarator(spec.local, newCall)
-              ]));
+              path.replaceWith(
+                t.variableDeclaration('const', [
+                  t.variableDeclarator(spec.local, newCall),
+                ])
+              );
               return;
             }
           }
-        
-          path.replaceWith(t.variableDeclaration('const', [
-            t.variableDeclarator(t.objectPattern(bindings), newCall)
-          ]));
+  
+          path.replaceWith(
+            t.variableDeclaration('const', [
+              t.variableDeclarator(t.objectPattern(bindings), newCall),
+            ])
+          );
         },
-
-        ExportAllDeclaration(path) {
-          // unsupported for now — could add logic to re-export from other modules if needed
-          throw path.buildCodeFrameError('export * is not supported by importBabel yet.');
-        },
-
+  
         ExportNamedDeclaration(path) {
-          if (path.node.source) {
-            throw path.buildCodeFrameError('export ... from is not supported by importBabel yet.');
+          // Leave plain exports alone: export { a, b }
+          const src = path.node.source && path.node.source.value;
+          if (!src) return;
+        
+          // Only rewrite relative sources
+          if (!isRelativeImport(src)) return;
+        
+          // Skip type-only re-exports (TS/Flow)
+          if (path.node.exportKind === 'type') return;
+        
+          const importCall = t.awaitExpression(
+            t.callExpression(t.identifier('__importBabelInternal'), [
+              t.stringLiteral(src),
+              t.stringLiteral(parentUrl),
+            ])
+          );
+        
+          // Build: const { local1: _u1, local2: _u2 } = await import(...);
+          const destructProps = [];
+          const exportSpecs = [];
+        
+          for (const spec of path.node.specifiers) {
+            if (!t.isExportSpecifier(spec)) continue;
+        
+            // `local` is the name in the source module (can be Identifier or StringLiteral; default is Identifier('default'))
+            const localKey = spec.local;         // Identifier | StringLiteral
+            const exported = spec.exported;      // Identifier | StringLiteral
+        
+            const uid = path.scope.generateUidIdentifier(
+              t.isIdentifier(exported) ? exported.name : 'reexp'
+            );
+        
+            // { localKey: uid }
+            // (non-computed, key must be Identifier or StringLiteral)
+            if (t.isIdentifier(localKey) || t.isStringLiteral(localKey)) {
+              destructProps.push(t.objectProperty(localKey, uid, false, false));
+            } else {
+              // Extremely rare fallback; normalize to string key
+              destructProps.push(t.objectProperty(t.stringLiteral(String(localKey.name)), uid));
+            }
+        
+            // export { uid as exported }
+            exportSpecs.push(t.exportSpecifier(uid, exported));
           }
+        
+          if (destructProps.length === 0) {
+            // Nothing to rewrite; keep as-is.
+            return;
+          }
+        
+          const tmpDecl = t.variableDeclaration('const', [
+            t.variableDeclarator(t.objectPattern(destructProps), importCall),
+          ]);
+        
+          const newExport = t.exportNamedDeclaration(null, exportSpecs, null);
+        
+          path.replaceWithMultiple([tmpDecl, newExport]);
         },
-
+        
+        ExportAllDeclaration(path) {
+          // Still unsupported: cannot expand statically without enumerating exports.
+          throw path.buildCodeFrameError(
+            'export * from ... is not supported by importBabel yet.'
+          );
+        },
+  
         CallExpression(path) {
-          // Handle dynamic import("...")
           if (path.node.callee.type === 'Import') {
             const arg = path.node.arguments[0];
             if (t.isStringLiteral(arg) && isRelativeImport(arg.value)) {
@@ -113,8 +173,8 @@ export async function importBabel(entryPath, { presets = [] } = {}) {
               ];
             }
           }
-        }
-      }
+        },
+      },
     });
   }
 

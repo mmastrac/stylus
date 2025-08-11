@@ -1,10 +1,6 @@
 import { JSX } from "react";
 import { Visualization, StatusData } from "./types";
-import { StackVisualization } from './visualizations/StackVisualization.tsx';
-import { IframeVisualization } from './visualizations/IframeVisualization.tsx';
-import { SVGVisualization } from './visualizations/SVGVisualization.tsx';
-import { IsoflowVisualization } from './visualizations/IsoflowVisualization.tsx';
-import { TableVisualization } from './visualizations/TableVisualization.tsx';
+import { StackVisualization, IframeVisualization, SVGVisualization, IsoflowVisualization, TableVisualization } from "./visualizations/index.ts";
 
 // Base Visualization Card Component
 interface VisualizationCardProps {

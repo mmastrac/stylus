@@ -17,7 +17,11 @@ dev:
     echo "Creating a temporary instance of Stylus..."
     BUILD_DIR=target/temp-instance
     rm -rf "$BUILD_DIR"
-    cargo run --bin stylus --no-default-features -- init "$BUILD_DIR"
+    if [ -n "$CONFIG_DIR" ]; then
+        cp -R "$CONFIG_DIR" "$BUILD_DIR"
+    else
+        cargo run --bin stylus --no-default-features -- init "$BUILD_DIR"
+    fi
     for file in crates/stylus-ui/web/src \
         crates/stylus-ui/web/index.html \
         crates/stylus-ui/web/import_map.json \

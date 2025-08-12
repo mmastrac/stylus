@@ -24,7 +24,7 @@ from-source-always = []
 
 [build-dependencies]
 sheller = "0.5.4"
-glob = "0.3.1"
+glob = "0.3.3"
 cargo-emit = "0.2.1"
 
 [lints.rust]

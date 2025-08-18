@@ -17,7 +17,7 @@ stylus-ui = { workspace = true, features = ["from-source-auto"], optional = true
 
 tokio = { version = "1.46", features = ["macros", "rt-multi-thread"] }
 axum = "0.7"
-hyper = { version = "1.0", features = ["full"] }
+hyper = { version = "1.7", features = ["full"] }
 hyper-util = { version = "0.1", features = ["server"] }
 tower = { version = "0.5", features = ["util", "make"] }
 tower-http = { version = "0.6", features = ["fs", "trace"] }

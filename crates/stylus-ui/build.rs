@@ -38,7 +38,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             --output {out_dir}/stylus.js --sourcemap=external web/src/app.tsx"#
         )?;
         try_run!("gzip -9 --force {out_dir}/stylus.js.map")?;
-        std::fs::copy("web/src/style.css", format!("{out_dir}/stylus.css"))?;
+        std::fs::copy("web/src/style.scss", format!("{out_dir}/stylus.scss"))?;
     } else {
         rerun_if_changed!("src/compiled/stylus.js");
         rerun_if_changed!("src/compiled/stylus.css");

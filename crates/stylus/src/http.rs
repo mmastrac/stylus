@@ -193,6 +193,7 @@ fn etag_matches(headers: &HeaderMap, etag: &str) -> bool {
     false
 }
 
+#[allow(unused)]
 fn handle_static_content_with_etag(
     headers: HeaderMap,
     content_type: &'static str,

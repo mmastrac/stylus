@@ -1,0 +1,197 @@
+:root {
+  /* Background colors */
+  --base-bg-primary: #f0f0f0;
+  --base-bg-content: white;
+  --base-bg-light: #f9fafb;
+  --base-bg-error: #fef2f2;
+  --base-bg-popup: white;
+  --base-bg-popup-header: #e0e0e0;
+
+  /* Header colors */
+  --base-header-text-color: white;
+  --base-header-bg-color-1: #667eea;
+  --base-header-bg-color-2: #764ba2;
+  
+  /* Text colors */
+  --base-text-primary: #374151;
+  --base-text-secondary: #6b7280;
+  --base-text-muted: #9ca3af;
+  --base-text-error: #dc2626;
+  
+  /* Border colors */
+  --base-border-primary: #e1e5e9;
+  --base-border-light: #e5e7eb;
+  --base-border-error: #fecaca;
+  --base-border-accent: #3b82f6;
+  
+  /* Status colors */
+  --base-status-success: #10b981;
+  --base-status-timeout: #d7ea08;
+  --base-status-error: #ef4444;
+  --base-status-blank: #b5cad3;
+  
+  /* Button colors */
+  --base-text-button: white;
+  --base-btn-primary: #3b82f6;
+  --base-btn-primary-hover: #2563eb;
+  
+  /* Shadow colors */
+  --base-shadow-light: rgba(0, 0, 0, 0.1);
+  --base-shadow-medium: rgba(0, 0, 0, 0.2);
+  
+  /* Modal overlay */
+  --base-overlay-bg: rgba(0, 0, 0, 0.5);
+}
+
+:root {
+  --bg-primary: var(--base-bg-primary);
+  --bg-content: var(--base-bg-content);
+  --bg-light: var(--base-bg-light);
+  --bg-error: var(--base-bg-error);
+  --bg-popup: var(--base-bg-popup);
+  --bg-popup-header: var(--base-bg-popup-header);
+  --header-text-color: var(--base-header-text-color);
+  --header-bg-color-1: var(--base-header-bg-color-1);
+  --header-bg-color-2: var(--base-header-bg-color-2);
+  --text-primary: var(--base-text-primary);
+  --text-secondary: var(--base-text-secondary);
+  --text-muted: var(--base-text-muted);
+  --text-button: var(--base-text-button);
+  --text-error: var(--base-text-error);
+  --border-primary: var(--base-border-primary);
+  --border-light: var(--base-border-light);
+  --border-error: var(--base-border-error);
+  --border-accent: var(--base-border-accent);
+  --status-success: var(--base-status-success);
+  --status-timeout: var(--base-status-timeout);
+  --status-error: var(--base-status-error);
+  --status-blank: var(--base-status-blank);
+  --btn-primary: var(--base-btn-primary);
+  --btn-primary-hover: var(--base-btn-primary-hover);
+  --shadow-light: var(--base-shadow-light);
+  --shadow-medium: var(--base-shadow-medium);
+  --overlay-bg: var(--base-overlay-bg);
+}
+
+/* Manual dark mode override */
+:root.dark-mode {
+  /* Background colors */
+  --bg-primary: hsl(from var(--base-bg-primary) h s calc(100 - l) / alpha);
+  --bg-content: hsl(from var(--base-bg-content) h s calc(100 - l) / alpha);
+  --bg-light: hsl(from var(--base-bg-light) h s calc(100 - l) / alpha);
+  --bg-error: hsl(from var(--base-bg-error) h s calc(100 - l) / alpha);
+  --bg-popup: hsl(from var(--base-bg-popup) h s calc(100 - l + 20) / alpha);
+  --bg-popup-header: hsl(from var(--base-bg-popup-header) h s calc(100 - l) / alpha);
+
+  --header-text-color: hsl(from var(--base-header-text-color) h s calc(l - 40) / alpha);
+  --header-bg-color-1: hsl(from var(--base-header-bg-color-1) h calc(s - 50) calc(l - 50) / alpha);
+  --header-bg-color-2: hsl(from var(--base-header-bg-color-2) h calc(s - 50) calc(l - 50) / alpha);
+  
+  /* Text colors */
+  --text-primary: hsl(from var(--base-text-primary) h s calc(100 - l) / alpha);
+  --text-secondary: hsl(from var(--base-text-secondary) h s calc(100 - l) / alpha);
+  --text-muted: hsl(from var(--base-text-muted) h s calc(100 - l) / alpha);
+  --text-button: hsl(from var(--base-text-button) h s calc(l - 20) / alpha);
+  --text-error: hsl(from var(--base-text-error) h s calc(100 - l) / alpha);
+  
+  /* Border colors */
+  --border-primary: hsl(from var(--base-border-primary) h s calc(100 - l) / alpha);
+  --border-light: hsl(from var(--base-border-light) h s calc(100 - l) / alpha);
+  --border-error: hsl(from var(--base-border-error) h s calc(100 - l) / alpha);
+  --border-accent: hsl(from var(--base-border-accent) h s calc(100 - l) / alpha);
+  
+  /* Status colors */
+  --status-success: hsl(from var(--base-status-success) h s 40 / alpha);
+  --status-timeout: hsl(from var(--base-status-timeout) h s 40 / alpha);
+  --status-error: hsl(from var(--base-status-error) h s 40 / alpha);
+  --status-blank: hsl(from var(--base-status-blank) h s 40 / alpha);
+  
+  /* Button colors */
+  --btn-primary: hsl(from var(--base-btn-primary) h s calc(100 - l) / alpha);
+  --btn-primary-hover: hsl(from var(--base-btn-primary-hover) h s calc(100 - l) / alpha);
+  
+  /* Shadow colors */
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.2);
+  
+  /* Modal overlay */
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+}
+
+/* Manual light mode override */
+:root.light-mode {
+  --bg-primary: var(--base-bg-primary);
+  --bg-content: var(--base-bg-content);
+  --bg-light: var(--base-bg-light);
+  --bg-error: var(--base-bg-error);
+  --bg-popup: var(--base-bg-popup);
+  --bg-popup-header: var(--base-bg-popup-header);
+  --header-text-color: var(--base-header-text-color);
+  --header-bg-color-1: var(--base-header-bg-color-1);
+  --header-bg-color-2: var(--base-header-bg-color-2);
+  --text-primary: var(--base-text-primary);
+  --text-secondary: var(--base-text-secondary);
+  --text-muted: var(--base-text-muted);
+  --text-button: var(--base-text-button);
+  --text-error: var(--base-text-error);
+  --border-primary: var(--base-border-primary);
+  --border-light: var(--base-border-light);
+  --border-error: var(--base-border-error);
+  --border-accent: var(--base-border-accent);
+  --status-success: var(--base-status-success);
+  --status-timeout: var(--base-status-timeout);
+  --status-error: var(--base-status-error);
+  --status-blank: var(--base-status-blank);
+  --btn-primary: var(--base-btn-primary);
+  --btn-primary-hover: var(--base-btn-primary-hover);
+  --shadow-light: var(--base-shadow-light);
+  --shadow-medium: var(--base-shadow-medium);
+  --overlay-bg: var(--base-overlay-bg);
+}
+
+/* Auto mode - system preference */
+@media (prefers-color-scheme: dark) {
+:root:not(.light-mode):not(.dark-mode) {
+  /* Background colors */
+  --bg-primary: hsl(from var(--base-bg-primary) h s calc(100 - l) / alpha);
+  --bg-content: hsl(from var(--base-bg-content) h s calc(100 - l) / alpha);
+  --bg-light: hsl(from var(--base-bg-light) h s calc(100 - l) / alpha);
+  --bg-error: hsl(from var(--base-bg-error) h s calc(100 - l) / alpha);
+  --bg-popup: hsl(from var(--base-bg-popup) h s calc(100 - l + 20) / alpha);
+  --bg-popup-header: hsl(from var(--base-bg-popup-header) h s calc(100 - l) / alpha);
+
+  --header-text-color: hsl(from var(--base-header-text-color) h s calc(l - 40) / alpha);
+  --header-bg-color-1: hsl(from var(--base-header-bg-color-1) h calc(s - 50) calc(l - 50) / alpha);
+  --header-bg-color-2: hsl(from var(--base-header-bg-color-2) h calc(s - 50) calc(l - 50) / alpha);
+  
+  /* Text colors */
+  --text-primary: hsl(from var(--base-text-primary) h s calc(100 - l) / alpha);
+  --text-secondary: hsl(from var(--base-text-secondary) h s calc(100 - l) / alpha);
+  --text-muted: hsl(from var(--base-text-muted) h s calc(100 - l) / alpha);
+  --text-button: hsl(from var(--base-text-button) h s calc(l - 20) / alpha);
+  --text-error: hsl(from var(--base-text-error) h s calc(100 - l) / alpha);
+  
+  /* Border colors */
+  --border-primary: hsl(from var(--base-border-primary) h s calc(100 - l) / alpha);
+  --border-light: hsl(from var(--base-border-light) h s calc(100 - l) / alpha);
+  --border-error: hsl(from var(--base-border-error) h s calc(100 - l) / alpha);
+  --border-accent: hsl(from var(--base-border-accent) h s calc(100 - l) / alpha);
+  
+  /* Status colors */
+  --status-success: hsl(from var(--base-status-success) h s 40 / alpha);
+  --status-timeout: hsl(from var(--base-status-timeout) h s 40 / alpha);
+  --status-error: hsl(from var(--base-status-error) h s 40 / alpha);
+  --status-blank: hsl(from var(--base-status-blank) h s 40 / alpha);
+  
+  /* Button colors */
+  --btn-primary: hsl(from var(--base-btn-primary) h s calc(100 - l) / alpha);
+  --btn-primary-hover: hsl(from var(--base-btn-primary-hover) h s calc(100 - l) / alpha);
+  
+  /* Shadow colors */
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.2);
+  
+  /* Modal overlay */
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+}
+}

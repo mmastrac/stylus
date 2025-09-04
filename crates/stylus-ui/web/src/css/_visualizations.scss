@@ -1,0 +1,172 @@
+/* Visualization Placeholder */
+.visualization-placeholder {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.visualization-placeholder h2 {
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+/* Visualization Grid and Cards */
+.visualization-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.visualization-card {
+  position: relative;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--bg-content);
+  box-shadow: 0 1px 3px var(--shadow-light);
+  min-height: 300px;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Greedy visualizations - always take max size */
+.visualization-card.greedy {
+  height: 60vh;
+}
+
+/* Sized visualizations - wrap content up to max */
+.visualization-card.sized {
+  height: auto;
+}
+
+.visualization-card-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+/* Sized visualizations - content should wrap */
+.visualization-card.sized .visualization-card-content {
+  height: auto;
+  flex: none;
+}
+
+.visualization-card-content h3 {
+  margin: 0 0 15px 0;
+  color: var(--text-primary);
+  font-size: 18px;
+}
+
+.visualization-card-content p {
+  margin: 10px 0;
+  color: var(--text-secondary);
+}
+
+.visualization-url {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-light);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border-left: 3px solid var(--border-accent);
+}
+
+.visualization-info {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 15px;
+  padding: 8px 12px;
+  background: var(--bg-light);
+  border-radius: 4px;
+  border-left: 3px solid var(--text-secondary);
+} 
+
+.visualization-grid-table {
+  width: 100%;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Sized visualizations - table should wrap content */
+.visualization-card.sized .visualization-grid-table {
+  flex: none;
+  height: auto;
+}
+
+.grid-header {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  background: hsl(from var(--bg-light) h s l / 0.8);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.grid-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-row {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  border-bottom: 1px solid var(--border-light);
+  cursor: zoom-in;
+}
+
+.grid-row:last-child {
+  border-bottom: none;
+}
+
+.grid-cell {
+  padding: 8px 12px;
+  border-right: 1px solid var(--border-light);
+  background: hsl(from var(--bg-content) h s l / 0.8);
+  display: flex;
+  align-items: center;
+}
+
+.grid-cell:last-child {
+  border-right: none;
+}
+
+.visualization-iframe {
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.visualization-iframe iframe {
+  width: 100%;
+  height: 100%;
+  border-width: 0px;
+  padding: 0;
+  margin: 0;
+}
+
+.visualization-isoflow {
+  flex: 1;
+  min-height: 0;
+}
+
+.visualization-isoflow .isoflow-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.visualization-isoflow .isoflow-placeholder > div > div {
+  background-color: var(--bg-primary) !important;
+}
+
+.visualization-isoflow .MuiPaper-root, .visualization-isoflow .MuiSvgIcon-root {
+  background-color: var(--bg-content) !important;
+  color: var(--text-primary) !important;
+}

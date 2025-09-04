@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     collections::{BTreeMap, HashMap},
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -608,59 +609,87 @@ fn parse_indexed_oid(input: &str) -> Option<(ObjectIdentifier, u32)> {
     }
 }
 
+fn parse_snmp_line(input: &str) -> Option<(&'static str, u32, Value)> {
+    let Some((left, right)) = input.split_once("=") else {
+        log::warn!("Unexpected snmpwalk/snmpbulkwalk output: {}", input);
+        return None;
+    };
+
+    let left = left.trim();
+    let (left_oid, left_index) = if let Some((oid, index)) = parse_indexed_oid(left) {
+        (oid, index)
+    } else {
+        log::warn!("Failed to parse OID from: {}", left);
+        return None;
+    };
+    let mut right = right.trim();
+    // Remove quotes if present
+    if right.starts_with('"') && right.ends_with('"') {
+        right = &right[1..right.len() - 1];
+    }
+
+    let mut right = Cow::Borrowed(right.trim());
+
+    let mut left = None;
+    for (name, oid, enum_values) in OID_MAP {
+        if left_oid == *oid {
+            left = Some((name, oid));
+            if !enum_values.is_empty() {
+                let value = right.parse::<u32>().unwrap_or_default();
+                for (enum_value, name) in *enum_values {
+                    if *enum_value == value {
+                        right = (*name).into();
+                        break;
+                    }
+                }
+            } else if oid == &rasn_mib::interfaces::PhysAddress::VALUE {
+                // MIBs not loaded, special case for ifPhysAddress
+                if !right.contains(":") {
+                    let hex = right.replace(|c: char| !c.is_ascii_hexdigit(), "");
+                    if hex.len() == 12 {
+                        let mut bytes = [0u8; 6];
+                        for i in 0..6 {
+                            bytes[i] = u8::from_str_radix(&hex[i * 2..i * 2 + 2], 16).unwrap();
+                        }
+                        right = format!(
+                            "{:x}:{:x}:{:x}:{:x}:{:x}:{:x}",
+                            bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5]
+                        )
+                        .into();
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    let Some((oid, _)) = left else {
+        log::warn!("Failed to find OID in OID_MAP: {}", left_oid);
+        return None;
+    };
+
+    let v = if let Ok(v) = right.parse::<i64>() {
+        Value::Int(v)
+    } else {
+        Value::Str(right.to_string().into())
+    };
+
+    Some((oid, left_index, v))
+}
+
 impl MonitorMessageProcessorInstance for SnmpMonitorMessageProcessorInstance {
     fn process_message(&self, input: &str) -> Vec<String> {
         // Parse the input as <oid>.index = <valud>?
         // Note that value may be missing and input may end in the equals. This is considered an empty string.
 
-        if let Some((left, right)) = input.split_once("=") {
-            let left = left.trim();
-            let (left_oid, left_index) = if let Some((oid, index)) = parse_indexed_oid(left) {
-                (oid, index)
-            } else {
-                log::warn!("Failed to parse OID from: {}", left);
-                return vec![];
-            };
-            let mut right = right.trim();
-
-            let mut left = None;
-            for (name, oid, enum_values) in OID_MAP {
-                if left_oid == *oid {
-                    left = Some((name, oid));
-                    if !enum_values.is_empty() {
-                        let value = right.parse::<u32>().unwrap_or_default();
-                        for (enum_value, name) in *enum_values {
-                            if *enum_value == value {
-                                right = name;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-
-            let Some((oid, _)) = left else {
-                log::warn!("Failed to find OID in OID_MAP: {}", left_oid);
-                return vec![];
-            };
-
-            let v = if let Ok(v) = right.parse::<i64>() {
-                Value::Int(v)
-            } else {
-                Value::Str(right.to_string())
-            };
-
+        if let Some((oid, index, v)) = parse_snmp_line(input) {
             self.ports
                 .lock()
                 .unwrap()
-                .entry(left_index as _)
+                .entry(index as _)
                 .or_default()
                 .insert(oid.to_string(), v);
-            return vec![];
-        };
-
-        log::warn!("Unexpected snmpwalk/snmpbulkwalk output: {}", input);
+        }
         vec![]
     }
 
@@ -725,6 +754,73 @@ fn calculate_bool(expression: &str, metadata: &HashMap<String, Value>) -> bool {
         Ok(Err(e)) => {
             log::warn!("Failed to evaluate expression {:?}: {:?}", expression, e);
             false
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_snmp_line() {
+        let test_cases = &[
+            // MIB
+            (
+                ".1.3.6.1.2.1.2.2.1.2.5 = Annapurna Labs Ltd. Gigabit Ethernet Adapter",
+                "ifDescr",
+                5,
+                Value::Str("Annapurna Labs Ltd. Gigabit Ethernet Adapter".into()),
+            ),
+            (".1.3.6.1.2.1.2.2.1.1.3 = 3", "ifIndex", 3, Value::Int(3)),
+            (
+                ".1.3.6.1.2.1.2.2.1.6.4 = 78:45:58:c0:2c:21",
+                "ifPhysAddress",
+                4,
+                Value::Str("78:45:58:c0:2c:21".into()),
+            ),
+            (
+                ".1.3.6.1.2.1.2.2.1.3.11 = 6",
+                "ifType",
+                11,
+                Value::Str("ethernetCsmacd".into()),
+            ),
+            (
+                ".1.3.6.1.2.1.2.2.1.6.7 = ",
+                "ifPhysAddress",
+                7,
+                Value::Str("".into()),
+            ),
+            // No MIB
+            (
+                r#".1.3.6.1.2.1.2.2.1.2.5 = "Annapurna Labs Ltd. Gigabit Ethernet Adapter""#,
+                "ifDescr",
+                5,
+                Value::Str("Annapurna Labs Ltd. Gigabit Ethernet Adapter".into()),
+            ),
+            (
+                r#".1.3.6.1.2.1.2.2.1.2.4 = "ether4""#,
+                "ifDescr",
+                4,
+                Value::Str("ether4".into()),
+            ),
+            (
+                r#".1.3.6.1.2.1.2.2.1.6.19 = "4C 5E 0C 95 5E AF ""#,
+                "ifPhysAddress",
+                19,
+                Value::Str("4c:5e:c:95:5e:af".into()),
+            ),
+            (
+                r#".1.3.6.1.2.1.2.2.1.6.7 = """#,
+                "ifPhysAddress",
+                7,
+                Value::Str("".into()),
+            ),
+        ];
+
+        for (input, oid, index, expected) in test_cases {
+            let result = parse_snmp_line(input);
+            assert_eq!(result, Some((*oid, *index, expected.clone())));
         }
     }
 }

@@ -1,10 +1,11 @@
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
 #[derive(Clone, PartialEq, Eq)]
 pub enum Value {
     Int(i64),
-    Str(String),
+    Str(Cow<'static, str>),
 }
 
 pub type Result = std::result::Result<Value, Error>;
@@ -29,9 +30,9 @@ impl Value {
         }
     }
 
-    pub fn as_str(&self) -> String {
+    pub fn as_str(&self) -> Cow<'static, str> {
         match self {
-            Value::Int(i) => i.to_string(),
+            Value::Int(i) => i.to_string().into(),
             Value::Str(s) => s.clone(),
         }
     }
@@ -74,8 +75,8 @@ impl Value {
     fn add(self, other: Value) -> Value {
         match (self, other) {
             (Value::Int(a), Value::Int(b)) => Value::Int(a + b),
-            (Value::Str(a), Value::Str(b)) => Value::Str(format!("{}{}", a, b)),
-            (a, b) => Value::Str(format!("{}{}", a.as_str(), b.as_str())),
+            (Value::Str(a), Value::Str(b)) => Value::Str(format!("{}{}", a, b).into()),
+            (a, b) => Value::Str(format!("{}{}", a.as_str(), b.as_str()).into()),
         }
     }
 
@@ -172,22 +173,22 @@ peg::parser!( pub grammar expression() for str {
         ws() "str" ws() "(" ws() v:expr(ctx) ws() ")" { Ok(Value::Str(v?.as_str())) }
         ws() "int" ws() "(" ws() v:expr(ctx) ws() ")" { Ok(Value::Int(v?.as_int())) }
         ws() "(" ws() v:expr(ctx) ws() ")" { Ok(v?) }
-        ws() s:string() { Ok(Value::Str(s)) }
+        ws() s:string() { Ok(Value::Str(s.into())) }
         ws() n:number() { Ok(Value::Int(n)) }
         ws() "startswith" ws() "(" ws() a:expr(ctx) ws() "," ws() b:expr(ctx) ws() ")" {
             let s1 = a?.as_str();
             let s2 = b?.as_str();
-            Ok(Value::from_bool(s1.starts_with(&s2)))
+            Ok(Value::from_bool(s1.starts_with(&*s2)))
         }
         ws() "endswith" ws() "(" ws() a:expr(ctx) ws() "," ws() b:expr(ctx) ws() ")" {
             let s1 = a?.as_str();
             let s2 = b?.as_str();
-            Ok(Value::from_bool(s1.ends_with(&s2)))
+            Ok(Value::from_bool(s1.ends_with(&*s2)))
         }
         ws() "contains" ws() "(" ws() a:expr(ctx) ws() "," ws() b:expr(ctx) ws() ")" {
             let s1 = a?.as_str();
             let s2 = b?.as_str();
-            Ok(Value::from_bool(s1.contains(&s2)))
+            Ok(Value::from_bool(s1.contains(&*s2)))
         }
         ws() "length" ws() "(" ws() v:expr(ctx) ws() ")" {
             let s = v?.as_str();
@@ -281,7 +282,7 @@ mod tests {
         assert_eq!(v, Value::Str("ab".into()));
 
         let v = expression::calculate(r#" '\"' "#, &ctx).unwrap().unwrap();
-        assert_eq!(v, Value::Str('"'.into()));
+        assert_eq!(v, Value::Str(Cow::Borrowed("\"")));
 
         let v = expression::calculate(r#" '\'' "#, &ctx).unwrap().unwrap();
         assert_eq!(v, Value::Str("'".into()));

@@ -213,8 +213,8 @@ fn monitor_thread_impl<T: FnMut(&str, WorkerMessage) -> Result<(), Box<dyn Error
     let mut f = |stream, s| {
         process_log_message(id, &failed, stream, s, sender, processor);
     };
-    let mut stdout = LineBuf::new(80);
-    let mut stderr = LineBuf::new(80);
+    let mut stdout = LineBuf::new(100);
+    let mut stderr = LineBuf::new(100);
 
     let start = Instant::now();
     let mut comms = popen

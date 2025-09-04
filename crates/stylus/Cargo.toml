@@ -39,3 +39,6 @@ keepcalm = { version = "0.4.1", features = ["serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 include_directory = "0.1"
 peg = "0.8"
+
+rasn-mib = "0.27.2"
+rasn-smi = "0.27.2"

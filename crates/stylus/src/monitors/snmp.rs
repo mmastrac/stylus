@@ -5,6 +5,7 @@ use std::{
     time::Duration,
 };
 
+use rasn_smi::ObjectType;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -143,7 +144,7 @@ impl SnmpNetworkMonitorConfig {
             parts.push(self.target.host.clone());
         }
 
-        parts.push("ifTable".into());
+        parts.push(rasn_mib::interfaces::Table::VALUE.to_string());
 
         MonitorDirTestConfig {
             interval: self.interval,

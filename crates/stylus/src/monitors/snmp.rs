@@ -435,10 +435,6 @@ impl SnmpNetworkMonitorConfig {
         // Output formatting: -O sQ
         parts.push("-OsQfne".into());
 
-        // Timeout (seconds)
-        parts.push("-t".into());
-        parts.push(self.timeout.as_secs().to_string());
-
         // SNMP version
         let version_flag = match self.target.version {
             1 => "1",

@@ -354,14 +354,18 @@ pub async fn run(config: Config, dry_run: bool) {
                         stylus_ui::STYLUS_JAVASCRIPT_MAP,
                     )
                 }),
-            ).route("/stylus.svg", get(get(|headers: HeaderMap| async {
-                handle_static_content_with_etag(
-                    headers,
-                    "image/svg+xml; charset=utf-8",
-                    None,
-                    &stylus_ui::STYLUS_LOGO,
-                )
-            })));
+            )
+            .route(
+                "/stylus.svg",
+                get(get(|headers: HeaderMap| async {
+                    handle_static_content_with_etag(
+                        headers,
+                        "image/svg+xml; charset=utf-8",
+                        None,
+                        &stylus_ui::STYLUS_LOGO,
+                    )
+                })),
+            );
     }
 
     // Add static files route if configured

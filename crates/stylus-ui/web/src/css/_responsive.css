@@ -61,6 +61,11 @@
   .visualization-card {
     padding: 15px;
     min-height: 180px;
+    max-height: max-content !important;
+  }
+
+  .visualization-row .row-columns {
+    grid-template-columns: 1fr !important;
   }
 }
 

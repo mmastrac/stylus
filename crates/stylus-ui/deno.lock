@@ -14,7 +14,5 @@
     "https://esm.sh/ieee754@1.2.1?target=denonext": "b8839b7562d93529fd58ec105fa4230b816e3dd0a2dd35e3d3b07cae2f16ae97",
     "https://esm.sh/immutable@5.1.3/X-ZW5vZGU6YnVmZmVyLG5vZGU6cHJvY2Vzcw/denonext/immutable.mjs": "467a54352e36529d9946e3108017aa09ae7abbe3335d2e7fc75d194692edb335",
     "https://esm.sh/immutable@5.1.3?external=node:buffer,node:process&target=denonext": "398c59bcd5f69c9840d70d5eb01ddb3bc04a4adf9fe476e6ca25896688b6a5b9",
-    "https://esm.sh/sass@1.90.0/X-ZW5vZGU6YnVmZmVyLG5vZGU6cHJvY2Vzcw/denonext/sass.mjs": "b3bf6cf0f3866a59e09aac446d55631330950f7b4c0e329755b1c86e765a9684",
-    "https://esm.sh/sass@1.90.0?external=node:process,node:buffer": "4181561357da3e2c28971b6fe3914054345e3eee307e46d09c6b5c0570ded2e1"
   }
 }

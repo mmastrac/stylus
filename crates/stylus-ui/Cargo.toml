@@ -29,4 +29,4 @@ cargo-emit = "0.2.1"
 tempfile = "3.21"
 
 [lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(use_files)'] }
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(use_files)', 'cfg(no_use_files)'] }

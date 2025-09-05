@@ -1,10 +1,6 @@
-extern crate cargo_emit;
-extern crate glob;
-extern crate sheller;
-
 use cargo_emit::{rerun_if_changed, rustc_cfg, warning};
-use std::path::Path;
 use std::fs;
+use std::path::Path;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
@@ -21,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         use glob::glob;
         use sheller::try_run;
 
-        warning!("Building Stylus from source, requires deno and sass");
+        warning!("Building Stylus from source, requires deno!");
 
         for entry in glob("web/**/*")? {
             if let Ok(entry) = entry {
@@ -39,10 +35,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             --output {out_dir}/stylus.js --sourcemap=external web/src/app.tsx"#
         )?;
         try_run!("gzip -9 --force {out_dir}/stylus.js.map")?;
-        
+
         // Inline CSS imports manually
         let css_content = inline_css_imports("web/src/style.css")?;
         fs::write(format!("{out_dir}/stylus.css"), css_content)?;
+
+        rustc_cfg!("no_use_files");
     } else {
         rerun_if_changed!("src/compiled/stylus.js");
         rerun_if_changed!("src/compiled/stylus.css");
@@ -62,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn inline_css_imports(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
     let content = fs::read_to_string(file_path)?;
     let mut result = String::new();
-    
+
     for line in content.lines() {
         let trimmed = line.trim();
         if trimmed.starts_with("@import") {
@@ -70,7 +68,7 @@ fn inline_css_imports(file_path: &str) -> Result<String, Box<dyn std::error::Err
             if let Some(import_path) = extract_import_path(trimmed) {
                 let base_dir = Path::new(file_path).parent().unwrap();
                 let full_path = base_dir.join(&import_path);
-                
+
                 if full_path.exists() {
                     // Recursively inline imports from the imported file
                     let imported_content = inline_css_imports(&full_path.to_string_lossy())?;
@@ -93,7 +91,7 @@ fn inline_css_imports(file_path: &str) -> Result<String, Box<dyn std::error::Err
             result.push('\n');
         }
     }
-    
+
     Ok(result)
 }
 
@@ -104,12 +102,12 @@ fn extract_import_path(import_line: &str) -> Option<String> {
             return Some(import_line[start + 1..start + 1 + end].to_string());
         }
     }
-    
+
     if let Some(start) = import_line.find('"') {
         if let Some(end) = import_line[start + 1..].find('"') {
             return Some(import_line[start + 1..start + 1 + end].to_string());
         }
     }
-    
+
     None
 }

@@ -11,7 +11,6 @@
   background: linear-gradient(135deg, var(--header-bg-color-1) 0%, var(--header-bg-color-2) 100%);
   color: var(--header-text-color);
   padding: 20px;
-  min-height: 84px; /* Ensure minimum height for logo + padding */
 }
 
 .header-content {

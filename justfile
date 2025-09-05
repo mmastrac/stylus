@@ -11,7 +11,7 @@ test: test-cli test-rust
 build-debug:
     cargo build --bin stylus
 
-dev:
+dev: clean-bundle
     #!/usr/bin/env bash
     set -o pipefail
     echo "Creating a temporary instance of Stylus..."
@@ -36,13 +36,18 @@ dev:
 ts-check:
     cd crates/stylus-ui/web && npx tsc --noEmit
 
-bundle:
-    cd crates/stylus-ui/ \
-      && mkdir -p src/compiled \
-      && cp web/src/style.css src/compiled/stylus.css \
-      && deno bundle --config web/deno.json --minify --platform browser \
-        --output src/compiled/stylus.js --sourcemap=external web/src/app.tsx \
-      && gzip -9 --force src/compiled/stylus.js.map
+clean-bundle:
+    rm crates/stylus-ui/src/compiled/* 2>/dev/null || true
+
+bundle: clean-bundle
+    #!/usr/bin/env bash
+    set -o pipefail
+    TEMP_DIR=$(mktemp -d)
+    echo "Building Stylus UI crate..."
+    cargo build -p stylus-ui --features=from-source-always --target-dir="$TEMP_DIR" 2>/dev/null
+    cp "$TEMP_DIR"/debug/build/stylus-ui-*/out/stylus.* crates/stylus-ui/src/compiled/
+    ls -l crates/stylus-ui/src/compiled/
+    rm -rf "$TEMP_DIR"
 
 release-tag:
     #!/usr/bin/env bash

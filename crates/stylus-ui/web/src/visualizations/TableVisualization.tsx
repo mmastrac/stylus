@@ -26,7 +26,7 @@ export function TableVisualization({ state }: TableVisualizationProps) {
                                 {Object.keys(monitor.children).length > 0 && (
                                     <span className="children-indicator">
                                         {Object.keys(monitor.children).map((childId) => (
-                                            <StatusIndicator key={childId} status={monitor.children[childId].status.status} className="small-status-indicator" />
+                                            <StatusIndicator key={childId} status={monitor.children[childId].status?.status || "blank"} className="small-status-indicator" />
                                         ))}
                                     </span>
                                 )}

@@ -572,7 +572,7 @@ pub struct SnmpMonitorMessageProcessorInstance {
     exclude: String,
     red: String,
     green: String,
-    ports: Mutex<HashMap<usize, HashMap<String, Value>>>,
+    ports: Mutex<BTreeMap<usize, HashMap<String, Value>>>,
 }
 
 impl MonitorMessageProcessor for SnmpMonitorMessageProcessor {
@@ -677,16 +677,37 @@ impl MonitorMessageProcessorInstance for SnmpMonitorMessageProcessorInstance {
     fn process_message(&self, input: &str) -> Vec<String> {
         // Parse the input as <oid>.index = <valud>?
         // Note that value may be missing and input may end in the equals. This is considered an empty string.
+        let mut result = vec![];
+        if let Some((oid, port_index, v)) = parse_snmp_line(input) {
+            let mut values = BTreeMap::new();
+            values.insert(
+                "index".into(),
+                MonitorDirAxisValue::Number(port_index as i64),
+            );
+            let Ok(port_id) = interpolate_id(&values, &self.id) else {
+                log::warn!(
+                    "Failed to interpolate id for port {}: {:?}",
+                    port_index,
+                    values
+                );
+                return result;
+            };
 
-        if let Some((oid, index, v)) = parse_snmp_line(input) {
+            result.push(format!(
+                "group.{}.status.metadata.{}={:?}",
+                port_id,
+                oid,
+                v.as_str()
+            ));
+
             self.ports
                 .lock()
                 .unwrap()
-                .entry(index as _)
+                .entry(port_index as _)
                 .or_default()
                 .insert(oid.to_string(), v);
         }
-        vec![]
+        result
     }
 
     fn finalize(&self) -> Vec<String> {
@@ -720,19 +741,12 @@ impl MonitorMessageProcessorInstance for SnmpMonitorMessageProcessorInstance {
                 continue;
             };
 
-            for (oid, value) in port_metadata {
-                result.push(format!(
-                    "group.{}.status.metadata.{}={:?}",
-                    port_id,
-                    oid,
-                    value.as_str()
-                ));
-            }
-
             if red {
                 result.push(format!("group.{}.status.status=\"red\"", port_id));
             } else if green {
                 result.push(format!("group.{}.status.status=\"green\"", port_id));
+            } else {
+                result.push(format!("group.{}.status.status=\"blank\"", port_id));
             }
         }
 

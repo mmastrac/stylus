@@ -78,7 +78,7 @@ export function StackVisualization({ state, stacks, size }: StackVisualizationPr
                         const child = children[childIndex];
                         childIndex++;
                         
-                        if (child) {
+                        if (child?.child?.status?.metadata) {
                             let title = `${child.id}`;
                             for (const [key, value] of Object.entries(child.child.status.metadata)) {
                                 title += `\n${key}: ${value}`;

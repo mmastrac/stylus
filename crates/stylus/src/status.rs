@@ -169,12 +169,11 @@ impl MonitorState {
     ) {
         self.css = None;
 
-        for child in self.children.iter_mut() {
+        for mut child in std::mem::take(&mut self.children) {
             let child_status = &mut child.1.status;
             if child_status.is_pending_status_set() || status != StatusState::Green {
                 child_status.finish(status, code, description.clone(), config);
-            } else {
-                child_status.finish(StatusState::Blank, code, "".into(), config);
+                self.children.insert(child.0, child.1);
             }
         }
 

@@ -1,6 +1,9 @@
 # stylus [![CI](https://github.com/mmastrac/stylus/actions/workflows/build.yml/badge.svg)](https://github.com/mmastrac/stylus/actions/workflows/build.yml) [![crates.io](https://img.shields.io/crates/v/stylus.svg)](https://crates.io/crates/stylus) [![Docker Pulls](https://img.shields.io/docker/pulls/mmastrac/stylus.svg)](https://hub.docker.com/r/mmastrac/stylus) [![Book](https://img.shields.io/badge/book-online-blue)](https://mmastrac.github.io/stylus/)
 
-<img src="./logo/stylus-white-1024x1024.svg" alt="Stylus Logo" align="right" style="max-height: 256px;">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mmastrac/stylus/refs/heads/master/logo/stylus-white-1024x1024.svg">
+  <img alt="Text changing depending on mode. Light: 'So light!' Dark: 'So dark!'" width="256" align="right" src="https://raw.githubusercontent.com/mmastrac/stylus/refs/heads/master/logo/stylus-black-1024x1024.svg">
+</picture>
 
 **Stylus** (_style + status_) is a lightweight status page for infrastructure
 and networks. Configure a set of bash scripts that test the various parts of

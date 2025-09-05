@@ -66,3 +66,12 @@ publish-docker:
     set -euf -o pipefail
     VERSION="v$(cargo metadata --format-version=1 | jq -r '.packages[] | select(.name == "stylus") | .version')"
     docker/build.sh "$VERSION"
+
+update-logo:
+    cp logo/logo.svg logo/stylus-black-1024x1024.svg
+    svgo logo/stylus-black-1024x1024.svg
+    cp logo/logo.svg logo/stylus-white-1024x1024.svg
+    sed -i '' 's/fill="black"/fill="white"/g' logo/stylus-white-1024x1024.svg
+    svgo logo/stylus-white-1024x1024.svg
+    cp logo/stylus-black-1024x1024.svg crates/stylus-ui/web/stylus.svg
+    

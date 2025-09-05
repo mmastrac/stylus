@@ -1,0 +1,32 @@
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 0;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 15px 25px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  flex: 1;
+  text-align: center;
+}
+
+.tab-button:hover {
+  background: var(--bg-content);
+  color: var(--text-primary);
+}
+
+.tab-button.active {
+  color: var(--btn-primary);
+  border-bottom-color: var(--btn-primary);
+  background: var(--bg-content);
+}

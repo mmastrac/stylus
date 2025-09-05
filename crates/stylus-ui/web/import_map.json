@@ -1,11 +1,13 @@
 {
     "imports": {
+        "sass": "https://esm.sh/sass@1.90.0?external=node:process,node:buffer",
         "babel": "https://esm.sh/@babel/standalone@@7.28.2/babel.min.js",
         "react": "https://esm.sh/react@19?dev",
         "react-dom": "https://esm.sh/react-dom@19?dev&external=react",
         "react-dom/client": "https://esm.sh/react-dom@19/client?dev&external=react",
         "react/jsx-runtime": "https://esm.sh/react@19/jsx-runtime?dev",
         "isoflow": "https://esm.sh/x-isoflow-react-19@1.1.1-patch-6?external=react,react-dom",
-        "node:process": "./stubs/node-process.js"
+        "node:process": "./stubs/node-process.js",
+        "node:buffer": "https://esm.sh/buffer@6.0.3"
     }
 }

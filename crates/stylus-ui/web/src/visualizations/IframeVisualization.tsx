@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { StatusData } from "../types";
+import { VisualizationState } from "./VisualizationState.tsx";
 
 // Common function to inject styles into a document
 function injectStylesIntoDocument(document: Document, cacheBuster: boolean = false): void {
@@ -39,12 +39,13 @@ function injectStylesIntoDocument(document: Document, cacheBuster: boolean = fal
 
 // Iframe Visualization Component
 interface IframeVisualizationProps {
+    state: VisualizationState;
     url?: string;
     inject?: boolean;
-    statusData: StatusData | null;
 }
 
-export function IframeVisualization({ url, inject, statusData }: IframeVisualizationProps) {
+export function IframeVisualization({ state, url, inject }: IframeVisualizationProps) {
+    const { statusData } = state;
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const isLoadedRef = useRef<boolean>(false);
 

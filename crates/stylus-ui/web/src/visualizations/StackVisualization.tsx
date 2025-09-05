@@ -1,6 +1,6 @@
 
-import { StatusData } from "../types";
 import { StatusIndicator } from "../utils.tsx";
+import { VisualizationState } from "./VisualizationState.tsx";
 
 // Stack Visualization Component
 interface StackRow {
@@ -16,11 +16,12 @@ interface Stack {
 
 interface StackVisualizationProps {
     stacks?: Stack[];
-    statusData: StatusData | null;
     size?: 'small' | 'large';
+    state: VisualizationState;
 }
 
-export function StackVisualization({ stacks, statusData, size }: StackVisualizationProps) {
+export function StackVisualization({ state, stacks, size }: StackVisualizationProps) {
+    const { statusData } = state;
     if (!stacks || !statusData) {
         return (
             <div className={`visualization-stack ${size ? `stack-${size}` : ''}`}>

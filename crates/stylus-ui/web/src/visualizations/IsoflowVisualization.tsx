@@ -1,7 +1,7 @@
-import { StatusData } from "../types";
 import IsoFlow from "isoflow";
+import { VisualizationState } from "./VisualizationState.tsx";
 
-function updateIsoflowDataWithStatus(data: any, statusData: StatusData | null) {
+function updateIsoflowDataWithStatus(data: any, statusData: any) {
     if (!statusData || !data) {
         return data;
     }
@@ -44,8 +44,8 @@ function updateIsoflowDataWithStatus(data: any, statusData: StatusData | null) {
             'blank': 'stylus-blank',
         }
 
-        if (monitor && COLOR_MAP[monitor.status.status] !== undefined) {
-            const color = COLOR_MAP[monitor.status.status];
+        if (monitor && COLOR_MAP[monitor.status.status as keyof typeof COLOR_MAP] !== undefined) {
+            const color = COLOR_MAP[monitor.status.status as keyof typeof COLOR_MAP];
             const rectangle = {
                 "id": `rect-status-${item.id}`,
                 "color": color,
@@ -75,10 +75,11 @@ function updateIsoflowDataWithStatus(data: any, statusData: StatusData | null) {
 
 interface IsoflowVisualizationProps {
     config?: string;
-    statusData: StatusData | null;
+    state: VisualizationState;
 }
 
-export function IsoflowVisualization({ config, statusData }: IsoflowVisualizationProps) {
+export function IsoflowVisualization({ state, config }: IsoflowVisualizationProps) {
+    const { statusData } = state;
     const initialData = updateIsoflowDataWithStatus(statusData?.config.config_d[config || "isoflow"], statusData);
     
     return (

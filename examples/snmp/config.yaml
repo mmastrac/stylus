@@ -10,20 +10,22 @@ ui:
   description: "SNMP Status"
   visualizations:
     - title: "SNMP Status"
-      description: "Current status of all SNMP components"
-      type: "table"
-    - title: "Rack 1"
-      description: "Rack 1"
-      type: "stack"
-      stacks:
-        - title: "Rack 1"
-          rows:
-            - id: "router"
-              size: "small"
-              layout: 3x1 4x2
-            - id: "switch"
-              size: "small"
-              layout: 3x4x2 1
-            - id: "switch-core"
-              size: "small"
-              layout: 3x4x2 2x2
+      description: "SNMP Status"
+      type: "row"
+      columns:
+        - type: "stack"
+          width: 1
+          stacks:
+            - title: "Rack 1"
+              rows:
+                - id: "router"
+                  size: "small"
+                  layout: 3x1 4x2
+                - id: "switch"
+                  size: "small"
+                  layout: 3x4x2 1
+                - id: "switch-core"
+                  size: "small"
+                  layout: 3x4x2 2x2
+        - type: "table"
+          width: 3

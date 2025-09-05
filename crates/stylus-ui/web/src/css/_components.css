@@ -1,0 +1,179 @@
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 0.5fr));
+  gap: 20px;
+}
+
+.status-card {
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--bg-content);
+  box-shadow: 0 1px 3px var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.small-status-indicator {
+  width: 8px;
+  height: 8px;
+  margin-right: 1px;
+}
+
+.children-indicator {
+  margin-left: 8px;
+}
+
+.status-code {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 8px;
+}
+
+.status-code::before {
+  content: "(";
+  color: var(--text-muted);
+}
+
+.status-code::after {
+  content: ")";
+  color: var(--text-muted);
+}
+
+.status-code[data-code="0"] {
+  display: none;
+}
+
+/* TODO: replace with color classes below */
+.status-success { background-color: var(--status-success); }
+.status-timeout { background-color: var(--status-timeout); }
+.status-error { background-color: var(--status-error); }
+.status-blank { background-color: var(--status-blank); }
+
+.status-green { background-color: var(--status-success); }
+.status-yellow { background-color: var(--status-timeout); }
+.status-red { background-color: var(--status-error); }
+.status-blank { background-color: var(--status-blank); }
+
+/* Child status indicators for group monitors */
+.child-status-indicator {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  margin: 2px;
+  cursor: help;
+  border: 1px solid var(--shadow-light);
+}
+
+.children-container {
+  margin: 15px 0;
+}
+
+.children-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+.error {
+  background: var(--bg-error);
+  border: 1px solid var(--border-error);
+  color: var(--text-error);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.refresh-button {
+  background: var(--btn-primary);
+  color: var(--text-button);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.refresh-button:hover {
+  background: var(--btn-primary-hover);
+}
+
+.show-popup {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+
+.show-popup::after {
+  content: "→"; /* unicode arrow pointing up and to the right */
+  font-size: 20px;
+  line-height: 14px;
+  font-weight: bold;
+  display: inline-block;
+  transform: rotate(-45deg);
+  vertical-align: bottom;
+}
+
+.log-preview {
+  margin: 15px 0;
+  padding: 10px;
+  background-color: var(--bg-light);
+  border-radius: 4px;
+  border-left: 3px solid var(--border-accent);
+}
+
+.log-entry {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-top: 5px;
+  word-break: break-all;
+}
+
+/* Status Card Footer */
+.status-card-footer {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-light);
+}
+
+/* View Log Button */
+.view-log-button {
+  background: var(--btn-primary);
+  color: var(--text-button);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.view-log-button:hover {
+  background: var(--btn-primary-hover);
+}
+
+.status-card h3 {
+  padding: 0px;
+  margin-top: 0px;
+}

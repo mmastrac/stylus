@@ -28,6 +28,36 @@ ui:
 
 ## Visualization Types
 
+### Row Visualization
+
+The row visualization allows you to split a visualization into multiple columns
+with configurable widths. Each column can contain any other visualization type.
+
+**Configuration:**
+
+```yaml
+- title: "My Rows"
+  description: "Row description"
+  type: "row"
+  columns:
+    - type: "table"
+      width: 1
+    - type: "stack"
+      width: 2
+      stacks:
+        - title: "Rack 1"
+          rows:
+            - id: "router"
+              size: "small"
+              layout: 3x1 4x2
+    - type: "svg"
+      width: 1
+      url: "/network.svg"
+```
+
+The `width` parameter for each column determines how much of the available space
+the column should take up.
+
 ### Table Visualization
 
 The table visualization displays monitor status in a structured table format with status indicators and clickable rows for log viewing.
@@ -162,6 +192,30 @@ ui:
       description: "Interactive dependency flow"
       type: "isoflow"
       config: "dependencies"
+```
+
+A row visualization with multiple columns.
+
+```yaml
+ui:
+  visualizations:
+    - title: "Dashboard"
+      description: "Multi-column dashboard layout"
+      type: "row"
+      columns:
+        - type: "table"
+          width: 1
+        - type: "stack"
+          width: 2
+          stacks:
+            - title: "Rack 1"
+              rows:
+                - id: "router"
+                  size: "small"
+                  layout: 3x1 4x2
+        - type: "svg"
+          width: 1
+          url: "/network.svg"
 ```
 
 ## Advanced Usage

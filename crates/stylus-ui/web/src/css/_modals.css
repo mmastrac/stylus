@@ -1,0 +1,84 @@
+/* Log Modal Styles */
+.log-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--overlay-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.log-modal {
+  background: var(--bg-popup);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px var(--shadow-medium);
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.log-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-popup-header);
+}
+
+.log-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.log-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.log-modal-close:hover {
+  background-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.log-modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.log-entries {
+  display: flex;
+  flex-direction: column;
+}
+
+.log-entries .log-entry {
+  padding: 0px 12px;
+  border-radius: 4px;
+  border-left: 3px solid var(--border-accent);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  color: var(--text-primary);
+  word-break: break-all;
+  white-space: pre-wrap;
+}

@@ -60,42 +60,6 @@ class FetchAwareCache {
     }
 }
 
-async function loadSass(style, path) {
-    const sass = await import('sass');
-    const cache = new FetchAwareCache(LOCAL_STORAGE_KEY + `sass-cache-${path}`, 'SASS');
-
-    await cache.get(path, async function() {
-        const scss = await fetch(path);
-        const scssText = await scss.text();
-        const files = [];
-        const result = await sass.compileStringAsync(scssText, {
-            importers: [
-                {
-                    canonicalize(url) {
-                        return new URL(`./src/${url}.scss`, location.href);
-                    },
-                    async load(url) {
-                        files.push(url);
-                        const contents = await fetch(url).then(res => res.text());
-                        return {
-                            contents,
-                            syntax: 'scss',
-                            extension: 'scss'
-                        };
-                    }
-                }
-            ]
-        });
-        style.textContent = result.css;
-        return {
-            files,
-            result: result.css
-        };
-    }, (css) => {
-        style.textContent = css;
-    });
-}
-
 async function loadRoot() {
     const res = await fetch('import_map.json');
     const json = await res.json();
@@ -103,11 +67,6 @@ async function loadRoot() {
     script.type = 'importmap';
     script.textContent = JSON.stringify(json);
     document.getElementsByTagName('head')[0].insertBefore(script, null);
-
-    const style = document.createElement('style');
-    document.getElementsByTagName('head')[0].insertBefore(style, null);
-
-    loadSass(style, 'src/style.scss');
 
     const module = await import('./babel-module-loader.js');
     await module.importBabel(

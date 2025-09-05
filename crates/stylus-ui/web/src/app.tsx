@@ -202,11 +202,14 @@ function Header({ title, description, themeMode, onThemeToggle }: HeaderProps) {
     return (
         <div className="header">
             <div className="header-content">
-                <div>
-                    <h1>{title}</h1>
-                    <p>{description}</p>
+                <img className="logo" src="/stylus.svg" alt="Stylus Logo" />
+                <div className="header-text">
+                    <h1 className="title">{title}</h1>
+                    <p className="description">{description}</p>
                 </div>
-                <ThemeToggle themeMode={themeMode} onToggle={onThemeToggle} />
+                <div className="header-controls">
+                    <ThemeToggle themeMode={themeMode} onToggle={onThemeToggle} />
+                </div>
             </div>
         </div>
     );

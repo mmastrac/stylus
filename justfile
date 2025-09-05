@@ -26,6 +26,7 @@ dev:
     for file in crates/stylus-ui/web/src \
         crates/stylus-ui/web/stubs \
         crates/stylus-ui/web/devmode \
+        crates/stylus-ui/web/stylus.svg \
         crates/stylus-ui/web/index.html \
         crates/stylus-ui/web/import_map.json; do
         ln -s ../../../"$file" "$BUILD_DIR/static/$(basename "$file")"

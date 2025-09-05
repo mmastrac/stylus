@@ -11,6 +11,8 @@ pub const STYLUS_JAVASCRIPT: &str = include_str!(concat!(env!("OUT_DIR"), "/styl
 pub const STYLUS_JAVASCRIPT_MAP: &[u8] =
     include_bytes!(concat!(env!("OUT_DIR"), "/stylus.js.map.gz"));
 #[cfg(not(use_files))]
-pub const STYLUS_CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/stylus.scss"));
+pub const STYLUS_CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/stylus.css"));
 
 pub const STYLUS_HTML: &str = include_str!("../web/index-compiled.html");
+
+pub const STYLUS_LOGO: &str = include_str!("../web/stylus.svg");

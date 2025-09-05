@@ -41,6 +41,8 @@
   
   /* Modal overlay */
   --base-overlay-bg: rgba(0, 0, 0, 0.5);
+
+  --base-logo-brightness: 0.9;
 }
 
 :root {
@@ -71,6 +73,7 @@
   --shadow-light: var(--base-shadow-light);
   --shadow-medium: var(--base-shadow-medium);
   --overlay-bg: var(--base-overlay-bg);
+  --logo-brightness: var(--base-logo-brightness);
 }
 
 /* Manual dark mode override */
@@ -116,6 +119,8 @@
   
   /* Modal overlay */
   --overlay-bg: rgba(0, 0, 0, 0.5);
+
+  --logo-brightness: 0.44;
 }
 
 /* Manual light mode override */
@@ -147,6 +152,7 @@
   --shadow-light: var(--base-shadow-light);
   --shadow-medium: var(--base-shadow-medium);
   --overlay-bg: var(--base-overlay-bg);
+  --logo-brightness: var(--base-logo-brightness);
 }
 
 /* Auto mode - system preference */
@@ -193,5 +199,7 @@
   
   /* Modal overlay */
   --overlay-bg: rgba(0, 0, 0, 0.5);
+
+  --logo-brightness: 0.44;
 }
 }

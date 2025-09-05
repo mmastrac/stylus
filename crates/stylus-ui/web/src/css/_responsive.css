@@ -10,7 +10,6 @@
   
   .header h1 {
     font-size: 20px;
-    margin: 0 0 5px 0;
   }
   
   .header p {
@@ -71,10 +70,10 @@
     padding: 3px;
   }
   
-  .header {
-    padding: 5px;
+  .header .logo {
+    height: 48px;
   }
-  
+
   .header h1 {
     font-size: 18px;
     display: inline-block;
@@ -121,5 +120,14 @@
   .visualization-card {
     padding: 12px;
     min-height: 160px;
+  }
+}
+
+@media (max-width: 320px) {
+  .header .logo {
+    display: none;
+  }
+  .header .theme-toggle {
+    display: none;
   }
 }

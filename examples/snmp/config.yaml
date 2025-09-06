@@ -20,7 +20,10 @@ ui:
               rows:
                 - id: "router"
                   size: "small"
-                  layout: 3x1 4x2
+                  layout: ~4x2 1 1x2
+                  # Unifi Dream Machine Pro SE is weird, so we need to order the ports
+                  # Bank of 8 ethernet ports, the 2.5 Gb port, then the two SFP ports
+                  order: 15-22 12 3-4
                 - id: "switch"
                   size: "small"
                   layout: 3x4x2 1

@@ -85,11 +85,26 @@ The stack visualization displays monitor status like a rack of servers.
       rows:
         - id: "group"
           size: "small"
-          layout: 1x5x2 1x1x2
+          # Two 1x2 groups, two column-wise 2x2 groups (4 + 8 = 12 ports total)
+          layout: 2x1x2 ~2x2x2
+          # Order the status indicators by index as [6, 1, 2, 3, 4, 5, 10, 9, 8, 7, 20, 21]
+          order: 6 1-5 10-7 20-21
 ```
 
-The `size` parameter controls the size of the status indicators, and the `layout`
-parameter controls the layout of the status indicators.
+The `size` parameter controls the size of the status indicators.
+
+The `layout` parameter controls the layout of the status indicators. A single
+number indicates a 1-high group (ie: W), two numbers are WxH, three number is
+NxWxH, where N repeats the WxH group. A layout group prefixed with `~` indicates
+that the group is laid out column-wise rather than row-wise.
+
+The `order` parameter controls the order of the status indicators. It is a
+space-separated list of ranges and single numbers. Ranges are inclusive, and
+support reverse order.
+
+Each group is laid out in order from left to right on each row, unless the group
+is prefixed with `~`, in which case it is laid out top-to-bottom on each column.
+Each port is taken from the next item in the order list.
 
 ### SVG Visualization
 

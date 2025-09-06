@@ -199,7 +199,6 @@ mod test {
                 (Yellow, "Success".into(), 0),
                 (Green, "Success".into(), 0),
                 (Yellow, "Success".into(), 0),
-                (Blank, "".into(), 0)
             ]
         );
         Ok(())

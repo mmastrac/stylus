@@ -55,7 +55,7 @@ release-tag:
     set -euf -o pipefail
     VERSION="v$(cargo metadata --format-version=1 | jq -r '.packages[] | select(.name == "stylus") | .version')"
     echo "Creating tag $VERSION..."
-    git tag "$VERSION"
+    git tag "$VERSION" || (echo "Tag already exists, run git tag -d $VERSION" && exit 1)
     echo "Tag created. Push with: git push origin $VERSION"
 
 publish: bundle

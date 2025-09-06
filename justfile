@@ -45,6 +45,7 @@ bundle: clean-bundle
     TEMP_DIR=$(mktemp -d)
     echo "Building Stylus UI crate..."
     cargo build -p stylus-ui --features=from-source-always --target-dir="$TEMP_DIR" 2>/dev/null
+    mkdir -p crates/stylus-ui/src/compiled/
     cp "$TEMP_DIR"/debug/build/stylus-ui-*/out/stylus.* crates/stylus-ui/src/compiled/
     ls -l crates/stylus-ui/src/compiled/
     rm -rf "$TEMP_DIR"
@@ -74,4 +75,3 @@ update-logo:
     sed -i '' 's/fill="black"/fill="white"/g' logo/stylus-white-1024x1024.svg
     svgo logo/stylus-white-1024x1024.svg
     cp logo/stylus-black-1024x1024.svg crates/stylus-ui/web/stylus.svg
-    

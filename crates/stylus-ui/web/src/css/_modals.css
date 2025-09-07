@@ -23,6 +23,21 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: all 0.3s ease-out;
+  transform-origin: center center;
+}
+
+.log-modal.loading {
+  width: 400px;
+  height: 200px;
+  max-width: 400px;
+}
+
+.log-modal.content-loaded {
+  width: 90%;
+  max-width: 800px;
+  height: auto;
+  max-height: 90vh;
 }
 
 .log-modal-header {
@@ -81,4 +96,34 @@
   color: var(--text-primary);
   word-break: break-all;
   white-space: pre-wrap;
+}
+
+/* Loading spinner styles */
+.log-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-light);
+  border-top: 3px solid var(--status-green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.log-loading p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
 }

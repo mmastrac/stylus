@@ -1550,7 +1550,7 @@ checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
 name = "stylus"
-version = "0.16.2"
+version = "0.16.3"
 dependencies = [
  "axum",
  "chrono",
@@ -1583,7 +1583,7 @@ dependencies = [
 
 [[package]]
 name = "stylus-ui"
-version = "0.16.2"
+version = "0.16.3"
 dependencies = [
  "cargo-emit",
  "glob",

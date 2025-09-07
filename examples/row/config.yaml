@@ -1,0 +1,51 @@
+version: 1
+server:
+  port: 8000
+  static: static
+
+monitor:
+  dir: monitor.d
+
+ui:
+  title: "Row Visualization Example"
+  description: "Demonstrates row layout with table and iframe components"
+  visualizations:
+    - title: "Network Dashboard"
+      description: "Mixed layout showing table and custom visualization"
+      type: "row"
+      columns:
+        - type: "table"
+          width: 2
+          title: "Network Status"
+          description: "Current status of all network components"
+        - type: "iframe"
+          width: 3
+          title: "Network Dashboard"
+          description: "Custom dashboard showing network metrics"
+          url: "/dashboard.html"
+          inject: true
+
+css:
+  # Use metadata to get prettier colors for status indicators
+  metadata:
+    blank:
+      color: "#9E9E9E"
+    red:
+      color: "#F44336"
+    yellow:
+      color: "#FF9800"
+    green:
+      color: "#4CAF50"
+  rules:
+    # Set CSS variables for each monitor's status card
+    - selectors: |
+        [data-monitor-id="{{monitor.id}}"]
+      declarations: |
+        --monitor-status-color: {{monitor.status.css.metadata.color}};
+        --monitor-id: "{{monitor.id}}";
+        --monitor-status: {{monitor.status.status}};
+    # Style the status indicator within each monitor card
+    - selectors: |
+        [data-monitor-id="{{monitor.id}}"] .status-indicator
+      declarations: |
+        background-color: {{monitor.status.css.metadata.color}} !important;

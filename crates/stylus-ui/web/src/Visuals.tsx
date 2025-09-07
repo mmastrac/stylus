@@ -1,5 +1,5 @@
 import { JSX } from "react";
-import { Visualization, StatusData } from "./types";
+import { Visualization, StatusData, RowColumn } from "./types";
 import { getVisualizationContent } from "./visualizations/index.tsx";
 
 // Base Visualization Card Component
@@ -11,25 +11,30 @@ interface VisualizationCardProps {
     onFullscreen?: (visualizationName: string) => void;
 }
 
-export function VisualizationCard({ visualization, statusData, onShowLog, isFullscreen = false, onFullscreen }: VisualizationCardProps) {
-    const getVisualizationClass = () => {
-        if (isFullscreen) return 'fullscreen';
-        
-        // Determine if visualization is greedy or sized
-        switch (visualization.type) {
-            case 'table':
-            case 'svg':
-            case 'stack':
-            case 'row':
-                return 'sized';
-            case 'iframe':
-            case 'isoflow':
-                return 'greedy';
-            default:
-                return 'sized';
-        }
-    };
+const getVisualizationClass = (isFullscreen: boolean, visualization: { type: string, columns?: RowColumn[] }) => {
+    if (isFullscreen) return 'fullscreen';
+    
+    // Determine if visualization is greedy or sized
+    switch (visualization.type) {
+        case 'table':
+        case 'svg':
+        case 'stack':
+        case 'row':
+            for (const column of visualization.columns || []) {
+                if (getVisualizationClass(isFullscreen, column) === 'greedy') {
+                    return 'greedy';
+                }
+            };
+            return 'sized';
+        case 'iframe':
+        case 'isoflow':
+            return 'greedy';
+        default:
+            return 'sized';
+    }
+};
 
+export function VisualizationCard({ visualization, statusData, onShowLog, isFullscreen = false, onFullscreen }: VisualizationCardProps) {
     const visualizationState = {
         statusData,
         onShowLog,
@@ -38,7 +43,7 @@ export function VisualizationCard({ visualization, statusData, onShowLog, isFull
     };
 
     return (
-        <div className={`visualization-card ${getVisualizationClass()}`}>
+        <div className={`visualization-card ${getVisualizationClass(isFullscreen, visualization)}`}>
             <div className="visualization-card-content">
                 {!isFullscreen && <h3>{visualization.title}</h3>}
                 {!isFullscreen && <p>{visualization.description}</p>}

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        html {
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            font-size: 14px;
+        }
+        .dashboard-container {
+            height: calc(100vh - 32px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 16px;
+        }
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .status-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-rows: repeat(auto-fit, minmax(80px, 1fr));
+        }
+        .status-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .status-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .status-info p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            background-color: var(--monitor-status-color, #9E9E9E);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .metrics-panel {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        .metrics-panel h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .metric:last-child {
+            border-bottom: none;
+        }
+        .metric-value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .footer {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+    <link id="status" rel="stylesheet" href="data:;" />
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🌐 Network Status Dashboard</h1>
+        </div>
+        
+        <div class="status-grid">
+            <div class="status-card" data-monitor-id="router">
+                <div class="status-info">
+                    <h3 id="router-name">Router</h3>
+                    <p id="router-desc">Core network router</p>
+                </div>
+                <div class="status-indicator"></div>
+            </div>
+            
+            <div class="status-card" data-monitor-id="server">
+                <div class="status-info">
+                    <h3 id="server-name">Server</h3>
+                    <p id="server-desc">Main application server</p>
+                </div>
+                <div class="status-indicator"></div>
+            </div>
+            
+            <div class="status-card" data-monitor-id="timeout">
+                <div class="status-info">
+                    <h3 id="timeout-name">Timeout Test</h3>
+                    <p id="timeout-desc">Timeout monitoring service</p>
+                </div>
+                <div class="status-indicator"></div>
+            </div>
+        </div>
+        
+        <div class="metrics-panel">
+            <h3>📊 Network Metrics</h3>
+            <div class="metric">
+                <span>Active Monitors</span>
+                <span class="metric-value" id="active-monitors">-</span>
+            </div>
+            <div class="metric">
+                <span>Healthy Services</span>
+                <span class="metric-value" id="healthy-services">-</span>
+            </div>
+            <div class="metric">
+                <span>Warning Services</span>
+                <span class="metric-value" id="warning-services">-</span>
+            </div>
+            <div class="metric">
+                <span>Failed Services</span>
+                <span class="metric-value" id="failed-services">-</span>
+            </div>
+            <div class="metric">
+                <span>Last Update</span>
+                <span class="metric-value" id="last-update">-</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            🔄 Real-time monitoring dashboard • Data updates automatically
+        </div>
+    </div>
+
+    <script>
+        // This script leverages Stylus's CSS injection for status updates
+        // The status indicators are automatically styled via injected CSS variables
+        
+        function updateDashboard(data) {
+            if (!data || !data.monitors) return;
+            
+            let activeCount = 0;
+            let healthyCount = 0;
+            let warningCount = 0;
+            let failedCount = 0;
+            
+            data.monitors.forEach(monitor => {
+                activeCount++;
+                const status = monitor.status?.status || 'unknown';
+                switch(status) {
+                    case 'up': healthyCount++; break;
+                    case 'warn': warningCount++; break;
+                    case 'down': failedCount++; break;
+                }
+                
+                // Update description if available
+                const descElement = document.getElementById(monitor.id + '-desc');
+                if (descElement && monitor.status?.metadata?.description) {
+                    descElement.textContent = monitor.status.metadata.description;
+                }
+            });
+            
+            // Update metrics
+            document.getElementById('active-monitors').textContent = activeCount;
+            document.getElementById('healthy-services').textContent = healthyCount;
+            document.getElementById('warning-services').textContent = warningCount;
+            document.getElementById('failed-services').textContent = failedCount;
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+        
+        // Initialize dashboard
+        updateDashboard({});
+        
+        // The Stylus inject system will call updateDashboard with real data
+        window.updateDashboard = updateDashboard;
+    </script>
+</body>
+</html>

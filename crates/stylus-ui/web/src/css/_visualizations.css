@@ -41,6 +41,22 @@
   height: auto;
 }
 
+.visualization-card.fullscreen .visualization-card {
+  /* padding is 40px */
+  height: calc(100% - 40px) !important;
+  max-height: 100% !important;
+  border-width: 0px !important;
+  box-shadow: none !important;
+}
+
+.visualization-card.sized, .visualization-card.greedy {
+  .visualization-card {
+    border-width: 0px !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
 .visualization-card-content {
   height: 100%;
   display: flex;

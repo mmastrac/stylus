@@ -11,6 +11,7 @@ include = [
   "src/**",
   "build.rs",
   "web/index-compiled.html",
+  "web/stylus.svg",
 ]
 
 [features]

@@ -38,12 +38,7 @@ $ stylus test new-project/config.yaml --monitor my-monitor
 !     "css": {
 !       "metadata": {}
 !     },
-!     "metadata": {},
-!     "log": [
-!       "%{DATA} [exec  ] Starting",
-!       "%{DATA} [stdout] Write your test script here",
-!       "%{DATA} [exec  ] Termination: 0"
-!     ]
+!     "metadata": {}
 !   },
 !   "children": {}
 ! }

@@ -1,5 +1,6 @@
 import IsoFlow from "isoflow";
 import { VisualizationState } from "./VisualizationState.tsx";
+import { getStatus } from "../utils.tsx";
 
 function updateIsoflowDataWithStatus(data: any, statusData: any) {
     if (!statusData || !data) {
@@ -44,8 +45,9 @@ function updateIsoflowDataWithStatus(data: any, statusData: any) {
             'blank': 'stylus-blank',
         }
 
-        if (monitor && COLOR_MAP[monitor.status.status as keyof typeof COLOR_MAP] !== undefined) {
-            const color = COLOR_MAP[monitor.status.status as keyof typeof COLOR_MAP];
+        const status = getStatus(monitor) as keyof typeof COLOR_MAP;
+        if (monitor && COLOR_MAP[status] !== undefined) {
+            const color = COLOR_MAP[status];
             const rectangle = {
                 "id": `rect-status-${item.id}`,
                 "color": color,

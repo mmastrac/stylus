@@ -1,9 +1,9 @@
 import { JSX, useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { StatusData, StatusResponse, Config, Monitor, Status } from "./types.ts";
+import { StatusData, StatusResponse, Config, Monitor, Status, MonitorChildStatus } from "./types.ts";
 import { VisualizationGrid, VisualizationCard } from "./Visuals.tsx";
 import { LogModal } from "./LogViewer.tsx";
-import { StatusIndicator, createUrlSafeId, findVisualizationById } from "./utils.tsx";
+import { StatusIndicator, createUrlSafeId, findVisualizationById, getStatus } from "./utils.tsx";
 
 // Custom hook for fetching status data
 function useStatusData() {
@@ -92,15 +92,19 @@ function useStatusData() {
 // Child Status Card Component (for group monitors)
 interface ChildStatusCardProps {
     childId: string;
-    childStatus: Status;
+    child: MonitorChildStatus;
 }
 
-function ChildStatusCard({ childId, childStatus }: ChildStatusCardProps) {
+function ChildStatusCard({ childId, child }: ChildStatusCardProps) {
+    if (child == null) {
+        return <div>(null child)</div>;
+    }
+
     return (
         <div 
             title={childId}
         >
-            <StatusIndicator status={childStatus} className="child-status-indicator" />
+            <StatusIndicator status={child.status} className="child-status-indicator" title={childId} />
         </div>
     );
 }
@@ -113,6 +117,9 @@ interface StatusCardProps {
 }
 
 function StatusCard({ monitor, onShowLog }: StatusCardProps) {
+    if (monitor == null) {
+        return <div className="status-card">(null)</div>;
+    }
 
     const isGroupMonitor = monitor.children && Object.keys(monitor.children).length > 0;
 
@@ -120,7 +127,7 @@ function StatusCard({ monitor, onShowLog }: StatusCardProps) {
         <div className="status-card">
             <h3>{monitor.id}</h3>
             <div>
-                <StatusIndicator status={monitor.status.status} />
+                <StatusIndicator status={monitor.status} />
                 <span>{monitor.status.description}</span>
                 <span className="status-code" data-code={monitor.status.code}>{monitor.status.code}</span>
             </div>
@@ -133,7 +140,7 @@ function StatusCard({ monitor, onShowLog }: StatusCardProps) {
                             <ChildStatusCard 
                                 key={childId}
                                 childId={childId}
-                                childStatus={childData.status.status}
+                                child={childData}
                             />
                         ))}
                     </div>

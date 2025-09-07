@@ -148,17 +148,13 @@ export function StackVisualization({ state, stacks, size }: StackVisualizationPr
                             ? children[groupStart + col * layoutDef.rows + row]
                             : children[groupStart + row * layoutDef.columns + col];
                         
-                        if (child?.child?.status?.metadata) {
-                            let title = `${child.id}`;
-                            for (const [key, value] of Object.entries(child.child.status.metadata)) {
-                                title += `\n${key}: ${value}`;
-                            }
+                        if (child?.child) {
                             groupChildren.push(
                                 <StatusIndicator 
                                     key={`${row}-${col}`}
-                                    status={child.child.status.status} 
+                                    status={child.child.status} 
                                     className="stack-status-indicator"
-                                    title={title}
+                                    title={`${child.id}`}
                                 />
                             );
                         } else {

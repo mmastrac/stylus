@@ -1,5 +1,5 @@
 import { Monitor, MonitorChildStatus, Status } from "../types.ts";
-import { StatusIndicator } from "../utils.tsx";
+import { getStatus, StatusIndicator } from "../utils.tsx";
 import { VisualizationState } from "./VisualizationState.tsx";
 
 interface TableVisualizationProps {
@@ -7,12 +7,17 @@ interface TableVisualizationProps {
 }
 
 function ChildrenIndicator({ monitor }: { monitor: Monitor }) {
-    const childKeys = Object.keys(monitor.children);
+    const children = monitor?.children || {};
+    const childKeys = Object.keys(children);
+    if (childKeys.length === 0) {
+        return <span />;
+    }
+
     if (childKeys.length <= 8) {
-        return Object.keys(monitor.children).length > 0 && (
+        return (
             <span className="children-indicator">
-                {Object.keys(monitor.children).map((childId) => (
-                    <StatusIndicator key={childId} status={monitor.children[childId].status?.status || "blank"} className="small-status-indicator" />
+                {childKeys.map((childId) => (
+                    <StatusIndicator key={childId} status={children[childId]?.status} className="small-status-indicator" />
                 ))}
             </span>
         );
@@ -20,9 +25,9 @@ function ChildrenIndicator({ monitor }: { monitor: Monitor }) {
 
     // If we have more than 8 children, group by state (except red)
     const failed: [string, MonitorChildStatus][] = [];
-    const childStatusCounts = Object.keys(monitor.children).reduce((acc, childId) => {
-        const child = monitor.children[childId];
-        const status = child.status?.status || "blank";
+    const childStatusCounts = childKeys.reduce((acc, childId) => {
+        const child = children[childId];
+        const status = getStatus(child);
         if (status === 'red') {
             failed.push([childId, child]);
         } else {
@@ -37,7 +42,7 @@ function ChildrenIndicator({ monitor }: { monitor: Monitor }) {
                 <span key={status}>{count}·<StatusIndicator key={status} status={status as Status} className="small-status-indicator" />&nbsp;</span>)
             )}
             {<span>{failed.map(([childId, child]) => {
-                return <StatusIndicator key={childId} status={child.status?.status || "blank"} className="small-status-indicator" />
+                return <StatusIndicator key={childId} status={child?.status} className="small-status-indicator" />
             })}</span>}
         </span>
     );
@@ -57,9 +62,9 @@ export function TableVisualization({ state }: TableVisualizationProps) {
                 </div>
                 <div className="grid-body">
                     {statusData?.monitors.map((monitor) => (
-                        <div key={monitor.id} className={`grid-row status-${monitor.status.status}`} onClick={() => onShowLog(monitor.id)}>
+                        <div key={monitor.id} className={`grid-row status-${getStatus(monitor)}`} onClick={() => onShowLog(monitor.id)}>
                             <div className="grid-cell">
-                                <StatusIndicator status={monitor.status.status} />
+                                <StatusIndicator status={monitor.status} />
                                 {monitor.id}
                                 {ChildrenIndicator({ monitor })}
                             </div>

@@ -1,5 +1,5 @@
 import { JSX } from "react";
-import { Status } from "./types.ts";
+import { MonitorStatus, Status } from "./types.ts";
 
 // Helper function for status handling
 export function getStatusClass(status: Status): string {
@@ -8,7 +8,7 @@ export function getStatusClass(status: Status): string {
         case 'yellow': return 'status-timeout';
         case 'red': return 'status-error';
         case 'blank': return 'status-blank';
-        default: return 'status-error';
+        default: return 'status-blank';
     }
 }
 
@@ -26,13 +26,25 @@ export function findVisualizationById(visualizations: any[], urlId: string): any
 
 // Status Indicator Component
 interface StatusIndicatorProps {
-    status: Status;
+    status: Status | MonitorStatus;
     className?: string;
     title?: string;
 }
 
 export function StatusIndicator({ status, className = "", title = "" }: StatusIndicatorProps): JSX.Element {
+    if (typeof status === "object") {
+        if (status?.metadata) {
+            for (const [key, value] of Object.entries(status.metadata)) {
+                title += `\n${key}: ${value}`;
+            }
+        }
+        status = status?.status || "blank";
+    }
     return (
         <span className={`status-indicator ${getStatusClass(status)} ${className}`} title={title}></span>
     );
 } 
+
+export function getStatus(monitor: { status: MonitorStatus }): Status {
+    return monitor?.status?.status || "blank";
+}

@@ -94,6 +94,10 @@ export interface MonitorChildStatus {
   status: MonitorStatus;
 }
 
+export interface StatusResponse {
+  monitors: Monitor[];
+}
+
 export interface StatusData {
   config: Config;
   monitors: Monitor[];

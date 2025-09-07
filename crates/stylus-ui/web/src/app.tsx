@@ -1,6 +1,6 @@
 import { JSX, useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { StatusData, Monitor, Status } from "./types.ts";
+import { StatusData, StatusResponse, Config, Monitor, Status } from "./types.ts";
 import { VisualizationGrid, VisualizationCard } from "./Visuals.tsx";
 import { LogModal } from "./LogViewer.tsx";
 import { StatusIndicator, createUrlSafeId, findVisualizationById } from "./utils.tsx";
@@ -8,10 +8,29 @@ import { StatusIndicator, createUrlSafeId, findVisualizationById } from "./utils
 // Custom hook for fetching status data
 function useStatusData() {
     const [data, setData] = useState<StatusData | null>(null);
+    const [config, setConfig] = useState<Config | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchData = async (): Promise<void> => {
+    // Fetch config once at startup
+    const fetchConfig = async (): Promise<Config> => {
+        const response = await fetch('/config.json');
+        if (!response.ok) {
+            throw new Error(`Failed to fetch config: ${response.status}`);
+        }
+        const configData: Config = await response.json();
+        if (configData.ui == undefined) {
+            throw new Error("Missing UI configuration");
+        }
+        return configData;
+    };
+
+    // Fetch status data (monitors only)
+    const fetchStatus = async (): Promise<void> => {
+        if (!config) {
+            return; // Wait for config to be loaded first
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -19,12 +38,13 @@ function useStatusData() {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const result: StatusData = await response.json();
-            if (result.config.ui == undefined) {
-                setError("Missing UI configuration");
-            } else {
-                setData(result);
-            }
+            const statusResponse: StatusResponse = await response.json();
+            
+            // Combine config and status into StatusData
+            setData({
+                config,
+                monitors: statusResponse.monitors
+            });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Unknown error');
         } finally {
@@ -33,13 +53,40 @@ function useStatusData() {
     };
 
     useEffect(() => {
-        fetchData();
-        // Set up auto-refresh every 5 seconds
-        const interval = setInterval(fetchData, 5000);
-        return () => clearInterval(interval);
+        // Load config once at startup
+        const initializeApp = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const configData = await fetchConfig();
+                setConfig(configData);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load configuration');
+                setLoading(false);
+            }
+        };
+
+        initializeApp();
     }, []);
 
-    return { data, loading, error, refetch: fetchData };
+    useEffect(() => {
+        if (!config) return;
+
+        // Initial status fetch
+        fetchStatus();
+        
+        // Set up auto-refresh every 5 seconds for status only
+        const interval = setInterval(fetchStatus, 5000);
+        return () => clearInterval(interval);
+    }, [config]);
+
+    const refetch = () => {
+        if (config) {
+            fetchStatus();
+        }
+    };
+
+    return { data, loading, error, refetch };
 }
 
 // Child Status Card Component (for group monitors)
@@ -291,16 +338,18 @@ function FullscreenVisualization({ data, visualizationName, onShowLog, onClose }
 // Visualization Tab Component
 interface VisualizationTabProps {
     data: StatusData | null;
+    loading: boolean;
     onShowLog: (monitorId: string) => void;
     onFullscreen: (visualizationName: string) => void;
 }
 
-function VisualizationTab({ data, onShowLog, onFullscreen }: VisualizationTabProps) {
+function VisualizationTab({ data, loading, onShowLog, onFullscreen }: VisualizationTabProps) {
     const visualizations = data?.config.ui.visualizations || [];
     
     return <VisualizationGrid 
         visualizations={visualizations} 
         statusData={data} 
+        loading={loading}
         onShowLog={onShowLog}
         onFullscreen={onFullscreen}
     />;
@@ -456,6 +505,7 @@ function Content({ data, loading, error, onRefetch, onShowLog }: ContentProps) {
                     {activeTab === 'visualization' ? (
                         <VisualizationTab 
                             data={data} 
+                            loading={loading}
                             onShowLog={onShowLog}
                             onFullscreen={handleFullscreenVisualization}
                         />

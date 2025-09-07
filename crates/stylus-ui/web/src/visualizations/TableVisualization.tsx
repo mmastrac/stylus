@@ -34,7 +34,7 @@ function ChildrenIndicator({ monitor }: { monitor: Monitor }) {
     return (
         <span className="children-indicator">
             {Object.entries(childStatusCounts).map(([status, count]) => (
-                <span>{count}·<StatusIndicator key={status} status={status as Status} className="small-status-indicator" />&nbsp;</span>)
+                <span key={status}>{count}·<StatusIndicator key={status} status={status as Status} className="small-status-indicator" />&nbsp;</span>)
             )}
             {<span>{failed.map(([childId, child]) => {
                 return <StatusIndicator key={childId} status={child.status?.status || "blank"} className="small-status-indicator" />

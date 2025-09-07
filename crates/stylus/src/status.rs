@@ -21,7 +21,6 @@ pub enum StatusState {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Status {
-    pub config: Config,
     pub monitors: Vec<SharedMut<MonitorState>>,
 }
 

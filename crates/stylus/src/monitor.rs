@@ -90,7 +90,6 @@ impl Monitor {
 
     pub fn status(&self) -> Status {
         Status {
-            config: self.config.clone(),
             monitors: self.monitors.iter().map(|m| m.state.clone()).collect(),
         }
     }

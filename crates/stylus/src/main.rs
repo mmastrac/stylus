@@ -3,7 +3,7 @@ use std::path::Path;
 
 use env_logger::Env;
 use include_directory::{include_directory, Dir};
-use keepcalm::SharedMut;
+use serde::Serialize;
 
 mod config;
 mod css;
@@ -20,8 +20,10 @@ extern crate log;
 #[macro_use]
 extern crate derive_more;
 
-use crate::config::{parse_config_from_args, parse_monitor_configs, OperationMode};
-use crate::status::{MonitorState, Status};
+use crate::config::{
+    parse_config_from_args, parse_monitor_configs, Config, MonitorDirConfig, OperationMode,
+};
+use crate::status::MonitorState;
 use crate::worker::monitor_run;
 
 #[tokio::main]
@@ -53,13 +55,18 @@ async fn run() {
         OperationMode::Dump(config) => {
             let monitors = parse_monitor_configs(&config.monitor.dir)
                 .expect("Unable to parse monitor configurations");
-            let status = Status {
-                config,
-                monitors: monitors.iter().map(|m| SharedMut::new(m.into())).collect(),
-            };
+
+            #[derive(Serialize)]
+            struct CombinedState {
+                config: Config,
+                monitors: Vec<MonitorDirConfig>,
+            }
+
+            let combined_state = CombinedState { config, monitors };
+
             println!(
                 "{}",
-                serde_json::to_string_pretty(&status)
+                serde_json::to_string_pretty(&combined_state)
                     .expect("Unable to pretty-print configuration")
             );
         }

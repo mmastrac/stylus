@@ -22,6 +22,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[derive(Clone)]
 struct AppState {
     monitor: Arc<Monitor>,
+    config: Arc<Config>,
 }
 
 async fn css_request(State(state): State<AppState>) -> impl IntoResponse {
@@ -31,7 +32,24 @@ async fn css_request(State(state): State<AppState>) -> impl IntoResponse {
 
 async fn status_request(State(state): State<AppState>) -> impl IntoResponse {
     let status = state.monitor.status();
+    if let Ok(delay) = std::env::var("_STYLUS_STATUS_DELAY") {
+        tokio::time::sleep(std::time::Duration::from_millis(
+            delay.parse::<u64>().unwrap(),
+        ))
+        .await;
+    }
     Json(status)
+}
+
+async fn config_request(State(state): State<AppState>) -> impl IntoResponse {
+    let config = state.config.clone();
+    if let Ok(delay) = std::env::var("_STYLUS_CONFIG_DELAY") {
+        tokio::time::sleep(std::time::Duration::from_millis(
+            delay.parse::<u64>().unwrap(),
+        ))
+        .await;
+    }
+    Json(config)
 }
 
 async fn log_request(
@@ -306,13 +324,15 @@ async fn index_handler(headers: HeaderMap, State(state): State<AppState>) -> imp
 }
 
 pub async fn run(config: Config, dry_run: bool) {
+    let config = Arc::new(config);
     let monitor = Arc::new(Monitor::new(&config).expect("Unable to create monitor"));
-    let state = AppState { monitor };
+    let state = AppState { monitor, config };
 
     // Build the router
     let mut app = Router::new()
         .route("/style.css", get(css_request))
         .route("/status.json", get(status_request))
+        .route("/config.json", get(config_request))
         .route("/log/:monitor_id", get(log_request))
         .route("/", get(index_handler));
 
@@ -369,16 +389,17 @@ pub async fn run(config: Config, dry_run: bool) {
     }
 
     // Add static files route if configured
-    if config.server.static_path.is_some() {
+    if state.config.server.static_path.is_some() {
         app = app.route("/*file", get(static_files_handler));
     }
 
-    let ip_addr = config
+    let ip_addr = state
+        .config
         .server
         .listen_addr
         .parse::<IpAddr>()
         .expect("Failed to parse listen address");
-    let addr = SocketAddr::new(ip_addr, config.server.port);
+    let addr = SocketAddr::new(ip_addr, state.config.server.port);
 
     // We print one and only one message
     eprintln!("Stylus {} is listening on {}!", VERSION, addr);

@@ -66,11 +66,22 @@ export function VisualizationCard({ visualization, statusData, onShowLog, isFull
 interface VisualizationGridProps {
     visualizations: Visualization[];
     statusData: StatusData | null;
+    loading: boolean;
     onShowLog: (monitorId: string) => void;
     onFullscreen?: (visualizationName: string) => void;
 }
 
-export function VisualizationGrid({ visualizations, statusData, onShowLog, onFullscreen }: VisualizationGridProps): JSX.Element {
+export function VisualizationGrid({ visualizations, statusData, loading, onShowLog, onFullscreen }: VisualizationGridProps): JSX.Element {
+    if (loading && !statusData) {
+        return (
+            <div className="content">
+                <div className="loading">
+                    <h2>Loading monitor status...</h2>
+                </div>
+            </div>
+        );
+    }
+
     if (!visualizations || visualizations.length === 0) {
         return (
             <div className="content">

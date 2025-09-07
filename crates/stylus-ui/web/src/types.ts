@@ -74,7 +74,6 @@ export interface MonitorStatus {
     metadata: Record<string, any>;
   };
   metadata: Record<string, any>;
-  log: string[];
 }
 
 export interface MonitorConfigItem {

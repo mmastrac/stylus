@@ -19,7 +19,7 @@ export function TableVisualization({ state }: TableVisualizationProps) {
                 </div>
                 <div className="grid-body">
                     {statusData?.monitors.map((monitor) => (
-                        <div key={monitor.id} className={`grid-row status-${monitor.status.status}`} onClick={() => onShowLog(monitor.id, monitor.status.log)}>
+                        <div key={monitor.id} className={`grid-row status-${monitor.status.status}`} onClick={() => onShowLog(monitor.id)}>
                             <div className="grid-cell">
                                 <StatusIndicator status={monitor.status.status} />
                                 {monitor.id}

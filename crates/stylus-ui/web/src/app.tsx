@@ -62,7 +62,7 @@ function ChildStatusCard({ childId, childStatus }: ChildStatusCardProps) {
 interface StatusCardProps {
     key: string;
     monitor: Monitor;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    onShowLog: (monitorId: string) => void;
 }
 
 function StatusCard({ monitor, onShowLog }: StatusCardProps) {
@@ -94,14 +94,12 @@ function StatusCard({ monitor, onShowLog }: StatusCardProps) {
             )}
             
             <div className="status-card-footer">
-                {monitor.status.log && monitor.status.log.length > 0 && (
-                    <button 
-                        className="view-log-button"
-                        onClick={() => onShowLog(monitor.id, monitor.status.log)}
-                    >
-                        View Log <span className="show-popup"></span>
-                    </button>
-                )}
+                <button 
+                    className="view-log-button"
+                    onClick={() => onShowLog(monitor.id)}
+                >
+                    View Log <span className="show-popup"></span>
+                </button>
             </div>
         </div>
     );
@@ -244,7 +242,7 @@ function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
 interface FullscreenVisualizationProps {
     data: StatusData | null;
     visualizationName: string;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    onShowLog: (monitorId: string) => void;
     onClose: () => void;
 }
 
@@ -293,7 +291,7 @@ function FullscreenVisualization({ data, visualizationName, onShowLog, onClose }
 // Visualization Tab Component
 interface VisualizationTabProps {
     data: StatusData | null;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    onShowLog: (monitorId: string) => void;
     onFullscreen: (visualizationName: string) => void;
 }
 
@@ -313,7 +311,7 @@ interface MonitorsTabProps {
     data: StatusData | null;
     loading: boolean;
     onRefetch: () => void;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    onShowLog: (monitorId: string) => void;
 }
 
 function MonitorsTab({ data, loading, onRefetch, onShowLog }: MonitorsTabProps) {
@@ -363,7 +361,7 @@ interface ContentProps {
     loading: boolean;
     error: string | null;
     onRefetch: () => void;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    onShowLog: (monitorId: string) => void;
 }
 
 function Content({ data, loading, error, onRefetch, onShowLog }: ContentProps) {
@@ -482,26 +480,22 @@ function App(): JSX.Element {
     const [logModal, setLogModal] = useState<{
         isOpen: boolean;
         monitorId: string;
-        logEntries: string[];
     }>({
         isOpen: false,
-        monitorId: '',
-        logEntries: []
+        monitorId: ''
     });
 
-    const handleShowLog = (monitorId: string, logEntries: string[]) => {
+    const handleShowLog = (monitorId: string) => {
         setLogModal({
             isOpen: true,
-            monitorId,
-            logEntries
+            monitorId
         });
     };
 
     const handleCloseLog = () => {
         setLogModal({
             isOpen: false,
-            monitorId: '',
-            logEntries: []
+            monitorId: ''
         });
     };
 
@@ -535,7 +529,6 @@ function App(): JSX.Element {
                 isOpen={logModal.isOpen}
                 onClose={handleCloseLog}
                 monitorId={logModal.monitorId}
-                logEntries={logModal.logEntries}
             />
         </div>
     );

@@ -6,7 +6,7 @@ import { getVisualizationContent } from "./visualizations/index.tsx";
 interface VisualizationCardProps {
     visualization: Visualization;
     statusData: StatusData | null;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    onShowLog: (monitorId: string) => void;
     isFullscreen?: boolean;
     onFullscreen?: (visualizationName: string) => void;
 }
@@ -66,7 +66,7 @@ export function VisualizationCard({ visualization, statusData, onShowLog, isFull
 interface VisualizationGridProps {
     visualizations: Visualization[];
     statusData: StatusData | null;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    onShowLog: (monitorId: string) => void;
     onFullscreen?: (visualizationName: string) => void;
 }
 

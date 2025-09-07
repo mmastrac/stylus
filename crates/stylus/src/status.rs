@@ -51,6 +51,7 @@ pub struct MonitorStatus {
     pub description: String,
     pub css: MonitorCssStatus,
     pub metadata: BTreeMap<String, String>,
+    #[serde(skip)]
     pub log: VecDeque<String>,
     #[serde(skip)]
     pub pending: Option<MonitorPendingStatus>,

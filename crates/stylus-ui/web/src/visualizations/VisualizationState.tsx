@@ -5,7 +5,7 @@ type GetVisualizationContent = (visualization: Visualization, state: Visualizati
 
 export interface VisualizationState {
     statusData: StatusData | null;
-    onShowLog: (monitorId: string, logEntries: string[]) => void;
+    onShowLog: (monitorId: string) => void;
     onFullscreen?: (visualizationName: string) => void;
     getVisualizationContent: GetVisualizationContent;
 }

@@ -17,6 +17,8 @@ pub enum StatusState {
     Green,
     Yellow,
     Red,
+    Blue,
+    Orange,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -261,6 +263,8 @@ impl MonitorStatus {
                 StatusState::Green => config.green.clone(),
                 StatusState::Yellow => config.yellow.clone(),
                 StatusState::Red => config.red.clone(),
+                StatusState::Blue => config.blue.clone(),
+                StatusState::Orange => config.orange.clone(),
             };
         }
     }

@@ -17,12 +17,18 @@ and available from the logging endpoint.
 
 ## Monitor States
 
-The state of a monitor is determined by the return value of the test script.
+The state of a monitor is determined by the return value of the test script or
+manually set by scripts/expressions. The six states, in order of precedence,
+are:
 
-- Blank: A test that has not run or completed yet
-- Yellow: A test that has timed out
-- Red: Tests that fail by returning a value other than zero
-- Green: Tests that return zero (success)
+| State |  | Description | How it's set |
+|-------|--------|-------------|--------------|
+| Red | 🔴 | Tests that fail by returning a value other than zero | Automatic (exit code ≠ 0) |
+| Orange | 🟠 | Warning state | Manual (scripts/expressions) |
+| Yellow | 🟡 | A test that has timed out | Automatic (timeout) |
+| Blue | 🔵 | Highlight state | Manual (scripts/expressions) |
+| Green | 🟢 | Tests that return zero (success) | Automatic (exit code = 0) |
+| Blank | ⚪ | A test that has not run or completed yet | Automatic (initial state) |
 
 ## Metadata
 

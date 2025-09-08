@@ -3,13 +3,7 @@ import { MonitorStatus, Status } from "./types.ts";
 
 // Helper function for status handling
 export function getStatusClass(status: Status): string {
-    switch (status) {
-        case 'green': return 'status-success';
-        case 'yellow': return 'status-timeout';
-        case 'red': return 'status-error';
-        case 'blank': return 'status-blank';
-        default: return 'status-blank';
-    }
+    return `status-${status}`;
 }
 
 // URL-safe ID generation and lookup utilities

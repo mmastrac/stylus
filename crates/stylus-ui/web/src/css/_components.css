@@ -65,6 +65,8 @@
 .status-yellow { background-color: var(--status-timeout); }
 .status-red { background-color: var(--status-error); }
 .status-blank { background-color: var(--status-blank); }
+.status-blue { background-color: var(--status-blue); }
+.status-orange { background-color: var(--status-orange); }
 
 /* Child status indicators for group monitors */
 .child-status-indicator {

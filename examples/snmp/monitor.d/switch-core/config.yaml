@@ -5,7 +5,8 @@ snmp:
   timeout: 60s
   exclude: |
     ifType != 'ethernetCsmacd'
-  red: |
+  # Warning if the port is running at less than 1Gbps
+  orange: |
     ifOperStatus == "up" and ifSpeed < 1000000000
   target:
     host: 192.168.1.2

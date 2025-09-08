@@ -19,8 +19,8 @@ monitor:
   dir: monitor.d
 
 css:
-  # Arbitrary metadata can be associated with each of the four states: blank (no state),
-  # red (failed), yellow (timed out) or green (success).
+  # Arbitrary metadata can be associated with each of the six states: blank (no state),
+  # red (failed), yellow (timed out), green (success), blue (highlight), or orange (warning).
 
   # Use metadata to get prettier colors - note that we can add arbitrary string keys and values here
   metadata:
@@ -32,6 +32,10 @@ css:
       color: "#ffdd94"
     green:
       color: "#d0e6a5"
+    blue:
+      color: "#3b82f6"
+    orange:
+      color: "#f9b356"
 
   # Specify a number of rules - selector/declaration pairs. Each pair will generate a CSS block.
   rules:

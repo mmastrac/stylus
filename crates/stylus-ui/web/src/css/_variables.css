@@ -29,6 +29,8 @@
   --base-status-timeout: #d7ea08;
   --base-status-error: #ef4444;
   --base-status-blank: #b5cad3;
+  --base-status-blue: #3b82f6;
+  --base-status-orange: #f9b356;
   
   /* Button colors */
   --base-text-button: white;
@@ -68,6 +70,8 @@
   --status-timeout: var(--base-status-timeout);
   --status-error: var(--base-status-error);
   --status-blank: var(--base-status-blank);
+  --status-blue: var(--base-status-blue);
+  --status-orange: var(--base-status-orange);
   --btn-primary: var(--base-btn-primary);
   --btn-primary-hover: var(--base-btn-primary-hover);
   --shadow-light: var(--base-shadow-light);
@@ -108,6 +112,8 @@
   --status-timeout: hsl(from var(--base-status-timeout) h s 40 / alpha);
   --status-error: hsl(from var(--base-status-error) h s 40 / alpha);
   --status-blank: hsl(from var(--base-status-blank) h s 40 / alpha);
+  --status-blue: hsl(from var(--base-status-blue) h s 40 / alpha);
+  --status-orange: hsl(from var(--base-status-orange) h s 40 / alpha);
   
   /* Button colors */
   --btn-primary: hsl(from var(--base-btn-primary) h s calc(100 - l) / alpha);
@@ -147,6 +153,8 @@
   --status-timeout: var(--base-status-timeout);
   --status-error: var(--base-status-error);
   --status-blank: var(--base-status-blank);
+  --status-blue: var(--base-status-blue);
+  --status-orange: var(--base-status-orange);
   --btn-primary: var(--base-btn-primary);
   --btn-primary-hover: var(--base-btn-primary-hover);
   --shadow-light: var(--base-shadow-light);
@@ -188,6 +196,8 @@
   --status-timeout: hsl(from var(--base-status-timeout) h s 40 / alpha);
   --status-error: hsl(from var(--base-status-error) h s 40 / alpha);
   --status-blank: hsl(from var(--base-status-blank) h s 40 / alpha);
+  --status-blue: hsl(from var(--base-status-blue) h s 40 / alpha);
+  --status-orange: hsl(from var(--base-status-orange) h s 40 / alpha);
   
   /* Button colors */
   --btn-primary: hsl(from var(--base-btn-primary) h s calc(100 - l) / alpha);

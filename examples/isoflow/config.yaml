@@ -24,6 +24,10 @@ css:
       color: "#ffdd94"
     green:
       color: "#d0e6a5"
+    blue:
+      color: "#3b82f6"
+    orange:
+      color: "#f9b356"
   rules:
     # Style the isoflow diagram with the appropriate status color
     - selectors: |

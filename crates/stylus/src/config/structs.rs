@@ -113,6 +113,10 @@ pub struct CssMetadataConfig {
     pub yellow: Arc<BTreeMap<String, String>>,
     #[serde(default, skip_serializing_if = "default")]
     pub green: Arc<BTreeMap<String, String>>,
+    #[serde(default, skip_serializing_if = "default")]
+    pub blue: Arc<BTreeMap<String, String>>,
+    #[serde(default, skip_serializing_if = "default")]
+    pub orange: Arc<BTreeMap<String, String>>,
 }
 
 impl Default for CssMetadataConfig {
@@ -122,6 +126,8 @@ impl Default for CssMetadataConfig {
             red: Arc::new(Default::default()),
             yellow: Arc::new(Default::default()),
             green: Arc::new(Default::default()),
+            blue: Arc::new(Default::default()),
+            orange: Arc::new(Default::default()),
         }
     }
 }

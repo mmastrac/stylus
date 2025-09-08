@@ -64,7 +64,7 @@ export interface Config {
   config_d: Record<string, any>;
 }
 
-export type Status = 'blank' | 'red' | 'green' | 'yellow';
+export type Status = 'blank' | 'red' | 'orange' | 'yellow' | 'green' | 'blue';
 
 export interface MonitorStatus {
   status: Status;

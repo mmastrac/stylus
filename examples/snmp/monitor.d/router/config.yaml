@@ -12,8 +12,14 @@ snmp:
       or contains(ifDescr, "2.5GbE Controller")
   # SNMP doesn't work properly on the UDM Pro SE, so try to detect if the port
   # is up via ifInOctets and ifOutOctets
+
+  # Show slow ports (< 1Gbps) as orange, fast ports (> 1Gbps) as blue
+  orange: |
+    ifOperStatus == "up" and ifAdminStatus == "up" and ifOutOctets > 0 and ifInOctets > 0 and ifSpeed < 1000000000
   green: |
     ifOperStatus == "up" and ifAdminStatus == "up" and ifOutOctets > 0 and ifInOctets > 0
+  blue: |
+    ifOperStatus == "up" and ifAdminStatus == "up" and ifOutOctets > 0 and ifInOctets > 0 and ifSpeed > 1000000000
   target:
     host: 192.168.1.1
     community: public

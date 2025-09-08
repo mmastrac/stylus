@@ -35,6 +35,12 @@ pub struct SnmpNetworkMonitorConfig {
     pub red: String,
     #[serde(default = "default_green")]
     pub green: String,
+    #[serde(default = "default_blue")]
+    pub blue: String,
+    #[serde(default = "default_orange")]
+    pub orange: String,
+    #[serde(default = "default_yellow")]
+    pub yellow: String,
     #[serde(skip_deserializing)]
     pub children: BTreeMap<String, MonitorDirChildConfig>,
     #[serde(skip_deserializing)]
@@ -55,6 +61,18 @@ fn default_red() -> String {
 
 fn default_green() -> String {
     format!("ifOperStatus == 'up' and ifAdminStatus == 'up'")
+}
+
+fn default_blue() -> String {
+    format!("false")
+}
+
+fn default_orange() -> String {
+    format!("false")
+}
+
+fn default_yellow() -> String {
+    format!("false")
 }
 
 const OID_MAP: &[(&str, &Oid, &[(u32, &str)])] = &[
@@ -520,6 +538,9 @@ impl SnmpNetworkMonitorConfig {
                 exclude: self.exclude.clone(),
                 red: self.red.clone(),
                 green: self.green.clone(),
+                blue: self.blue.clone(),
+                orange: self.orange.clone(),
+                yellow: self.yellow.clone(),
             })),
         }
     }
@@ -563,6 +584,9 @@ pub struct SnmpMonitorMessageProcessor {
     exclude: String,
     red: String,
     green: String,
+    blue: String,
+    orange: String,
+    yellow: String,
 }
 
 #[derive(Debug, Default)]
@@ -572,6 +596,9 @@ pub struct SnmpMonitorMessageProcessorInstance {
     exclude: String,
     red: String,
     green: String,
+    blue: String,
+    orange: String,
+    yellow: String,
     ports: Mutex<BTreeMap<usize, HashMap<String, Value>>>,
 }
 
@@ -583,6 +610,9 @@ impl MonitorMessageProcessor for SnmpMonitorMessageProcessor {
             exclude: self.exclude.clone(),
             red: self.red.clone(),
             green: self.green.clone(),
+            blue: self.blue.clone(),
+            orange: self.orange.clone(),
+            yellow: self.yellow.clone(),
             ports: Default::default(),
         })
     }
@@ -726,6 +756,9 @@ impl MonitorMessageProcessorInstance for SnmpMonitorMessageProcessorInstance {
 
             let red = calculate_bool(&self.red, &port_metadata);
             let green = calculate_bool(&self.green, &port_metadata);
+            let blue = calculate_bool(&self.blue, &port_metadata);
+            let orange = calculate_bool(&self.orange, &port_metadata);
+            let yellow = calculate_bool(&self.yellow, &port_metadata);
 
             let mut values = BTreeMap::new();
             values.insert(
@@ -743,6 +776,12 @@ impl MonitorMessageProcessorInstance for SnmpMonitorMessageProcessorInstance {
 
             if red {
                 result.push(format!("group.{}.status.status=\"red\"", port_id));
+            } else if orange {
+                result.push(format!("group.{}.status.status=\"orange\"", port_id));
+            } else if yellow {
+                result.push(format!("group.{}.status.status=\"yellow\"", port_id));
+            } else if blue {
+                result.push(format!("group.{}.status.status=\"blue\"", port_id));
             } else if green {
                 result.push(format!("group.{}.status.status=\"green\"", port_id));
             } else {

@@ -9,6 +9,7 @@ Stylus supports several types of monitors:
 - **[Standard Monitor](standard.md)** - Single test for a single host
 - **[Group Monitor](group.md)** - Single script that updates multiple monitors
 - **[SNMP Monitor](snmp.md)** - Network device monitoring via SNMP
+- **[Ping Monitor](ping.md)** - Network connectivity monitoring via ping
 
 ## Logging
 

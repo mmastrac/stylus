@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, PartialEq, Eq)]
 pub enum Value {
@@ -132,6 +132,22 @@ fn unescape_string(input: &str) -> String {
     output
 }
 
+pub trait ExpressionContext {
+    fn get(&self, key: &str) -> Option<&Value>;
+}
+
+impl ExpressionContext for HashMap<String, Value> {
+    fn get(&self, key: &str) -> Option<&Value> {
+        self.get(key)
+    }
+}
+
+impl ExpressionContext for BTreeMap<String, Value> {
+    fn get(&self, key: &str) -> Option<&Value> {
+        self.get(key)
+    }
+}
+
 peg::parser!( pub grammar expression() for str {
     rule number() -> i64
         = n:$(['0'..='9']+) { n.parse().unwrap() }
@@ -145,10 +161,10 @@ peg::parser!( pub grammar expression() for str {
 
     rule ws() = quiet!{[ ' ' | '\t' | '\r' | '\n' ]*}
 
-    pub rule calculate(ctx: &HashMap<String, Value>) -> Result
+    pub rule calculate(ctx: &impl ExpressionContext) -> Result
         = ws() v:expr(ctx) ws() { v }
 
-    rule expr(ctx: &HashMap<String, Value>) -> Result = precedence!{
+    rule expr(ctx: &impl ExpressionContext) -> Result = precedence!{
         // Python-like precedence (low -> high): or, and, not, comparisons, +-, */, ^, atoms
         x:(@) ws() "or" ws() y:@ { Ok(x?.logical_or(y?)) }
         x:(@) ws() "and" ws() y:@ { Ok(x?.logical_and(y?)) }

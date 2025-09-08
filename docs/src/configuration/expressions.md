@@ -4,8 +4,7 @@ Stylus uses a custom expression language for evaluating conditions in monitor co
 
 ## Overview
 
-The expression language is currently only used in the SNMP monitor `include`,
-`exclude`, `red`, and `green` conditions
+The expression language is currently only used in the SNMP and ping monitors.
 
 ## Data Types
 

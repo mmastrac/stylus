@@ -1,0 +1,6 @@
+ping:
+  host: 1.1.1.1
+  interval: 30s
+  timeout: 10s
+  warning_timeout: 100ms
+  count: 3

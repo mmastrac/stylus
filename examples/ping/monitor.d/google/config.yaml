@@ -1,0 +1,6 @@
+ping:
+  host: 8.8.8.8
+  interval: 30s
+  timeout: 3s
+  warning_timeout: 100ms
+  count: 3

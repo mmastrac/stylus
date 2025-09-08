@@ -30,12 +30,9 @@ Interfaces are first filtered by the `include` and `exclude` conditions. If
 `include` is true and `exclude` is false, the interface is included in the
 monitor.
 
-The `red` and `green` conditions are evaluated using the
-[expressions](../expressions.md) language.
-
-`red` is first evaluated. If it is true, the monitor will show red. Otherwise,
-`green` is evaluated. If it is true, the monitor will show green. If neither is
-true, the monitor will show blank.
+The `red`, `orange`, `yellow`, `blue` and `green` conditions are evaluated using
+the [expressions](../expressions.md) language. The first condition that is true
+will determine the status of the interface.
 
 By default, the SNMP monitor will show interfaces as green if they have
 `ifOperStatus` and `ifAdminStatus` set to `"up"`, and blank if either of those
@@ -60,9 +57,21 @@ snmp:
   exclude: |
     contains(ifDescr, 'Loopback')
 
-  # (optional) Condition that determines when the monitor should be red (default: "false")
+  # (optional) Condition that determines when the monitor should be red/error (default: "false")
   red: |
     ifOperStatus == "up" and ifSpeed < 1000000000
+
+  # (optional) Condition that determines when the monitor should be orange/warning (default: "false")
+  orange: |
+    ifOperStatus == "up" and ifSpeed < 1000000000
+
+  # (optional) Condition that determines when the monitor should be yellow/timeout (default: "false")
+  yellow: |
+    false
+
+  # (optional) Condition that determines when the monitor should be blue/highlight (default: "false")
+  blue: |
+    ifOperStatus == "up" and ifSpeed > 1000000000
 
   # (optional) Condition that determines when the monitor should be green (default: "ifOperStatus == 'up' and ifAdminStatus == 'up'")
   green: |

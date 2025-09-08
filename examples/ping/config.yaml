@@ -1,0 +1,10 @@
+version: 1
+server:
+  port: 8000
+ui:
+  title: "Ping Example"
+  description: "Demonstrates ping monitor"
+  visualizations:
+    - title: "Ping Status"
+      description: "Current status of all ping components"
+      type: "table"

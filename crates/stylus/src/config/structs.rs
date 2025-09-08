@@ -6,6 +6,7 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
 use crate::monitor::MonitorMessageProcessor;
+use crate::monitors::ping::PingMonitorConfig;
 use crate::monitors::snmp::SnmpNetworkMonitorConfig;
 
 pub enum OperationMode {
@@ -160,6 +161,7 @@ pub enum MonitorDirRootConfig {
     Test(MonitorDirTestConfig),
     Group(MonitorDirGroupConfig),
     Snmp(SnmpNetworkMonitorConfig),
+    Ping(PingMonitorConfig),
 }
 
 impl MonitorDirRootConfig {
@@ -170,6 +172,9 @@ impl MonitorDirRootConfig {
             MonitorDirRootConfig::Group(ref group) => &group.test,
             MonitorDirRootConfig::Snmp(ref snmp) => {
                 snmp.test.as_ref().expect("test_mut was not called")
+            }
+            MonitorDirRootConfig::Ping(ref ping) => {
+                ping.test.as_ref().expect("test_mut was not called")
             }
         }
     }
@@ -184,6 +189,12 @@ impl MonitorDirRootConfig {
                     snmp.test = Some(snmp.test());
                 }
                 snmp.test.as_mut().unwrap()
+            }
+            MonitorDirRootConfig::Ping(ref mut ping) => {
+                if ping.test.is_none() {
+                    ping.test = Some(ping.test());
+                }
+                ping.test.as_mut().unwrap()
             }
         }
     }

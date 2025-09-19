@@ -8,14 +8,15 @@ monitor:
 
 ui:
   visualizations:
-    - title: "Infrastructure Status Table"
-      description: "Status table showing the health of infrastructure components"
-      type: "table"
     - title: "D3 Infrastructure Diagram"
-      description: "A D3.js visualization showing infrastructure components with status colors"
-      type: "iframe"
-      url: "/d3.html"
-      inject: true
+      type: "row"
+      columns:
+      - type: "table"
+        width: 2
+      - type: "iframe"
+        width: 3
+        url: "/d3.html"
+        inject: true
 
 css:
   # Use metadata to get prettier colors for the d3 diagram

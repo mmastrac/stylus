@@ -75,3 +75,97 @@ update-logo:
     sed -i '' 's/fill="black"/fill="white"/g' logo/stylus-white-1024x1024.svg
     svgo logo/stylus-white-1024x1024.svg
     cp logo/stylus-black-1024x1024.svg crates/stylus-ui/web/stylus.svg
+
+screenshot-examples: build-debug
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    # Ensure screenshots directory exists
+    mkdir -p docs/src/screenshots
+    
+    # Find Chrome/Chromium executable
+    CHROME=""
+    for browser in "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+                   "/Applications/Chromium.app/Contents/MacOS/Chromium" \
+                   "google-chrome" \
+                   "chromium" \
+                   "chromium-browser"; do
+        if command -v "$browser" >/dev/null 2>&1 || [ -x "$browser" ]; then
+            CHROME="$browser"
+            break
+        fi
+    done
+    
+    if [ -z "$CHROME" ]; then
+        echo "Error: Chrome or Chromium not found. Please install Chrome or Chromium."
+        exit 1
+    fi
+    
+    echo "Using Chrome/Chromium at: $CHROME"
+    
+    # Get list of example directories
+    EXAMPLES=($(find examples -maxdepth 1 -type d -not -path examples | sort))
+    for example_dir in "${EXAMPLES[@]}"; do
+        example_name=$(basename "$example_dir")
+        echo "Processing example: $example_name"
+        
+        # Start Stylus in background
+        echo "Starting Stylus for $example_name..."
+        target/debug/stylus run "$example_dir" &
+        STYLUS_PID=$!
+        
+        echo "Waiting for server to start..."
+        for i in {1..30}; do
+            if curl -s http://localhost:8000 >/dev/null 2>&1; then
+                echo "Server is ready!"
+                break
+            fi
+            if [ $i -eq 30 ]; then
+                echo "Timeout waiting for server to start for $example_name"
+                kill $STYLUS_PID 2>/dev/null || true
+                continue 2
+            fi
+            sleep 1
+        done
+        
+        sleep 10
+
+        # Take screenshot with delay
+        echo "Taking screenshot for $example_name..."
+        screenshot_path="docs/src/screenshots/examples/${example_name}.png"
+        "$CHROME" \
+            --headless=new \
+            --disable-gpu \
+            --screen-info={1600x1200} \
+            --window-size=1200,1000 \
+            --timeout=10000 \
+            --virtual-time-budget=10000 \
+            --force-device-scale-factor=1 \
+            --force-color-profile=srgb \
+            --force-prefers-color-scheme=light \
+            --screenshot="$screenshot_path" \
+            "http://localhost:8000"
+        
+        # Trim constant color from edges
+        echo "Trimming screenshot for $example_name..."
+        if command -v magick >/dev/null 2>&1; then
+            magick "$screenshot_path" -trim "$screenshot_path"
+        elif command -v convert >/dev/null 2>&1; then
+            convert "$screenshot_path" -trim "$screenshot_path"
+        else
+            echo "Warning: ImageMagick not found, skipping trim for $example_name"
+        fi
+        
+        # Stop Stylus
+        echo "Stopping Stylus..."
+        kill $STYLUS_PID 2>/dev/null || true
+        
+        # Wait a moment for cleanup
+        sleep 2
+        
+        echo "Screenshot saved: docs/src/screenshots/${example_name}.png"
+        echo "---"
+    done
+    
+    echo "All screenshots completed!"
+    echo "Screenshots saved in: docs/src/screenshots/"

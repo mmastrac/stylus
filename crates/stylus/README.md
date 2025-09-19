@@ -2,10 +2,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mmastrac/stylus/refs/heads/master/logo/stylus-white-1024x1024.svg">
-  <img alt="Text changing depending on mode. Light: 'So light!' Dark: 'So dark!'" width="256" align="right" src="https://raw.githubusercontent.com/mmastrac/stylus/refs/heads/master/logo/stylus-black-1024x1024.svg">
+  <img alt="Logo for Stylus" width="256" align="right" src="https://raw.githubusercontent.com/mmastrac/stylus/refs/heads/master/logo/stylus-black-1024x1024.svg">
 </picture>
 
-**Stylus** (_style + status_) is a lightweight status page for infrastructure
+**Stylus** (_stylish + status_) is a lightweight status page for infrastructure
 and networks. Configure a set of bash scripts that test the various parts of
 your infrastructure, set up visualizations with minimal configuration, and
 **Stylus** will generate you a dashboard for your system.
@@ -79,13 +79,12 @@ running alpine's `apk` tool inside the container) to handle your specific cases.
 
 ### Ping
 
-Unless you have a particularly lossy connection, a single ping should be enough
-to test whether a host is up:
+**Stylus** has a built-in ping monitor that can be used to monitor network
+connectivity to a host.
 
-```bash
-#!/bin/bash
-set -xeuf -o pipefail
-ping -c 1 8.8.8.8
+```yaml
+ping:
+  host: 8.8.8.8
 ```
 
 ### cURL
@@ -149,11 +148,11 @@ and is pretty much limited by how heavyweight your test scripts are.
 
 ### D3.js example
 
-![Screenshot](docs/src/screenshots/screenshot-3.png)
+![Screenshot](docs/src/screenshots/examples/d3.png)
 
 ### A basic home network diagram
 
-![Screenshot](docs/src/screenshots/screenshot-2.png)
+![Screenshot](docs/src/screenshots/examples/snmp.png)
 
 ## Historical Note
 

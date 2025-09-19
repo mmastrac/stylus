@@ -10,13 +10,13 @@ ui:
   title: "Simple Network Status"
   description: "Network Status with Dynamic SVG Colors"
   visualizations:
-    - title: "Status Table"
+    - title: "Network"
+      type: "row"
       description: "Current status of all network components"
-      type: "table"
-    - title: "Network Diagram"
-      description: "SVG representation of network"
-      type: "svg"
-      url: "/network-diagram.svg"
+      columns:
+        - type: "table"
+        - type: "svg"
+          url: "/network-diagram.svg"
 
 css:
   # Use metadata to get prettier colors - note that we can add arbitrary string keys and values here

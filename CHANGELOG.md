@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2025-09-19
+
+### Added
+- **Ping Monitor**: A new `ping` monitor allows you to write simpler
+  host-pinging monitors
+
+### Changed
+- **Blue and Orange States**: Blue and Orange states are now available for all
+  monitors. Blue acts like a highlight, while Orange is for non-timeout
+  warnings.
+
 ## [0.16.4] - 2025-09-07
 
 ### Fixed

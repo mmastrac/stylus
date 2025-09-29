@@ -1282,9 +1282,9 @@ dependencies = [
 
 [[package]]
 name = "rasn-mib"
-version = "0.27.2"
+version = "0.27.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3131b6420a5d557418a45c29407fb413c0c460d9d99243f8aabe3c0dc0394c2"
+checksum = "408a659b8e6824bda53fafaac8cd87434d9fd60b6d479ca02ee023c7cb41f47b"
 dependencies = [
  "rasn",
  "rasn-smi",

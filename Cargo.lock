@@ -1292,9 +1292,9 @@ dependencies = [
 
 [[package]]
 name = "rasn-smi"
-version = "0.27.2"
+version = "0.27.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e38ee9103d23a9ea0f6b7fa52239ec778679aab3fd729831005643b323c0140b"
+checksum = "3f0d808057c1870fd93d45965c723658c81419f01c1e45f275b813604be83429"
 dependencies = [
  "chrono",
  "rasn",
